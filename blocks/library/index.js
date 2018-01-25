@@ -20,6 +20,7 @@ import * as image from './image';
 import * as latestPosts from './latest-posts';
 import * as list from './list';
 import * as more from './more';
+// import * as page from './page';
 import * as paragraph from './paragraph';
 import * as preformatted from './preformatted';
 import * as pullquote from './pullquote';
@@ -72,6 +73,7 @@ export const registerCoreBlocks = () => {
 		list,
 		latestPosts,
 		more,
+		// page,
 		paragraph,
 		preformatted,
 		pullquote,
