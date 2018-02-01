@@ -102,10 +102,22 @@ add_action( 'admin_enqueue_scripts', 'customberg_register_scripts' );
 function the_customberg_project() {
 	global $post;
 
+	$post_to_edit = gutenberg_get_post_to_edit( $post );
+
+	// Set initial title to empty string for auto draft for duration of edit.
+	// Otherwise, title defaults to and displays as "Auto Draft".
+	$is_new_post = 'auto-draft' === $post_to_edit['status'];
+	if ( $is_new_post ) {
+		$post_to_edit['title'] = array(
+			'raw'      => '',
+			'rendered' => apply_filters( 'the_title', '', $post->ID ),
+		);
+	}
+
 	// Initialize the post data.
 	wp_add_inline_script(
 		'wp-edit-template',
-		'window._wpGutenbergPost = ' . wp_json_encode( gutenberg_get_post_to_edit( $post ) ) . ';'
+		'window._wpGutenbergPost = ' . wp_json_encode( $post_to_edit ) . ';'
 	);
 
 	$script  = '( function() {';
