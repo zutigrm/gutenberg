@@ -90,6 +90,7 @@ class InlineColorUI extends Component {
 
 		let activeColor;
 
+		const isDisableCustomColors = get( select( 'core/block-editor' ).getSettings(), [ 'disableCustomColors' ], false );
 		const colors = get( select( 'core/block-editor' ).getSettings(), [ 'colors' ], [] );
 		const activeColorFormat = getActiveFormat( value, name );
 
@@ -112,6 +113,7 @@ class InlineColorUI extends Component {
 				<ColorPalette
 					colors={ colors }
 					value={ activeColor }
+					disableCustomColors={ isDisableCustomColors }
 					onChange={ ( color ) => {
 						if ( color ) {
 							onChange(
