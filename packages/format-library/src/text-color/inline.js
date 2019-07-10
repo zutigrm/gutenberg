@@ -20,7 +20,7 @@ import {
 } from '@wordpress/rich-text';
 import { URLPopover } from '@wordpress/block-editor';
 
-const URLPopoverAtLink = ( { isActive, addingLink, value, ...props } ) => {
+const ColorPopoverAtLink = ( { isActive, addingColor, value, ...props } ) => {
 	const anchorRect = useMemo( () => {
 		const selection = window.getSelection();
 		const range = selection.rangeCount > 0 ? selection.getRangeAt( 0 ) : null;
@@ -28,7 +28,7 @@ const URLPopoverAtLink = ( { isActive, addingLink, value, ...props } ) => {
 			return;
 		}
 
-		if ( addingLink ) {
+		if ( addingColor ) {
 			return getRectangleFromRange( range );
 		}
 
@@ -45,7 +45,7 @@ const URLPopoverAtLink = ( { isActive, addingLink, value, ...props } ) => {
 		if ( closest ) {
 			return closest.getBoundingClientRect();
 		}
-	}, [ isActive, addingLink, value.start, value.end ] );
+	}, [ isActive, addingColor, value.start, value.end ] );
 
 	if ( ! anchorRect ) {
 		return null;
@@ -85,7 +85,7 @@ class InlineColorUI extends Component {
 			value,
 			onChange,
 			isActive,
-			addingLink,
+			addingColor,
 		} = this.props;
 
 		let activeColor;
@@ -101,10 +101,10 @@ class InlineColorUI extends Component {
 		}
 
 		return (
-			<URLPopoverAtLink
+			<ColorPopoverAtLink
 				value={ value }
 				isActive={ isActive }
-				addingLink={ addingLink }
+				addingColor={ addingColor }
 				onClickOutside={ this.onClickOutside }
 				onClose={ this.resetState }
 				className="components-inline-color-popover"
@@ -128,7 +128,7 @@ class InlineColorUI extends Component {
 					} }
 				>
 				</ColorPalette>
-			</URLPopoverAtLink>
+			</ColorPopoverAtLink>
 		);
 	}
 }

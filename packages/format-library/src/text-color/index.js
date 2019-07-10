@@ -25,12 +25,12 @@ export const textColor = {
 			this.onClose = this.onClose.bind( this );
 
 			this.state = {
-				isOpen: false,
+				useState: false,
 			};
 		}
 
 		onClose() {
-			this.setState( { isOpen: false } );
+			this.setState( { useState: false } );
 		}
 
 		render() {
@@ -46,13 +46,13 @@ export const textColor = {
 					<RichTextToolbarButton
 						icon="editor-textcolor"
 						title={ title }
-						onClick={ () => this.setState( { isOpen: true } ) }
+						onClick={ () => this.setState( { useState: true } ) }
 						isActive={ isActive }
 					/>
-					{ this.state.isOpen && (
+					{ this.state.useState && (
 						<InlineColorUI
 							name={ name }
-							addingLink={ this.state.isOpen }
+							addingColor={ this.state.useState }
 							onClose={ this.onClose }
 							isActive={ isActive }
 							activeAttributes={ activeAttributes }
