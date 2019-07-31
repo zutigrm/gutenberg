@@ -17,11 +17,11 @@ import {
  * WordPress dependencies
  */
 import {
-	Caption,
 	Icon,
 	Toolbar,
 	ToolbarButton,
 } from '@wordpress/components';
+import Caption from '@wordpress/components/src/caption'
 import {
 	MediaPlaceholder,
 	MediaUpload,
