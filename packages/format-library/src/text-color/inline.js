@@ -18,7 +18,12 @@ import {
 	removeFormat,
 	getActiveFormat,
 } from '@wordpress/rich-text';
-import { URLPopover } from '@wordpress/block-editor';
+import {
+	URLPopover,
+	getColorClassName,
+	getColorObjectByColorValue,
+	getColorObjectByAttributeValues,
+} from '@wordpress/block-editor';
 
 const ColorPopoverAtLink = ( { isActive, addingColor, value, ...props } ) => {
 	const anchorRect = useMemo( () => {
@@ -98,6 +103,12 @@ class InlineColorUI extends Component {
 			const styleColor = activeColorFormat.attributes.style;
 			if ( styleColor ) {
 				activeColor = styleColor.replace( new RegExp( `^color:\\s*` ), '' );
+			} else {
+				const currentClass = activeColorFormat.attributes.class;
+				if ( currentClass ) {
+					const colorSlug = currentClass.replace( /.*has-(.*?)-color.*/, '$1' );
+					activeColor = getColorObjectByAttributeValues( colors, colorSlug ).color;
+				}
 			}
 		}
 
@@ -116,10 +127,13 @@ class InlineColorUI extends Component {
 					disableCustomColors={ isDisableCustomColors }
 					onChange={ ( color ) => {
 						if ( color ) {
+							const colorObject = getColorObjectByColorValue( colors, color );
 							onChange(
 								applyFormat( value, {
 									type: name,
-									attributes: {
+									attributes: colorObject ? {
+										class: getColorClassName( 'color', colorObject.slug ),
+									} : {
 										style: `color:${ color }`,
 									},
 								} )
