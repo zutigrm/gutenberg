@@ -1,1 +1,2 @@
-export { default as transformStyles } from './transform-styles';
+import { default as transformStyles, traverse, urlRewrite } from './transform-styles';
+export { transformStyles, traverse, urlRewrite };

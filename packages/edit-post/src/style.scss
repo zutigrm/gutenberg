@@ -111,3 +111,9 @@ body.block-editor-page {
 		max-width: none;
 	}
 }
+
+@element .editor-post-title__block and (min-width: 500px) {
+	.edit-post-sidebar__panel-tab {
+		color: red;
+	}
+}

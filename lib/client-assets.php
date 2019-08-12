@@ -629,3 +629,14 @@ function gutenberg_extend_block_editor_preload_paths( $preload_paths, $post ) {
 	return $preload_paths;
 }
 add_filter( 'block_editor_preload_paths', 'gutenberg_extend_block_editor_preload_paths', 10, 2 );
+
+
+function enqueue_eqcss() {
+	$suffix = SCRIPT_DEBUG ? '' : '.min';
+	gutenberg_register_vendor_script(
+		'eqcss',
+		'https://unpkg.com/eqcss@1.9.2/EQCSS' . $suffix . '.js'
+	);
+	wp_enqueue_script( 'eqcss' );
+}
+add_action( 'enqueue_block_editor_assets', 'enqueue_eqcss' );
