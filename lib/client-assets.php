@@ -640,3 +640,22 @@ function enqueue_eqcss() {
 	wp_enqueue_script( 'eqcss' );
 }
 add_action( 'enqueue_block_editor_assets', 'enqueue_eqcss' );
+
+function enqueue_css_element_queries () {
+	wp_enqueue_script(
+		'css-element-queries-resize-sensor',
+		'https://unpkg.com/css-element-queries@1.2.1/src/ResizeSensor.js',
+		array(),
+		null,
+		true
+	);
+	wp_enqueue_script(
+		'css-element-queries-element-queries',
+		'https://unpkg.com/css-element-queries@1.2.1/src/ElementQueries.js',
+		array( 'css-element-queries-resize-sensor' ),
+		null,
+		true
+	);
+
+}
+//add_action( 'enqueue_block_editor_assets', 'enqueue_css_element_queries' );

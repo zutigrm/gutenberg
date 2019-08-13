@@ -43,6 +43,7 @@
 		"@wordpress/url": "file:../url",
 		"@wordpress/viewport": "file:../viewport",
 		"classnames": "^2.2.5",
+		"css-element-queries": "^1.2.1",
 		"eqcss": "^1.9.2",
 		"lodash": "^4.17.14",
 		"memize": "^1.0.5",

@@ -112,7 +112,23 @@ body.block-editor-page {
 	}
 }
 
-@element .editor-post-title__block and (min-width: 500px) {
+.editor-block-list__layout[max-width~="600px"] > div[data-type="core/paragraph"] {
+	color: red !important;
+}
+
+@element .editor-block-list__layout and (max-width: 600px) {
+	eq_this > div[data-type="core/paragraph"] {
+		color: red;
+	}
+}
+
+@element .editor-styles-wrapper and (max-width: 600px) {
+	#adminmenumain {
+		display: none;
+	}
+}
+
+@element div[data-type="core/paragraph"] and (min-width: 500px) {
 	.edit-post-sidebar__panel-tab {
 		color: red;
 	}
