@@ -407,13 +407,22 @@ _Type_
 
 -   `Object` 
 
+<a name="transformMediaQueries" href="#transformMediaQueries">#</a> **transformMediaQueries**
+
+Undocumented declaration.
+
 <a name="transformStyles" href="#transformStyles">#</a> **transformStyles**
 
-Undocumented declaration.
+Applies a series of CSS rule transforms to wrap selectors inside a given class and/or rewrite URLs depending on the parameters passed.
 
-<a name="traverse" href="#traverse">#</a> **traverse**
+_Parameters_
 
-Undocumented declaration.
+-   _styles_ `Array`: CSS rules.
+-   _wrapperClassName_ `string`: Wrapper Class Name.
+
+_Returns_
+
+-   `Array`: converted rules.
 
 <a name="URLInput" href="#URLInput">#</a> **URLInput**
 
@@ -432,10 +441,6 @@ _Related_
 _Related_
 
 -   <https://github.com/WordPress/gutenberg/blob/master/packages/block-editor/src/components/url-popover/README.md>
-
-<a name="urlRewrite" href="#urlRewrite">#</a> **urlRewrite**
-
-Undocumented declaration.
 
 <a name="Warning" href="#Warning">#</a> **Warning**
 

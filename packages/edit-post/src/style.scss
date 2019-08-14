@@ -133,3 +133,9 @@ body.block-editor-page {
 		color: red;
 	}
 }
+
+@media (   orientation: portrait) and   (min-width: 500px    ) {
+	body {
+		display: block;
+	}
+}

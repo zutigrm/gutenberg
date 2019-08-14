@@ -39,6 +39,4 @@ const transformStyles = ( styles, wrapperClassName = '' ) => {
 	} );
 };
 
-export { traverse, urlRewrite };
-
 export default transformStyles;
