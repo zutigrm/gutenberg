@@ -115,7 +115,7 @@ class EditorProvider extends Component {
 		if ( ! this.props.settings.styles ) {
 			return;
 		}
-		// This partial paths probably should be a setting passed to the editor that includes styles added by the plugins
+		// Todo: The partial paths should be a setting that includes styles added by the plugins.
 		transformMediaQueries( [
 			'block-editor/style.css',
 			'editor/style.css',
