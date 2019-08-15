@@ -639,7 +639,7 @@ function enqueue_eqcss() {
 	);
 	wp_enqueue_script( 'eqcss' );
 }
-add_action( 'enqueue_block_editor_assets', 'enqueue_eqcss' );
+//add_action( 'enqueue_block_editor_assets', 'enqueue_eqcss' );
 
 function enqueue_css_element_queries () {
 	wp_enqueue_script(

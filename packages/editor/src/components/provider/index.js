@@ -116,12 +116,14 @@ class EditorProvider extends Component {
 			return;
 		}
 		// This partial paths probably should be a setting passed to the editor that includes styles added by the plugins
-		//transformMediaQueries( [
-		//	'block-editor/style.css',
-		//	'block-library/style.css',
-		//	'block-library/theme.css',
-		//	'block-library/editor.css',
-		//] );
+		transformMediaQueries( [
+			'block-editor/style.css',
+			'editor/style.css',
+			'block-library/style.css',
+			'block-library/theme.css',
+			'block-library/editor.css',
+			'format-library/style.css',
+		] );
 		const updatedStyles = transformStyles( this.props.settings.styles, '.editor-styles-wrapper' );
 
 		map( updatedStyles, ( updatedCSS ) => {

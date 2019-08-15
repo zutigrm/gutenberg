@@ -116,6 +116,10 @@ body.block-editor-page {
 	color: red !important;
 }
 
+.editor-styles-wrapper {
+	width: 550px;
+}
+
 @element .editor-block-list__layout and (max-width: 600px) {
 	eq_this > div[data-type="core/paragraph"] {
 		color: red;
@@ -134,8 +138,3 @@ body.block-editor-page {
 	}
 }
 
-@media (   orientation: portrait) and   (min-width: 500px    ) {
-	body {
-		display: block;
-	}
-}

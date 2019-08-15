@@ -1,44 +1,40 @@
 /**
  * External dependencies
  */
-import { filter, get, map, includes, some } from 'lodash';
+import {
+	filter,
+	get,
+	map,
+	some,
+} from 'lodash';
+import ElementQueries from 'css-element-queries/src/ElementQueries';
 
-const HANDLED_PROPERTIES = [
-	'min-width',
-	'max-width',
-	'min-height',
-	'max-height',
-	'orientation',
-	'min-aspect-ratio',
-	'man-aspect-ratio',
-];
+/**
+ * Internal dependencies
+ */
+import traverse from '../transform-styles/traverse';
+import wrap from '../transform-styles/transforms/wrap';
 
-function canTransformRule( rule ) {
+function parseMediaQueryRule( rule ) {
 	// Make sure there are no multiple media rules.
 	if ( ! rule.media || rule.media.length !== 1 ) {
-		return false;
+		return null;
 	}
 
 	const mediaQueryCondition = rule.media[ 0 ];
-	// Verify if it is a simple media query that maybe could be transformed into an element query.
-	const mediaMatches = mediaQueryCondition.match( /^\(([^\(]*?):[^\(]*?\)$/ );
-	if ( ! mediaMatches || ! mediaMatches[ 1 ] ) {
-		return false;
+	// Verify if it is a simple media query that could be transformed into an element query.
+	const mediaMatches = mediaQueryCondition.match( /^\(((min|max)-(width|height)):([^\(]*?)\)$/ );
+	if ( ! mediaMatches || ! mediaMatches[ 1 ] || ! mediaMatches[ 4 ] ) {
+		return null;
 	}
-	const property = mediaMatches[ 1 ];
-
-	return includes(
-		HANDLED_PROPERTIES,
-		property
-	);
+	return {
+		property: mediaMatches[ 1 ].trim(),
+		value: mediaMatches[ 4 ].trim(),
+	};
 }
 
-export default function transformMediaQueries( partialPaths ) {
-	const { EQCSS } = window;
-	if ( ! EQCSS ) {
-		return;
-	}
-	const styleSheets = filter(
+function getStyleSheetsThatMatchPaths( partialPaths ) {
+	return filter(
 		get( window, [ 'document', 'styleSheets' ], [] ),
 		( styleSheet ) => {
 			return (
@@ -52,22 +48,42 @@ export default function transformMediaQueries( partialPaths ) {
 			);
 		}
 	);
+}
+
+function getMediaQueryInnerText( rule ) {
+	return map(
+		rule.cssRules,
+		( { cssText } ) => ( cssText )
+	).join( '\n' );
+}
+
+function getTransformedMediaQuery( rule ) {
+	const parsedMediaQuery = parseMediaQueryRule( rule );
+	if ( ! parsedMediaQuery ) {
+		return;
+	}
+	return traverse(
+		getMediaQueryInnerText( rule ),
+		wrap( `.editor-styles-wrapper[${ parsedMediaQuery.property }~="${ parsedMediaQuery.value }"]` )
+	);
+}
+
+export default function transformMediaQueries( partialPaths ) {
+	if ( ! window || ! window.document ) {
+		return;
+	}
+
+	const styleSheets = getStyleSheetsThatMatchPaths( partialPaths );
 
 	const rulesToProcess = [];
+
 	styleSheets.forEach(
 		( styleSheet ) => {
 			for ( let i = 0; i < styleSheet.rules.length; ) {
 				const rule = styleSheet.rules[ i ];
-				if ( canTransformRule( rule ) ) {
-					const innerRulesText = map(
-						rule.cssRules,
-						( { cssText } ) => ( cssText )
-					);
-					rulesToProcess.push( [
-						`@element .editor-styles-wrapper and ${ rule.media[ 0 ] } {`,
-						...innerRulesText,
-						`}`,
-					].join( '\n' ) );
+				const transformedMediaQuery = getTransformedMediaQuery( rule );
+				if ( transformedMediaQuery ) {
+					rulesToProcess.push( transformedMediaQuery );
 					styleSheet.removeRule( i );
 				} else {
 					++i;
@@ -78,7 +94,12 @@ export default function transformMediaQueries( partialPaths ) {
 	if ( ! rulesToProcess.length ) {
 		return;
 	}
+
 	const elementQueriesCode = rulesToProcess.join( '\n' );
-	console.log( elementQueriesCode );
-	EQCSS.process( elementQueriesCode );
+
+	const node = document.createElement( 'style' );
+	node.innerHTML = elementQueriesCode;
+	document.body.appendChild( node );
+	ElementQueries.listen();
+	ElementQueries.init();
 }
