@@ -25,6 +25,7 @@
 		"@wordpress/block-editor": "file:../block-editor",
 		"@wordpress/components": "file:../components",
 		"@wordpress/dom": "file:../dom",
+		"@wordpress/data": "file:../data",
 		"@wordpress/element": "file:../element",
 		"@wordpress/html-entities": "file:../html-entities",
 		"@wordpress/i18n": "file:../i18n",

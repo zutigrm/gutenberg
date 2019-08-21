@@ -1,67 +1,101 @@
 /**
+ * External dependencies
+ */
+import { get } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { useCallback, useMemo, useState } from '@wordpress/element';
 import { RichTextToolbarButton } from '@wordpress/block-editor';
+import { Dashicon } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import InlineColorUI from './inline';
+import { default as InlineColorUI, getActiveColor } from './inline';
 
 const name = 'core/text-color';
 const title = __( 'Text Color' );
+
+const EMPTY_ARRAY = [];
+
+function TextColorEdit( {
+	value,
+	onChange,
+	isActive,
+	activeAttributes,
+} ) {
+	const colors = useSelect(
+		( select ) => {
+			const { getSettings } = select( 'core/block-editor' );
+			return get( getSettings(), [ 'colors' ], EMPTY_ARRAY );
+		}
+	);
+	const [ isAddingColor, setIsAddingColor ] = useState( false );
+	const enableIsAddingColor = useCallback(
+		() => ( setIsAddingColor( true ) ),
+		[ setIsAddingColor ]
+	);
+	const disableIsAddingColor = useCallback(
+		() => ( setIsAddingColor( false ) ),
+		[ setIsAddingColor ]
+	);
+	const colorIndicatorStyle = useMemo(
+		() => {
+			const activeColor = getActiveColor( name, value, colors );
+			if ( ! activeColor ) {
+				return undefined;
+			}
+			return {
+				backgroundColor: activeColor,
+			};
+		},
+		[ value, colors ]
+	);
+	return (
+		<>
+			<RichTextToolbarButton
+				name={ isActive ? 'text-color' : undefined }
+				icon={
+					<>
+						<Dashicon icon="editor-textcolor" />
+						{ isActive && (
+							<span
+								className="format-library-text-color-button__indicator"
+								style={ colorIndicatorStyle }
+							/>
+						) }
+					</>
+				}
+				title={ title }
+				onClick={ enableIsAddingColor }
+			/>
+			{ isAddingColor && (
+				<InlineColorUI
+					name={ name }
+					addingColor={ isAddingColor }
+					onClose={ disableIsAddingColor }
+					isActive={ isActive }
+					activeAttributes={ activeAttributes }
+					value={ value }
+					onChange={ onChange }
+				/>
+			) }
+		</>
+	);
+}
 
 export const textColor = {
 	name,
 	title,
 	tagName: 'span',
 	className: 'has-inline-color',
-	edit: class TextColorEdit extends Component {
-		constructor() {
-			super( ...arguments );
-
-			this.onClose = this.onClose.bind( this );
-
-			this.state = {
-				useState: false,
-			};
-		}
-
-		onClose() {
-			this.setState( { useState: false } );
-		}
-
-		render() {
-			const {
-				value,
-				onChange,
-				isActive,
-				activeAttributes,
-			} = this.props;
-
-			return (
-				<>
-					<RichTextToolbarButton
-						icon="editor-textcolor"
-						title={ title }
-						onClick={ () => this.setState( { useState: true } ) }
-						isActive={ isActive }
-					/>
-					{ this.state.useState && (
-						<InlineColorUI
-							name={ name }
-							addingColor={ this.state.useState }
-							onClose={ this.onClose }
-							isActive={ isActive }
-							activeAttributes={ activeAttributes }
-							value={ value }
-							onChange={ onChange }
-						/>
-					) }
-				</>
-			);
-		}
+	attributes: {
+		style: 'style',
+		class: 'class',
 	},
+	edit: TextColorEdit,
 };

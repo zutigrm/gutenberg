@@ -25,6 +25,22 @@ import {
 	getColorObjectByAttributeValues,
 } from '@wordpress/block-editor';
 
+export function getActiveColor( formatName, formatValue, colors ) {
+	const activeColorFormat = getActiveFormat( formatValue, formatName );
+	if ( ! activeColorFormat ) {
+		return;
+	}
+	const styleColor = activeColorFormat.attributes.style;
+	if ( styleColor ) {
+		return styleColor.replace( new RegExp( `^color:\\s*` ), '' );
+	}
+	const currentClass = activeColorFormat.attributes.class;
+	if ( currentClass ) {
+		const colorSlug = currentClass.replace( /.*has-(.*?)-color.*/, '$1' );
+		return getColorObjectByAttributeValues( colors, colorSlug ).color;
+	}
+}
+
 const ColorPopoverAtLink = ( { isActive, addingColor, value, ...props } ) => {
 	const anchorRect = useMemo( () => {
 		const selection = window.getSelection();
@@ -93,25 +109,10 @@ class InlineColorUI extends Component {
 			addingColor,
 		} = this.props;
 
-		let activeColor;
-
 		const isDisableCustomColors = get( select( 'core/block-editor' ).getSettings(), [ 'disableCustomColors' ], false );
 		const colors = get( select( 'core/block-editor' ).getSettings(), [ 'colors' ], [] );
-		const activeColorFormat = getActiveFormat( value, name );
 
-		if ( activeColorFormat ) {
-			const styleColor = activeColorFormat.attributes.style;
-			if ( styleColor ) {
-				activeColor = styleColor.replace( new RegExp( `^color:\\s*` ), '' );
-			} else {
-				const currentClass = activeColorFormat.attributes.class;
-				if ( currentClass ) {
-					const colorSlug = currentClass.replace( /.*has-(.*?)-color.*/, '$1' );
-					activeColor = getColorObjectByAttributeValues( colors, colorSlug ).color;
-				}
-			}
-		}
-
+		const activeColor = getActiveColor( name, value, colors );
 		return (
 			<ColorPopoverAtLink
 				value={ value }
