@@ -194,21 +194,6 @@ class CoverEdit extends Component {
 				<InspectorControls>
 					{ !! url && (
 						<PanelBody title={ __( 'Media Settings' ) }>
-							{ !! ( url || id ) && (
-								<PanelRow>
-									<Button
-										isDefault
-										isSmall
-										className="wp-block-cover__reset-button"
-										onClick={ () => setAttributes( {
-											url: undefined,
-											id: undefined,
-										} ) }
-									>
-										{ __( 'Clear Background' ) }
-									</Button>
-								</PanelRow>
-							) }
 							{ !! url && ( IMAGE_BACKGROUND_TYPE === backgroundType ) && (
 								<ToggleControl
 									label={ __( 'Fixed Background' ) }
@@ -223,6 +208,21 @@ class CoverEdit extends Component {
 									value={ focalPoint }
 									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
 								/>
+							) }
+							{ !! ( url || id ) && (
+								<PanelRow>
+									<Button
+										isDefault
+										isSmall
+										className="block-library-cover__reset-button"
+										onClick={ () => setAttributes( {
+											url: undefined,
+											id: undefined,
+										} ) }
+									>
+										{ __( 'Clear Background' ) }
+									</Button>
+								</PanelRow>
 							) }
 						</PanelBody>
 					) }
