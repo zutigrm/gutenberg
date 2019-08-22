@@ -28,6 +28,9 @@
 		},
 		"focalPoint": {
 			"type": "object"
+		},
+		"name": {
+			"type": "string"
 		}
 	}
 }
