@@ -227,7 +227,7 @@ class CoverEdit extends Component {
 										hasParallax: undefined,
 									} ) }
 								>
-									{ __( 'Clear Background' ) }
+									{ __( 'Clear Media' ) }
 								</Button>
 							</PanelRow>
 						</PanelBody>
