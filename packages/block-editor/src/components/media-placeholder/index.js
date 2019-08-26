@@ -160,6 +160,7 @@ export class MediaPlaceholder extends Component {
 			onSelectURL,
 			mediaUpload,
 			append,
+			children,
 		} = this.props;
 
 		let instructions = labels.instructions;
@@ -220,6 +221,7 @@ export class MediaPlaceholder extends Component {
 				append={ append }
 			>
 				{ content }
+				{ children }
 			</Placeholder>
 		);
 	}
