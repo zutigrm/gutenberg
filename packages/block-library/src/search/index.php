@@ -16,16 +16,14 @@ function render_block_core_search( $attributes ) {
 	static $instance_id = 0;
 
 	$input_id      = 'wp-block-search__input-' . ++$instance_id;
-	$label_markup  = '';
 	$button_markup = '';
 
-	if ( ! empty( $attributes['label'] ) ) {
-		$label_markup = sprintf(
-			'<label for="%s" class="wp-block-search__label">%s</label>',
-			$input_id,
-			$attributes['label']
-		);
-	}
+	$label_text   = empty( $attributes['label'] ) ? __( 'Search' ) : $attributes['label'];
+	$label_markup = sprintf(
+		'<label for="%s" class="wp-block-search__label">%s</label>',
+		$input_id,
+		$label_text
+	);
 
 	$input_markup = sprintf(
 		'<input type="search" id="%s" class="wp-block-search__input" name="s" value="%s" placeholder="%s" />',
