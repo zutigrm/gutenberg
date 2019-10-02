@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ScrollView } from 'react-native';
+import { WPScrollView } from 'react-native-aztec';
 
 /**
  * Internal dependencies
@@ -11,9 +11,9 @@ import styles from './style.android.scss';
 
 const HTMLInputContainer = ( { children, parentHeight } ) => (
 	<KeyboardAvoidingView style={ styles.keyboardAvoidingView } parentHeight={ parentHeight }>
-		<ScrollView style={ styles.scrollView } >
+		<WPScrollView style={ styles.scrollView } >
 			{ children }
-		</ScrollView>
+		</WPScrollView>
 	</KeyboardAvoidingView>
 );
 
