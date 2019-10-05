@@ -15,7 +15,7 @@ function MenuItemActions( {
 	moveRight,
 	moveToEnd,
 	moveToStart,
-	onEditLableClicked,
+	onEditLabelClicked,
 	remove,
 } ) {
 	return (
@@ -26,7 +26,7 @@ function MenuItemActions( {
 				{ destination }
 			</MenuItem>
 			<MenuItem
-				onClick={ onEditLableClicked }
+				onClick={ onEditLabelClicked }
 				icon="edit"
 			>
 				{ __( 'Edit label text' ) }

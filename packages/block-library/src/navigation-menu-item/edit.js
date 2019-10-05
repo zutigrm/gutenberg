@@ -42,7 +42,7 @@ function NavigationMenuItemEdit( {
 	setAttributes,
 } ) {
 	const plainTextRef = useRef( null );
-	const onEditLableClicked = useCallback(
+	const onEditLabelClicked = useCallback(
 		( onClose ) => () => {
 			onClose();
 			invoke( plainTextRef, [ 'current', 'textarea', 'focus' ] );
@@ -77,7 +77,7 @@ function NavigationMenuItemEdit( {
 						<MenuItemActions
 							clientId={ clientId }
 							destination={ attributes.destination }
-							onEditLableClicked={ onEditLableClicked( onClose ) }
+							onEditLabelClicked={ onEditLabelClicked( onClose ) }
 						/>
 					) }
 				/>

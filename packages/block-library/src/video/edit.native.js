@@ -58,7 +58,7 @@ class VideoEdit extends React.Component {
 		this.finishMediaUploadWithFailure = this.finishMediaUploadWithFailure.bind( this );
 		this.updateMediaProgress = this.updateMediaProgress.bind( this );
 		this.onVideoPressed = this.onVideoPressed.bind( this );
-		this.onVideoContanerLayout = this.onVideoContanerLayout.bind( this );
+		this.onVideoContainerLayout = this.onVideoContainerLayout.bind( this );
 		this.onFocusCaption = this.onFocusCaption.bind( this );
 	}
 
@@ -137,7 +137,7 @@ class VideoEdit extends React.Component {
 		setAttributes( { id, src: url } );
 	}
 
-	onVideoContanerLayout( event ) {
+	onVideoContainerLayout( event ) {
 		const { width } = event.nativeEvent.layout;
 		const height = width / VIDEO_ASPECT_RATIO;
 		if ( height !== this.state.videoContainerHeight ) {
@@ -222,7 +222,7 @@ class VideoEdit extends React.Component {
 							const containerStyle = showVideo && isSelected ? style.containerFocused : style.container;
 
 							return (
-								<View onLayout={ this.onVideoContanerLayout } style={ containerStyle }>
+								<View onLayout={ this.onVideoContainerLayout } style={ containerStyle }>
 									{ showVideo &&
 										<View style={ style.videoContainer }>
 											<Video
