@@ -14,6 +14,11 @@ import { withSelect } from '@wordpress/data';
 import { RichText } from '@wordpress/block-editor';
 import { isBlobURL } from '@wordpress/blob';
 
+/**
+ * Internal dependencies
+ */
+import Menu from './menu';
+
 class GalleryImage extends Component {
 	constructor() {
 		super( ...arguments );
@@ -127,37 +132,7 @@ class GalleryImage extends Component {
 					height: 150,
 				} }>
 				{ href ? <a href={ href }>{ img }</a> : img }
-				<View
-					style={ {
-						position: 'absolute',
-					} }>
-					<IconButton
-						icon="arrow-left"
-						onClick={ isFirstItem ? undefined : onMoveBackward }
-						label={ __( 'Move Image Backward' ) }
-						aria-disabled={ isFirstItem }
-						disabled={ ! isSelected }
-					/>
-					<IconButton
-						icon="arrow-right"
-						onClick={ isLastItem ? undefined : onMoveForward }
-						label={ __( 'Move Image Forward' ) }
-						aria-disabled={ isLastItem }
-						disabled={ ! isSelected }
-					/>
-				</View>
-				<View
-					style={ {
-						position: 'absolute',
-						right: 0,
-					} }>
-					<IconButton
-						icon="no-alt"
-						onClick={ onRemove }
-						label={ __( 'Remove Image' ) }
-						disabled={ ! isSelected }
-					/>
-				</View>
+				<Menu { ...{ isFirstItem, isLastItem, isSelected, onRemove, onMoveForward, onMoveBackward } } />
 				<View
 					style={ {
 						flex: 1,

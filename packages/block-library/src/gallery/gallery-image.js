@@ -17,7 +17,7 @@ import { isBlobURL } from '@wordpress/blob';
 /**
  * Internal dependencies
  */
-import { leftArrow, rightArrow } from './icons';
+import Menu from './menu';
 
 class GalleryImage extends Component {
 	constructor() {
@@ -133,33 +133,7 @@ class GalleryImage extends Component {
 		return (
 			<figure className={ className }>
 				{ href ? <a href={ href }>{ img }</a> : img }
-				<div className="block-library-gallery-item__move-menu">
-					<IconButton
-						icon={ leftArrow }
-						onClick={ isFirstItem ? undefined : onMoveBackward }
-						className="blocks-gallery-item__move-backward"
-						label={ __( 'Move image backward' ) }
-						aria-disabled={ isFirstItem }
-						disabled={ ! isSelected }
-					/>
-					<IconButton
-						icon={ rightArrow }
-						onClick={ isLastItem ? undefined : onMoveForward }
-						className="blocks-gallery-item__move-forward"
-						label={ __( 'Move image forward' ) }
-						aria-disabled={ isLastItem }
-						disabled={ ! isSelected }
-					/>
-				</div>
-				<div className="block-library-gallery-item__inline-menu">
-					<IconButton
-						icon="no-alt"
-						onClick={ onRemove }
-						className="blocks-gallery-item__remove"
-						label={ __( 'Remove image' ) }
-						disabled={ ! isSelected }
-					/>
-				</div>
+				<Menu { ...{ isFirstItem, isLastItem, isSelected, onRemove, onMoveForward, onMoveBackward } } />
 				{ ( isSelected || caption ) && (
 					<RichText
 						tagName="figcaption"
