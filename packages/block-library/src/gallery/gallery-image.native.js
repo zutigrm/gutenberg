@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 
 /**
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { IconButton, Spinner } from '@wordpress/components';
+import { IconButton, Image, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { BACKSPACE, DELETE } from '@wordpress/keycodes';
 import { withSelect } from '@wordpress/data';
@@ -105,12 +105,7 @@ class GalleryImage extends Component {
 			/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 			<>
 				<Image
-					style={ {
-						width: '100%',
-						height: '100%',
-						resizeMode: 'cover',
-					} }
-					source={ { uri: url } }
+					src={ url }
 					alt={ alt }
 					data-id={ id }
 					onClick={ this.onSelectImage }
