@@ -386,7 +386,11 @@ class WritingFlow extends Component {
 	}
 
 	render() {
-		const { children } = this.props;
+		const { children, isCleanNewPost } = this.props;
+
+		if ( isCleanNewPost ) {
+			this.disableNavigationMode();
+		}
 
 		// Disable reason: Wrapper itself is non-interactive, but must capture
 		// bubbling events from children to determine focus transition intents.
@@ -415,6 +419,8 @@ class WritingFlow extends Component {
 
 export default compose( [
 	withSelect( ( select ) => {
+		const { isCleanNewPost } = select( 'core/editor' );
+
 		const {
 			getSelectedBlockClientId,
 			getMultiSelectedBlocksStartClientId,
@@ -431,8 +437,8 @@ export default compose( [
 		const selectedBlockClientId = getSelectedBlockClientId();
 		const selectionStartClientId = getMultiSelectedBlocksStartClientId();
 		const selectionEndClientId = getMultiSelectedBlocksEndClientId();
-
 		return {
+			isCleanNewPost: isCleanNewPost(),
 			selectedBlockClientId,
 			selectionStartClientId,
 			selectionBeforeEndClientId: getPreviousBlockClientId( selectionEndClientId || selectedBlockClientId ),
