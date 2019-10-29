@@ -69,7 +69,7 @@ export default function useBlockNavigator( clientId ) {
 				selectedBlockClientId={ selectedBlockClientId }
 				selectBlock={ selectBlock }
 				showNestedBlocks
-				showMovers
+				showBlockMovers
 			/>
 		</Modal>
 	);

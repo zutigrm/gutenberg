@@ -45,10 +45,10 @@ export default function BlockNavigationList( {
 	selectedBlockClientId,
 	selectBlock,
 	showNestedBlocks,
-	showMovers,
+	showBlockMovers,
 	isRootItem = true,
 } ) {
-	const hasMovers = showMovers && blocks.length > 1;
+	const hasBlockMovers = showBlockMovers && blocks.length > 1;
 
 	return (
 		/*
@@ -77,14 +77,16 @@ export default function BlockNavigationList( {
 								{ blockDisplayName }
 								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
 							</Button>
-							{ hasMovers && ( <BlockMover clientIds={ [ block.clientId ] } /> ) }
+							{ hasBlockMovers && (
+								<BlockMover clientIds={ [ block.clientId ] } />
+							) }
 						</div>
 						{ showNestedBlocks && !! block.innerBlocks && !! block.innerBlocks.length && (
 							<BlockNavigationList
 								blocks={ block.innerBlocks }
 								selectedBlockClientId={ selectedBlockClientId }
 								selectBlock={ selectBlock }
-								showMovers={ showMovers }
+								showBlockMovers={ showBlockMovers }
 								showNestedBlocks
 								isRootItem={ false }
 							/>
