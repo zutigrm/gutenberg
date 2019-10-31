@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { noop, get } from 'lodash';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
  */
-import { Button, Dashicon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { Component, createRef } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
@@ -157,13 +158,10 @@ export class PostPublishButton extends Component {
 					isLarge
 					ref={ this.buttonNode }
 					{ ...componentProps }
+					className={ classnames( componentProps.className, {
+						'editor-post-publish-button__has-changes-dot': hasNonPostEntityChanges,
+					} ) }
 				>
-					{ hasNonPostEntityChanges && (
-						<Dashicon
-							icon="layout"
-							style={ { marginRight: '3px', marginLeft: '-5px' } }
-						/>
-					) }
 					{ componentChildren }
 				</Button>
 				{ /* Todo: Remove the wrapping div when DotTips are removed. */ }
