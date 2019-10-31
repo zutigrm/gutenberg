@@ -38,11 +38,17 @@ import {
 	useState,
 } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import BlockNavigationList from '../navigation-menu/block-navigation-list';
+
 function NavigationMenuItemEdit( {
 	attributes,
 	isSelected,
 	isParentOfSelectedBlock,
 	setAttributes,
+	parentNavigationClientId,
 } ) {
 	const [ isLinkOpen, setIsLinkOpen ] = useState( false );
 	const [ isEditingLink, setIsEditingLink ] = useState( false );
@@ -120,6 +126,11 @@ function NavigationMenuItemEdit( {
 			</BlockControls>
 			<InspectorControls>
 				<PanelBody
+					title={ __( 'Navigation Structure' ) }
+				>
+					<BlockNavigationList clientId={ parentNavigationClientId } />
+				</PanelBody>
+				<PanelBody
 					title={ __( 'Menu Settings' ) }
 				>
 					<ToggleControl
@@ -192,10 +203,14 @@ function NavigationMenuItemEdit( {
 }
 
 export default withSelect( ( select, ownProps ) => {
-	const { hasSelectedInnerBlock } = select( 'core/block-editor' );
+	const {
+		hasSelectedInnerBlock,
+		__experimentalGetClosestParentWithName: getClosestParentWithName,
+	} = select( 'core/block-editor' );
 	const { clientId } = ownProps;
 
 	return {
+		parentNavigationClientId: getClosestParentWithName( clientId, 'core/navigation-menu' ),
 		isParentOfSelectedBlock: hasSelectedInnerBlock( clientId, true ),
 	};
 } )( NavigationMenuItemEdit );
