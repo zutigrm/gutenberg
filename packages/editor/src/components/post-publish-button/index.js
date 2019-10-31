@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { noop, get } from 'lodash';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -16,16 +17,48 @@ import { DotTip } from '@wordpress/nux';
 /**
  * Internal dependencies
  */
+import EntitiesSavedStates from '../entities-saved-states';
 import PublishButtonLabel from './label';
+
 export class PostPublishButton extends Component {
 	constructor( props ) {
 		super( props );
 		this.buttonNode = createRef();
+
+		this.createOnClick = this.createOnClick.bind( this );
+		this.closeEntitiesSavedStates = this.closeEntitiesSavedStates.bind( this );
+
+		this.state = {
+			entitiesSavedStatesCallback: false,
+		};
 	}
 	componentDidMount() {
 		if ( this.props.focusOnMount ) {
 			this.buttonNode.current.focus();
 		}
+	}
+
+	createOnClick( callback ) {
+		return ( ...args ) => {
+			const { hasNonPostEntityChanges } = this.props;
+			if ( hasNonPostEntityChanges ) {
+				return this.setState( {
+					entitiesSavedStatesCallback: () => callback( ...args ),
+				} );
+			}
+
+			return callback( ...args );
+		};
+	}
+
+	closeEntitiesSavedStates( savedById ) {
+		const { postType, postId } = this.props;
+		const { entitiesSavedStatesCallback } = this.state;
+		this.setState( { entitiesSavedStatesCallback: false }, () => {
+			if ( savedById[ `postType | ${ postType } | ${ postId }` ] ) {
+				entitiesSavedStatesCallback();
+			}
+		} );
 	}
 
 	render() {
@@ -46,7 +79,12 @@ export class PostPublishButton extends Component {
 			onSubmit = noop,
 			onToggle,
 			visibility,
+			hasNonPostEntityChanges,
 		} = this.props;
+		const {
+			entitiesSavedStatesCallback,
+		} = this.state;
+
 		const isButtonDisabled =
 			isSaving ||
 			forceIsSaving ||
@@ -93,7 +131,7 @@ export class PostPublishButton extends Component {
 			className: 'editor-post-publish-button',
 			isBusy: isSaving && isPublished,
 			isPrimary: true,
-			onClick: onClickButton,
+			onClick: this.createOnClick( onClickButton ),
 		};
 
 		const toggleProps = {
@@ -102,7 +140,7 @@ export class PostPublishButton extends Component {
 			className: 'editor-post-publish-panel__toggle',
 			isBusy: isSaving && isPublished,
 			isPrimary: true,
-			onClick: onClickToggle,
+			onClick: this.createOnClick( onClickToggle ),
 		};
 
 		const toggleChildren = isBeingScheduled ? __( 'Schedule…' ) : __( 'Publish…' );
@@ -112,10 +150,17 @@ export class PostPublishButton extends Component {
 		const componentChildren = isToggle ? toggleChildren : buttonChildren;
 		return (
 			<div>
+				<EntitiesSavedStates
+					isOpen={ Boolean( entitiesSavedStatesCallback ) }
+					onRequestClose={ this.closeEntitiesSavedStates }
+				/>
 				<Button
 					isLarge
 					ref={ this.buttonNode }
 					{ ...componentProps }
+					className={ classnames( componentProps.className, {
+						'editor-post-publish-button__has-changes-dot': hasNonPostEntityChanges,
+					} ) }
 				>
 					{ componentChildren }
 				</Button>
@@ -140,6 +185,8 @@ export default compose( [
 			isPostSavingLocked,
 			getCurrentPost,
 			getCurrentPostType,
+			getCurrentPostId,
+			hasNonPostEntityChanges,
 		} = select( 'core/editor' );
 		return {
 			isSaving: isSavingPost(),
@@ -151,6 +198,8 @@ export default compose( [
 			isPublished: isCurrentPostPublished(),
 			hasPublishAction: get( getCurrentPost(), [ '_links', 'wp:action-publish' ], false ),
 			postType: getCurrentPostType(),
+			postId: getCurrentPostId(),
+			hasNonPostEntityChanges: hasNonPostEntityChanges(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

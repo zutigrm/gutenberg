@@ -82,6 +82,14 @@ _Related_
 
 Undocumented declaration.
 
+<a name="BlockBreadcrumb" href="#BlockBreadcrumb">#</a> **BlockBreadcrumb**
+
+Block breadcrumb component, displaying the hierarchy of the current block selection as a breadcrumb.
+
+_Returns_
+
+-   `WPElement`: Block Breadcrumb.
+
 <a name="BlockControls" href="#BlockControls">#</a> **BlockControls**
 
 Undocumented declaration.
@@ -137,7 +145,7 @@ _Parameters_
 
 _Returns_
 
--   `WPElement`: Rendered element.
+-   `WPComponent`: The component to be rendered.
 
 <a name="BlockSelectionClearer" href="#BlockSelectionClearer">#</a> **BlockSelectionClearer**
 
@@ -450,6 +458,10 @@ _Related_
 _Related_
 
 -   <https://github.com/WordPress/gutenberg/blob/master/packages/block-editor/src/components/url-popover/README.md>
+
+<a name="useBlockEditContext" href="#useBlockEditContext">#</a> **useBlockEditContext**
+
+Undocumented declaration.
 
 <a name="Warning" href="#Warning">#</a> **Warning**
 
