@@ -132,6 +132,11 @@ function NavigationMenu( {
 			{ navigatorModal }
 			<InspectorControls>
 				<PanelBody
+					title={ __( 'Navigation Structure' ) }
+				>
+					<BlockNavigationList clientId={ clientId } />
+				</PanelBody>
+				<PanelBody
 					title={ __( 'Menu Settings' ) }
 				>
 					<CheckboxControl
@@ -140,11 +145,6 @@ function NavigationMenu( {
 						label={ __( 'Automatically add new pages' ) }
 						help={ __( 'Automatically add new top level pages to this menu.' ) }
 					/>
-				</PanelBody>
-				<PanelBody
-					title={ __( 'Navigation Structure' ) }
-				>
-					<BlockNavigationList clientId={ clientId } />
 				</PanelBody>
 			</InspectorControls>
 

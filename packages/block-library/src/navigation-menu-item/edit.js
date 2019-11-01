@@ -38,6 +38,11 @@ import {
 } from '@wordpress/block-editor';
 import { Fragment, useState, useEffect } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import BlockNavigationList from '../navigation-menu/block-navigation-list';
+
 function NavigationMenuItemEdit( {
 	attributes,
 	hasDescendants,
@@ -46,6 +51,7 @@ function NavigationMenuItemEdit( {
 	setAttributes,
 	insertMenuItemBlock,
 	fetchSearchSuggestions,
+	parentNavigationClientId,
 } ) {
 	const { label, opensInNewTab, title, url } = attributes;
 	const link = title ? { title, url } : null;
@@ -70,7 +76,9 @@ function NavigationMenuItemEdit( {
 	// Set the menu item when it's new.
 	// - Open LinkControl popover.
 	useEffect( () => {
-		if ( ! label && isSelected ) setIsLinkOpen( true );
+		if ( ! label && isSelected ) {
+			setIsLinkOpen( true );
+		}
 	}, [] );
 
 	/**
@@ -151,6 +159,11 @@ function NavigationMenuItemEdit( {
 				</Toolbar>
 			</BlockControls>
 			<InspectorControls>
+				<PanelBody
+					title={ __( 'Navigation Structure' ) }
+				>
+					<BlockNavigationList clientId={ parentNavigationClientId } />
+				</PanelBody>
 				<PanelBody
 					title={ __( 'Menu Settings' ) }
 				>
@@ -243,10 +256,16 @@ function NavigationMenuItemEdit( {
 
 export default compose( [
 	withSelect( ( select, ownProps ) => {
-		const { getClientIdsOfDescendants, hasSelectedInnerBlock, getSettings } = select( 'core/block-editor' );
+		const {
+			getClientIdsOfDescendants,
+			hasSelectedInnerBlock,
+			getSettings,
+			__experimentalGetClosestParentWithName: getClosestParentWithName,
+		} = select( 'core/block-editor' );
 		const { clientId } = ownProps;
 
 		return {
+			parentNavigationClientId: getClosestParentWithName( clientId, 'core/navigation-menu' ),
 			isParentOfSelectedBlock: hasSelectedInnerBlock( clientId, true ),
 			hasDescendants: !! getClientIdsOfDescendants( [ clientId ] ).length,
 			fetchSearchSuggestions: getSettings().__experimentalFetchLinkSuggestions,
