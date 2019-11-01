@@ -36,6 +36,7 @@ export default function BlockNavigationList( { clientId } ) {
 			selectBlock={ selectBlock }
 			showNestedBlocks
 			showBlockMovers
+			showAppender
 		/>
 	);
 }

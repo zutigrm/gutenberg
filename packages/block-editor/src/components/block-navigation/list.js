@@ -17,6 +17,7 @@ import { create, getTextContent } from '@wordpress/rich-text';
  */
 import BlockIcon from '../block-icon';
 import BlockMover from '../block-mover';
+import ButtonBlockAppender from '../button-block-appender';
 
 /**
  * Get the block display name, if it has one, or the block title if it doesn't.
@@ -44,11 +45,16 @@ export default function BlockNavigationList( {
 	blocks,
 	selectedBlockClientId,
 	selectBlock,
+	showAppender,
+
+	// Internal use only.
 	showNestedBlocks,
 	showBlockMovers,
 	isRootItem = true,
+	parentBlockClientId,
 } ) {
 	const hasBlockMovers = showBlockMovers && blocks.length > 1;
+	const shouldShowAppender = showAppender && !! parentBlockClientId;
 
 	return (
 		/*
@@ -87,6 +93,8 @@ export default function BlockNavigationList( {
 								selectedBlockClientId={ selectedBlockClientId }
 								selectBlock={ selectBlock }
 								showBlockMovers={ showBlockMovers }
+								parentBlockClientId={ block.clientId }
+								showAppender={ showAppender }
 								showNestedBlocks
 								isRootItem={ false }
 							/>
@@ -94,6 +102,16 @@ export default function BlockNavigationList( {
 					</li>
 				);
 			} ) }
+			{ shouldShowAppender && (
+				<li>
+					<div className="editor-block-navigation__item block-editor-block-navigation__item">
+						<ButtonBlockAppender
+							rootClientId={ parentBlockClientId }
+							__experimentalSelectBlockOnInsert={ false }
+						/>
+					</div>
+				</li>
+			) }
 		</ul>
 		/* eslint-enable jsx-a11y/no-redundant-roles */
 	);
