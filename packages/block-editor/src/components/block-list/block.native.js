@@ -173,6 +173,7 @@ class BlockListBlock extends Component {
 			focusedBorderColor,
 			icon,
 			isSelected,
+			isTouchable,
 			isValid,
 			showTitle,
 			title,
@@ -221,6 +222,7 @@ class BlockListBlock extends Component {
 					}>
 						{ showTitle && this.renderBlockTitle() }
 						<View
+							pointerEvents={ isTouchable ? 'auto': 'none' }
 							accessibilityLabel={ accessibilityLabel }
 							style={ [
 								! isSelected && this.applyUnSelectedStyle(),
@@ -252,6 +254,7 @@ export default compose( [
 			getBlockHierarchyRootClientId,
 			getSelectedBlockClientId,
 			getBlock,
+			getBlockParents,
 			getBlockRootClientId,
 			getSelectedBlock,
 			getFirstToSelectBlock,
@@ -293,6 +296,8 @@ export default compose( [
 		const isNestedInnerBlock = ! isDashed && selectedBlockClientId === getBlockRootClientId( firstToSelectId );
 		const isGroupType = blockType.name === 'core/group' || blockType.name === 'core/media-text';
 		const isParentSelected = parentId === selectedBlockClientId;
+		const isDescendantSelected = selectedBlockClientId && getBlockParents( selectedBlockClientId ).includes( clientId );
+		const isTouchable = isSelected || isDescendantSelected;
 
 		return {
 			icon,
@@ -303,6 +308,7 @@ export default compose( [
 			blockType,
 			isLastBlock,
 			isSelected,
+			isTouchable,
 			isValid,
 			getAccessibilityLabelExtra,
 			showFloatingToolbar,

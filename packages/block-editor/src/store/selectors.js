@@ -504,6 +504,10 @@ export function getFirstToSelectBlock( state, clientId ) {
 		return rootParent;
 	}
 
+	if ( selectedId === clientId ) {
+		return clientId;
+	}
+
 	const selectedRoot = getBlockHierarchyRootClientId( state, selectedId );
 	const clientRoot = getBlockHierarchyRootClientId( state, clientId );
 
