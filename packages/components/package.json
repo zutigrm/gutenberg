@@ -22,7 +22,9 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@babel/runtime": "^7.4.4",
+		"@emotion/cache": "^10.0.19",
 		"@emotion/core": "10.0.22",
+		"@emotion/memoize": "^0.7.3",
 		"@emotion/styled": "10.0.23",
 		"@wordpress/a11y": "file:../a11y",
 		"@wordpress/compose": "file:../compose",
@@ -46,6 +48,7 @@
 		"react-dates": "^17.1.1",
 		"react-spring": "^8.0.20",
 		"rememo": "^3.0.0",
+		"stylis-plugin-extra-scope": "^0.1.1",
 		"tinycolor2": "^1.4.1",
 		"uuid": "^3.3.2"
 	},
