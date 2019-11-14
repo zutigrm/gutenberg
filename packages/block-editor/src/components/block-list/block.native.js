@@ -222,7 +222,7 @@ class BlockListBlock extends Component {
 					}>
 						{ showTitle && this.renderBlockTitle() }
 						<View
-							pointerEvents={ isTouchable ? 'auto': 'none' }
+							pointerEvents={ isTouchable ? 'auto': 'box-only' }
 							accessibilityLabel={ accessibilityLabel }
 							style={ [
 								! isSelected && this.applyUnSelectedStyle(),
