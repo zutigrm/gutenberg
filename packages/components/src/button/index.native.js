@@ -63,6 +63,7 @@ export function Button( props ) {
 	const {
 		children,
 		onClick,
+		onLongPress,
 		disabled,
 		hint,
 		fixedRatio = true,
@@ -106,6 +107,7 @@ export function Button( props ) {
 			accessibilityRole={ 'button' }
 			accessibilityHint={ hint }
 			onPress={ onClick }
+			onLongPress={ onLongPress }
 			style={ styles.container }
 			disabled={ isDisabled }
 			testID={ testID }
