@@ -14,7 +14,7 @@ import { getUnregisteredTypeHandlerName } from '@wordpress/blocks';
 import styles from './style.scss';
 import InserterMenu from './menu';
 
-const defaultRenderToggle = ( { onToggle, disabled, style } ) => (
+const defaultRenderToggle = ( { onToggle, disabled, style, onLongPress } ) => (
 	<ToolbarButton
 		title={ __( 'Add block' ) }
 		icon={ ( <Dashicon icon="plus-alt" style={ style } color={ style.color } /> ) }
@@ -24,7 +24,7 @@ const defaultRenderToggle = ( { onToggle, disabled, style } ) => (
 			// testID is present to disambiguate this element for native UI tests. It's not
 			// usually required for components. See: https://git.io/JeQ7G.
 			testID: 'add-block-button',
-			onLongPress: onToggle,
+			onLongPress,
 		} }
 		isDisabled={ disabled }
 	/>
