@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Dropdown, ToolbarButton, Dashicon } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
+import { withSelect, withDispatch } from '@wordpress/data';
 import { compose, withPreferredColorScheme } from '@wordpress/compose';
 
 /**
@@ -62,9 +62,10 @@ class Inserter extends Component {
 			disabled,
 			renderToggle = defaultRenderToggle,
 			getStylesFromColorScheme,
+			onInsertBefore,
 		} = this.props;
 		const style = getStylesFromColorScheme( styles.addBlockButton, styles.addBlockButtonDark );
-		return renderToggle( { onToggle, isOpen, disabled, style } );
+		return renderToggle( { onToggle, isOpen, disabled, style, onLongPress: onInsertBefore } );
 	}
 
 	/**
@@ -111,8 +112,8 @@ export default compose( [
 		} = select( 'core/block-editor' );
 
 		let destinationRootClientId = rootClientId;
+		const end = getBlockSelectionEnd();
 		if ( ! destinationRootClientId && ! clientId && ! isAppender ) {
-			const end = getBlockSelectionEnd();
 			if ( end ) {
 				destinationRootClientId = getBlockRootClientId( end ) || undefined;
 			}
@@ -120,6 +121,31 @@ export default compose( [
 
 		return {
 			destinationRootClientId,
+			end,
+		};
+	} ),
+	withDispatch( ( dispatch, { isAppender, destinationRootClientId, end }, { select } ) => {
+		return {
+			onInsertBefore() {
+				if ( isAppender ) {
+					return;
+				}
+
+				let insertionIndex = 0;
+
+				if ( end ) {
+					const { getBlockIndex } = select( 'core/block-editor' );
+					insertionIndex = getBlockIndex( end, destinationRootClientId );
+				}
+
+				const { insertDefaultBlock } = dispatch( 'core/block-editor' );
+
+				insertDefaultBlock(
+					undefined,
+					destinationRootClientId,
+					insertionIndex
+				);
+			},
 		};
 	} ),
 	withPreferredColorScheme,
