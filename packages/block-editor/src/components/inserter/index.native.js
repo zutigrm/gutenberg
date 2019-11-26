@@ -4,8 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Dropdown, ToolbarButton, Dashicon } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { withSelect, withDispatch } from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 import { compose, withPreferredColorScheme } from '@wordpress/compose';
+import { isUnmodifiedDefaultBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -32,6 +33,10 @@ const defaultRenderToggle = ( { onToggle, disabled, style, onLongPress } ) => (
 class Inserter extends Component {
 	constructor() {
 		super( ...arguments );
+
+		this.state = {
+			shouldInsertBefore: false,
+		};
 
 		this.onToggle = this.onToggle.bind( this );
 		this.renderToggle = this.renderToggle.bind( this );
@@ -62,10 +67,22 @@ class Inserter extends Component {
 			disabled,
 			renderToggle = defaultRenderToggle,
 			getStylesFromColorScheme,
-			onInsertBefore,
 		} = this.props;
 		const style = getStylesFromColorScheme( styles.addBlockButton, styles.addBlockButtonDark );
-		return renderToggle( { onToggle, isOpen, disabled, style, onLongPress: onInsertBefore } );
+
+		const onPress = () => {
+			this.setState( { shouldInsertBefore: false }, () => {
+				onToggle();
+			} );
+		};
+
+		const onLongPress = () => {
+			this.setState( { shouldInsertBefore: true }, () => {
+				onToggle();
+			} );
+		};
+
+		return renderToggle( { onToggle: onPress, isOpen, disabled, style, onLongPress } );
 	}
 
 	/**
@@ -78,16 +95,27 @@ class Inserter extends Component {
 	 * @return {WPElement} Dropdown content element.
 	 */
 	renderContent( { onClose, isOpen } ) {
-		const { rootClientId, clientId, isAppender } = this.props;
+		const {
+			destinationRootClientId,
+			clientId,
+			isAppender,
+			insertionIndexBefore,
+			insertionIndexDefault,
+		} = this.props;
+		const { shouldInsertBefore } = this.state;
 
 		return (
 			<InserterMenu
 				isOpen={ isOpen }
 				onSelect={ onClose }
 				onDismiss={ onClose }
-				rootClientId={ rootClientId }
+				rootClientId={ destinationRootClientId }
 				clientId={ clientId }
 				isAppender={ isAppender }
+				isDefaultInsert={ ! shouldInsertBefore }
+				insertionIndex={
+					shouldInsertBefore ? insertionIndexBefore : insertionIndexDefault
+				}
 			/>
 		);
 	}
@@ -109,44 +137,60 @@ export default compose( [
 		const {
 			getBlockRootClientId,
 			getBlockSelectionEnd,
+			getBlockOrder,
+			getBlockIndex,
+			getBlock,
 		} = select( 'core/block-editor' );
 
 		let destinationRootClientId = rootClientId;
+
+		function getDefaultInsertionIndex() {
+			const {
+				isPostTitleSelected,
+			} = select( 'core/editor' );
+
+			// if post title is selected insert as first block
+			if ( isPostTitleSelected() ) {
+				return 0;
+			}
+
+			// If the clientId is defined, we insert at the position of the block.
+			if ( clientId ) {
+				return getBlockIndex( clientId, destinationRootClientId );
+			}
+
+			// If there a selected block,
+			const end = getBlockSelectionEnd();
+			if ( ! isAppender && end ) {
+				// and the last selected block is unmodified (empty), it will be replaced
+				if ( isUnmodifiedDefaultBlock( getBlock( end ) ) ) {
+					return getBlockIndex( end, destinationRootClientId );
+				}
+
+				// we insert after the selected block.
+				return getBlockIndex( end, destinationRootClientId ) + 1;
+			}
+
+			// Otherwise, we insert at the end of the current rootClientId
+			return getBlockOrder( destinationRootClientId ).length;
+		}
+
+		let insertionIndexBefore = 0;
+
 		const end = getBlockSelectionEnd();
 		if ( ! destinationRootClientId && ! clientId && ! isAppender ) {
 			if ( end ) {
-				destinationRootClientId = getBlockRootClientId( end ) || undefined;
+				destinationRootClientId = getBlockRootClientId( end );
+				insertionIndexBefore = getBlockIndex( end, destinationRootClientId );
 			}
 		}
 
 		return {
 			destinationRootClientId,
-			end,
+			insertionIndexBefore,
+			insertionIndexDefault: getDefaultInsertionIndex(),
 		};
 	} ),
-	withDispatch( ( dispatch, { isAppender, destinationRootClientId, end }, { select } ) => {
-		return {
-			onInsertBefore() {
-				if ( isAppender ) {
-					return;
-				}
 
-				let insertionIndex = 0;
-
-				if ( end ) {
-					const { getBlockIndex } = select( 'core/block-editor' );
-					insertionIndex = getBlockIndex( end, destinationRootClientId );
-				}
-
-				const { insertDefaultBlock } = dispatch( 'core/block-editor' );
-
-				insertDefaultBlock(
-					undefined,
-					destinationRootClientId,
-					insertionIndex
-				);
-			},
-		};
-	} ),
 	withPreferredColorScheme,
 ] )( Inserter );
