@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, ToolbarButton, Dashicon } from '@wordpress/components';
+import { Dropdown, ToolbarButton, Dashicon, Picker } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withSelect } from '@wordpress/data';
 import { compose, withPreferredColorScheme } from '@wordpress/compose';
@@ -13,6 +13,26 @@ import { isUnmodifiedDefaultBlock } from '@wordpress/blocks';
  */
 import styles from './style.scss';
 import InserterMenu from './menu';
+
+const addBeforeOption = {
+	value: 'before',
+	label: __( 'Add Block Before' ),
+};
+
+const addAfterOption = {
+	value: 'after',
+	label: __( 'Add Block After' ),
+};
+
+const addToBeginningOption = {
+	value: 'before',
+	label: __( 'Add to beginning' ),
+};
+
+const addToEndOption = {
+	value: 'after',
+	label: __( 'Add to end' ),
+};
 
 const defaultRenderToggle = ( { onToggle, disabled, style, onLongPress } ) => (
 	<ToolbarButton
@@ -41,6 +61,14 @@ class Inserter extends Component {
 		this.onToggle = this.onToggle.bind( this );
 		this.renderToggle = this.renderToggle.bind( this );
 		this.renderContent = this.renderContent.bind( this );
+	}
+
+	getInsertionOptions() {
+		const { isAnyBlockSelected } = this.props;
+		if ( isAnyBlockSelected ) {
+			return [ addBeforeOption, addAfterOption ];
+		}
+		return [ addToBeginningOption, addToEndOption ];
 	}
 
 	getInsertionIndex() {
@@ -93,12 +121,33 @@ class Inserter extends Component {
 		};
 
 		const onLongPress = () => {
-			this.setState( { insertionType: 'before' }, () => {
+			if ( this.picker ) {
+				this.picker.presentPicker();
+			}
+		};
+
+		const onPickerSelect = ( value ) => {
+			this.setState( { insertionType: value }, () => {
 				onToggle();
 			} );
 		};
 
-		return renderToggle( { onToggle: onPress, isOpen, disabled, style, onLongPress } );
+		return (
+			<>
+				{ renderToggle( {
+					onToggle: onPress,
+					isOpen,
+					disabled,
+					style,
+					onLongPress,
+				} ) }
+				<Picker
+					ref={ ( instance ) => ( this.picker = instance ) }
+					options={ this.getInsertionOptions() }
+					onChange={ onPickerSelect }
+				/>
+			</>
+		);
 	}
 
 	/**
