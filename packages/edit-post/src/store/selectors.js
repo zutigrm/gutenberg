@@ -28,6 +28,11 @@ export function isEditorSidebarOpened( state ) {
 	return includes( [ 'edit-post/document', 'edit-post/block' ], activeGeneralSidebar );
 }
 
+export function isNotificationOpened( state ) {
+	const notification = getPreference( state, 'notification' );
+	return notification;
+}
+
 /**
  * Returns true if the plugin sidebar is opened.
  *

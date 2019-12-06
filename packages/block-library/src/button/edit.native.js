@@ -44,7 +44,7 @@ const MAX_BORDER_RADIUS_VALUE = 50;
 const BORDER_WIDTH = 1;
 const BLOCK_SPACING = 4;
 
-function ButtonEdit( { attributes, setAttributes, backgroundColor, textColor, isSelected, closeGeneralSidebar } ) {
+function ButtonEdit( { attributes, setAttributes, backgroundColor, textColor, isSelected, closeGeneralSidebar, openNotification } ) {
 	const {
 		placeholder,
 		text,
@@ -91,9 +91,10 @@ function ButtonEdit( { attributes, setAttributes, backgroundColor, textColor, is
 	};
 
 	const openNotificationSheet = () => {
+		const args = { title: 'Color Settings', type: 'plural' };
 		closeGeneralSidebar();
 		InteractionManager.runAfterInteractions( () => {
-			toggleShowNoticationSheet();
+			openNotification( args );
 		} );
 	};
 
@@ -183,7 +184,6 @@ function ButtonEdit( { attributes, setAttributes, backgroundColor, textColor, is
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<NotificationSheet title="Color Settings" isVisible={ showHelp } onClose={ toggleShowNoticationSheet } type="plural" />
 		</View>
 	);
 }
@@ -192,10 +192,11 @@ export default compose( [
 	withInstanceId,
 	withColors( 'backgroundColor', { textColor: 'color' } ),
 	withDispatch( ( dispatch ) => {
-		const { closeGeneralSidebar } = dispatch( 'core/edit-post' );
+		const { closeGeneralSidebar, openNotification } = dispatch( 'core/edit-post' );
 
 		return {
 			closeGeneralSidebar,
+			openNotification,
 		};
 	} ),
 ] )( ButtonEdit );

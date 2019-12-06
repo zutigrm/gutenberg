@@ -17,6 +17,13 @@ export function openGeneralSidebar( name ) {
 	};
 }
 
+export function openNotification( args ) {
+	return {
+		type: 'OPEN_NOTIFICATION',
+		args,
+	};
+}
+
 /**
  * Returns an action object signalling that the user closed the sidebar.
  *
@@ -25,6 +32,12 @@ export function openGeneralSidebar( name ) {
 export function closeGeneralSidebar() {
 	return {
 		type: 'CLOSE_GENERAL_SIDEBAR',
+	};
+}
+
+export function closeNotification() {
+	return {
+		type: 'CLOSE_NOTIFICATION',
 	};
 }
 

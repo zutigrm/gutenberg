@@ -71,6 +71,22 @@ export const preferences = flow( [
 
 		return state;
 	},
+	notification( state, action ) {
+		switch ( action.type ) {
+			case 'OPEN_NOTIFICATION': {
+				return {
+					...state,
+					...action.args,
+					isNotificationDismissed: false,
+				};
+			}
+			case 'CLOSE_NOTIFICATION':
+				return {
+					...state,
+					isNotificationDismissed: true,
+				};
+		}
+	},
 	panels( state, action ) {
 		switch ( action.type ) {
 			case 'TOGGLE_PANEL_ENABLED': {

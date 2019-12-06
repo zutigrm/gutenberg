@@ -7,7 +7,8 @@ import { Platform, View, Text } from 'react-native';
  * WordPress dependencies
  */
 import { BottomSheet, Icon } from '@wordpress/components';
-import { withPreferredColorScheme } from '@wordpress/compose';
+import { withPreferredColorScheme, compose } from '@wordpress/compose';
+import { withSelect, withDispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -15,7 +16,11 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import styles from './style.scss';
 
-function NotificationSheet( { title, getStylesFromColorScheme, isVisible, onClose, type = 'singular' } ) {
+function NotificationSheet( { notificationOpened, title, getStylesFromColorScheme, closeNotification, type = 'singular' } ) {
+	if ( ! notificationOpened ) {
+		return null;
+	}
+
 	const infoTextStyle = getStylesFromColorScheme( styles.infoText, styles.infoTextDark );
 	const infoTitleStyle = getStylesFromColorScheme( styles.infoTitle, styles.infoTitleDark );
 	const infoDescriptionStyle = getStylesFromColorScheme( styles.infoDescription, styles.infoDescriptionDark );
@@ -28,18 +33,18 @@ function NotificationSheet( { title, getStylesFromColorScheme, isVisible, onClos
 	const titleFormatPlural = Platform.OS === 'android' ? __( '\'%s\' aren\'t yet supported on WordPress for Android' ) :
 		__( '\'%s\' aren\'t yet supported on WordPress for iOS' );
 
-	const titleFormat = type === 'plural' ? titleFormatPlural : titleFormatSingular;
+	const titleFormat = notificationOpened.type === 'plural' ? titleFormatPlural : titleFormatSingular;
 
 	const infoTitle = sprintf(
 		titleFormat,
-		title,
+		notificationOpened.title,
 	);
 
 	return (
 		<BottomSheet
-			isVisible={ isVisible }
+			isVisible={ ! notificationOpened.isNotificationDismissed }
 			hideHeader
-			onClose={ onClose }
+			onClose={ closeNotification }
 		>
 			<View style={ styles.infoContainer } >
 				<Icon icon="editor-help" color={ infoSheetIconStyle.color } size={ styles.infoSheetIcon.size } />
@@ -49,10 +54,27 @@ function NotificationSheet( { title, getStylesFromColorScheme, isVisible, onClos
 				<Text style={ [ infoTextStyle, infoDescriptionStyle ] }>
 					{ __( 'We are working hard to add more blocks with each release. In the meantime, you can also edit this post on the web.' ) }
 				</Text>
-
 			</View>
 		</BottomSheet>
 	);
 }
 
-export default withPreferredColorScheme( NotificationSheet );
+export default compose( [
+	withSelect( ( select ) => {
+		const {
+			isNotificationOpened,
+		} = select( 'core/edit-post' );
+
+		return {
+			notificationOpened: isNotificationOpened(),
+		};
+	} ),
+	withDispatch( ( dispatch ) => {
+		const { closeNotification } = dispatch( 'core/edit-post' );
+
+		return {
+			closeNotification,
+		};
+	} ),
+]
+)( withPreferredColorScheme( NotificationSheet ) );
