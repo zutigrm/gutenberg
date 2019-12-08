@@ -20,6 +20,12 @@ const addBeforeOption = {
 	icon: 'insert-before',
 };
 
+const replaceCurrentOption = {
+	value: 'replace',
+	label: __( 'Replace Current Block' ),
+	icon: 'controls-repeat',
+};
+
 const addAfterOption = {
 	value: 'after',
 	label: __( 'Add Block After' ),
@@ -68,8 +74,11 @@ class Inserter extends Component {
 	}
 
 	getInsertionOptions() {
-		const { isAnyBlockSelected } = this.props;
+		const { isAnyBlockSelected, isSelectedBlockReplaceable } = this.props;
 		if ( isAnyBlockSelected ) {
+			if ( isSelectedBlockReplaceable ) {
+				return [ addBeforeOption, replaceCurrentOption, addAfterOption ];
+			}
 			return [ addBeforeOption, addAfterOption ];
 		}
 		return [ addToBeginningOption, addToEndOption ];
@@ -82,13 +91,27 @@ class Inserter extends Component {
 			insertionIndexAfter,
 		} = this.props;
 		const { insertionType } = this.state;
-		if ( insertionType === 'before' ) {
+		if ( insertionType === 'before' || insertionType === 'replace' ) {
 			return insertionIndexBefore;
 		}
 		if ( insertionType === 'after' ) {
 			return insertionIndexAfter;
 		}
 		return insertionIndexDefault;
+	}
+
+	getShouldReplaceBlock() {
+		const {
+			isSelectedBlockReplaceable,
+		} = this.props;
+		const { insertionType } = this.state;
+		if ( insertionType === 'replace' ) {
+			return true;
+		}
+		if ( insertionType === 'default' && isSelectedBlockReplaceable ) {
+			return true;
+		}
+		return false;
 	}
 
 	onToggle( isOpen ) {
@@ -170,7 +193,6 @@ class Inserter extends Component {
 			clientId,
 			isAppender,
 		} = this.props;
-		const { insertionType } = this.state;
 		return (
 			<InserterMenu
 				isOpen={ isOpen }
@@ -179,7 +201,7 @@ class Inserter extends Component {
 				rootClientId={ destinationRootClientId }
 				clientId={ clientId }
 				isAppender={ isAppender }
-				isDefaultInsert={ insertionType === 'default' }
+				shouldReplaceBlock={ this.getShouldReplaceBlock() }
 				insertionIndex={ this.getInsertionIndex() }
 			/>
 		);
@@ -214,6 +236,9 @@ export default compose( [
 			rootClientId;
 		const selectedBlockIndex = getBlockIndex( end, destinationRootClientId );
 		const endOfRootIndex = getBlockOrder( rootClientId ).length;
+		const isSelectedUnmodifiedDefaultBlock = isAnyBlockSelected ?
+			isUnmodifiedDefaultBlock( getBlock( end ) ) :
+			undefined;
 
 		function getDefaultInsertionIndex() {
 			const {
@@ -233,7 +258,7 @@ export default compose( [
 			// If there is a selected block,
 			if ( isAnyBlockSelected ) {
 				// and the last selected block is unmodified (empty), it will be replaced
-				if ( isUnmodifiedDefaultBlock( getBlock( end ) ) ) {
+				if ( isSelectedUnmodifiedDefaultBlock ) {
 					return selectedBlockIndex;
 				}
 
@@ -259,6 +284,7 @@ export default compose( [
 			insertionIndexBefore,
 			insertionIndexAfter,
 			isAnyBlockSelected,
+			isSelectedBlockReplaceable: isSelectedUnmodifiedDefaultBlock,
 		};
 	} ),
 
