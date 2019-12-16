@@ -23,7 +23,7 @@ const addBeforeOption = {
 const replaceCurrentOption = {
 	value: 'replace',
 	label: __( 'Replace Current Block' ),
-	icon: 'controls-repeat',
+	icon: 'plus-alt',
 };
 
 const addAfterOption = {
