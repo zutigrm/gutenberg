@@ -142,9 +142,7 @@ class Inserter extends Component {
 		const style = getStylesFromColorScheme( styles.addBlockButton, styles.addBlockButtonDark );
 
 		const onPress = () => {
-			this.setState( { insertionType: 'default' }, () => {
-				onToggle();
-			} );
+			this.setState( { insertionType: 'default' }, onToggle );
 		};
 
 		const onLongPress = () => {
@@ -154,9 +152,7 @@ class Inserter extends Component {
 		};
 
 		const onPickerSelect = ( value ) => {
-			this.setState( { insertionType: value }, () => {
-				onToggle();
-			} );
+			this.setState( { insertionType: value }, onToggle );
 		};
 
 		return (
