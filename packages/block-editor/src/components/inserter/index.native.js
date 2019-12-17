@@ -64,10 +64,6 @@ class Inserter extends Component {
 	constructor() {
 		super( ...arguments );
 
-		this.state = {
-			insertionType: 'default',
-		};
-
 		this.onToggle = this.onToggle.bind( this );
 		this.renderToggle = this.renderToggle.bind( this );
 		this.renderContent = this.renderContent.bind( this );
@@ -84,13 +80,12 @@ class Inserter extends Component {
 		return [ addToBeginningOption, addToEndOption ];
 	}
 
-	getInsertionIndex() {
+	getInsertionIndex( insertionType ) {
 		const {
 			insertionIndexDefault,
 			insertionIndexBefore,
 			insertionIndexAfter,
 		} = this.props;
-		const { insertionType } = this.state;
 		if ( insertionType === 'before' || insertionType === 'replace' ) {
 			return insertionIndexBefore;
 		}
@@ -100,11 +95,10 @@ class Inserter extends Component {
 		return insertionIndexDefault;
 	}
 
-	shouldReplaceBlock() {
+	shouldReplaceBlock( insertionType ) {
 		const {
 			isSelectedBlockReplaceable,
 		} = this.props;
-		const { insertionType } = this.state;
 		if ( insertionType === 'replace' ) {
 			return true;
 		}
@@ -142,7 +136,11 @@ class Inserter extends Component {
 		const style = getStylesFromColorScheme( styles.addBlockButton, styles.addBlockButtonDark );
 
 		const onPress = () => {
-			this.setState( { insertionType: 'default' }, onToggle );
+			this.setState( {
+				destinationRootClientId: this.props.destinationRootClientId,
+				shouldReplaceBlock: this.shouldReplaceBlock( 'default' ),
+				insertionIndex: this.getInsertionIndex( 'default' ),
+			}, onToggle );
 		};
 
 		const onLongPress = () => {
@@ -151,8 +149,12 @@ class Inserter extends Component {
 			}
 		};
 
-		const onPickerSelect = ( value ) => {
-			this.setState( { insertionType: value }, onToggle );
+		const onPickerSelect = ( insertionType ) => {
+			this.setState( {
+				destinationRootClientId: this.props.destinationRootClientId,
+				shouldReplaceBlock: this.shouldReplaceBlock( insertionType ),
+				insertionIndex: this.getInsertionIndex( insertionType ),
+			}, onToggle );
 		};
 
 		return (
@@ -185,10 +187,14 @@ class Inserter extends Component {
 	 */
 	renderContent( { onClose, isOpen } ) {
 		const {
-			destinationRootClientId,
 			clientId,
 			isAppender,
 		} = this.props;
+		const {
+			destinationRootClientId,
+			shouldReplaceBlock,
+			insertionIndex,
+		} = this.state;
 		return (
 			<InserterMenu
 				isOpen={ isOpen }
@@ -197,8 +203,8 @@ class Inserter extends Component {
 				rootClientId={ destinationRootClientId }
 				clientId={ clientId }
 				isAppender={ isAppender }
-				shouldReplaceBlock={ this.shouldReplaceBlock() }
-				insertionIndex={ this.getInsertionIndex() }
+				shouldReplaceBlock={ shouldReplaceBlock }
+				insertionIndex={ insertionIndex }
 			/>
 		);
 	}
