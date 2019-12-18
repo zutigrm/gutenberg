@@ -14,36 +14,6 @@ import { isUnmodifiedDefaultBlock } from '@wordpress/blocks';
 import styles from './style.scss';
 import InserterMenu from './menu';
 
-const addBeforeOption = {
-	value: 'before',
-	label: __( 'Add Block Before' ),
-	icon: 'insert-before',
-};
-
-const replaceCurrentOption = {
-	value: 'replace',
-	label: __( 'Replace Current Block' ),
-	icon: 'plus-alt',
-};
-
-const addAfterOption = {
-	value: 'after',
-	label: __( 'Add Block After' ),
-	icon: 'insert-after',
-};
-
-const addToBeginningOption = {
-	value: 'before',
-	label: __( 'Add To Beginning' ),
-	icon: 'insert-before',
-};
-
-const addToEndOption = {
-	value: 'after',
-	label: __( 'Add To End' ),
-	icon: 'insert-after',
-};
-
 const defaultRenderToggle = ( { onToggle, disabled, style, onLongPress } ) => (
 	<ToolbarButton
 		title={ __( 'Add block' ) }
@@ -70,6 +40,36 @@ export class Inserter extends Component {
 	}
 
 	getInsertionOptions() {
+		const addBeforeOption = {
+			value: 'before',
+			label: __( 'Add Block Before' ),
+			icon: 'insert-before',
+		};
+
+		const replaceCurrentOption = {
+			value: 'replace',
+			label: __( 'Replace Current Block' ),
+			icon: 'plus-alt',
+		};
+
+		const addAfterOption = {
+			value: 'after',
+			label: __( 'Add Block After' ),
+			icon: 'insert-after',
+		};
+
+		const addToBeginningOption = {
+			value: 'before',
+			label: __( 'Add To Beginning' ),
+			icon: 'insert-before',
+		};
+
+		const addToEndOption = {
+			value: 'after',
+			label: __( 'Add To End' ),
+			icon: 'insert-after',
+		};
+
 		const { isAnyBlockSelected, isSelectedBlockReplaceable } = this.props;
 		if ( isAnyBlockSelected ) {
 			if ( isSelectedBlockReplaceable ) {
