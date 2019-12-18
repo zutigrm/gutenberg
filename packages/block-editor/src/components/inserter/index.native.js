@@ -60,7 +60,7 @@ const defaultRenderToggle = ( { onToggle, disabled, style, onLongPress } ) => (
 	/>
 );
 
-class Inserter extends Component {
+export class Inserter extends Component {
 	constructor() {
 		super( ...arguments );
 
