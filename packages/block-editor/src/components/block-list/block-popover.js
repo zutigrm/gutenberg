@@ -102,7 +102,7 @@ function BlockPopover( {
 	// position in the right corner.
 	// To do: refactor `Popover` to make this prop clearer.
 	const popoverPosition = showEmptyBlockSideInserter ? 'top left right' : 'top right left';
-	const popoverIsSticky = hasMultiSelection ? '.wp-block.is-multi-selected' : true;
+	const anchorSelector = `.wp-block.is-${ hasMultiSelection ? 'multi-' : '' }selected > [data-block]`;
 
 	return (
 		<Popover
@@ -110,13 +110,13 @@ function BlockPopover( {
 			animate={ false }
 			position={ popoverPosition }
 			focusOnMount={ false }
-			anchorRef={ node.lastChild }
+			anchorRef={ anchorSelector }
 			className="block-editor-block-list__block-popover"
-			__unstableSticky={ showEmptyBlockSideInserter ? false : popoverIsSticky }
+			__unstableSticky={ ! showEmptyBlockSideInserter }
 			__unstableSlotName="block-toolbar"
 			// Allow subpixel positioning for the block movement animation.
-			__unstableAllowVerticalSubpixelPosition={ moverDirection !== 'horizontal' && node }
-			__unstableAllowHorizontalSubpixelPosition={ moverDirection === 'horizontal' && node }
+			// __unstableAllowVerticalSubpixelPosition={ moverDirection !== 'horizontal' && node }
+			// __unstableAllowHorizontalSubpixelPosition={ moverDirection === 'horizontal' && node }
 			onBlur={ () => setIsToolbarForced( false ) }
 		>
 			{ ( shouldShowContextualToolbar || isToolbarForced ) && (
