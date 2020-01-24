@@ -14,7 +14,6 @@ import {
 	isTextField,
 	placeCaretAtHorizontalEdge,
 } from '@wordpress/dom';
-import { BACKSPACE, DELETE, ENTER } from '@wordpress/keycodes';
 import {
 	getBlockType,
 	getSaveElement,
@@ -68,8 +67,6 @@ function BlockListBlock( {
 	onReplace,
 	onInsertBlocksAfter,
 	onMerge,
-	onRemove,
-	onInsertDefaultBlockAfter,
 	toggleSelection,
 	animateOnChange,
 	enableAnimation,
@@ -168,37 +165,6 @@ function BlockListBlock( {
 
 	// Other event handlers
 
-	/**
-	 * Interprets keydown event intent to remove or insert after block if key
-	 * event occurs on wrapper node. This can occur when the block has no text
-	 * fields of its own, particularly after initial insertion, to allow for
-	 * easy deletion and continuous writing flow to add additional content.
-	 *
-	 * @param {KeyboardEvent} event Keydown event.
-	 */
-	const onKeyDown = ( event ) => {
-		const { keyCode, target } = event;
-
-		switch ( keyCode ) {
-			case ENTER:
-				if ( target === wrapper.current ) {
-					// Insert default block after current block if enter and event
-					// not already handled by descendant.
-					onInsertDefaultBlockAfter();
-					event.preventDefault();
-				}
-				break;
-			case BACKSPACE:
-			case DELETE:
-				if ( target === wrapper.current ) {
-					// Remove block on backspace.
-					onRemove( clientId );
-					event.preventDefault();
-				}
-				break;
-		}
-	};
-
 	const onMouseLeave = ( { which, buttons } ) => {
 		// The primary button must be pressed to initiate selection. Fall back
 		// to `which` if the standard `buttons` property is falsy. There are
@@ -292,8 +258,6 @@ function BlockListBlock( {
 			className={ wrapperClassName }
 			data-block={ clientId }
 			data-type={ name }
-			// Only allow shortcuts when a blocks is selected and not locked.
-			onKeyDown={ isSelected && ! isLocked ? onKeyDown : undefined }
 			// Only allow selection to be started from a selected block.
 			onMouseLeave={ isSelected ? onMouseLeave : undefined }
 			tabIndex="0"
@@ -402,8 +366,6 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 	const {
 		updateBlockAttributes,
 		insertBlocks,
-		insertDefaultBlock,
-		removeBlock,
 		mergeBlocks,
 		replaceBlocks,
 		toggleSelection,
@@ -419,14 +381,6 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 			const { rootClientId } = ownProps;
 			insertBlocks( blocks, index, rootClientId );
 		},
-		onInsertDefaultBlockAfter() {
-			const { clientId, rootClientId } = ownProps;
-			const {
-				getBlockIndex,
-			} = select( 'core/block-editor' );
-			const index = getBlockIndex( clientId, rootClientId );
-			insertDefaultBlock( {}, rootClientId, index + 1 );
-		},
 		onInsertBlocksAfter( blocks ) {
 			const { clientId, rootClientId } = ownProps;
 			const {
@@ -434,9 +388,6 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 			} = select( 'core/block-editor' );
 			const index = getBlockIndex( clientId, rootClientId );
 			insertBlocks( blocks, index + 1, rootClientId );
-		},
-		onRemove( clientId ) {
-			removeBlock( clientId );
 		},
 		onMerge( forward ) {
 			const { clientId } = ownProps;
