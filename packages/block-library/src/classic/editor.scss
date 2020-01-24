@@ -310,7 +310,7 @@ div[data-type="core/freeform"] {
 	// when the block itself is selected, without it they would also show when a parent block
 	// is selected.
 	div[data-type="core/freeform"].is-selected &,
-	div[data-type="core/freeform"].is-typing & {
+	.is-typing div[data-type="core/freeform"] & {
 		display: block;
 		border-color: $light-gray-800;
 	}

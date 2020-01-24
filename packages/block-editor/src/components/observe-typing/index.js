@@ -180,7 +180,7 @@ class ObserveTyping extends Component {
 	}
 
 	render() {
-		const { children } = this.props;
+		const { children, isTyping } = this.props;
 
 		// Disable reason: This component is responsible for capturing bubbled
 		// keyboard events which are interpreted as typing intent.
@@ -188,6 +188,7 @@ class ObserveTyping extends Component {
 		/* eslint-disable jsx-a11y/no-static-element-interactions */
 		return (
 			<div
+				className={ isTyping ? 'is-typing' : undefined }
 				onFocus={ this.stopTypingOnNonTextField }
 				onKeyPress={ this.startTypingInTextField }
 				onKeyDown={ this.onKeyDown }
