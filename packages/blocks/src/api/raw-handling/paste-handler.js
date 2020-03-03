@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { flatMap, filter, compact } from 'lodash';
+import { flatMap, filter, compact, mapValues } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import { createBlock, getBlockTransforms, findTransform } from '../factory';
-import { hasBlockSupport } from '../registration';
+import { hasBlockSupport, getBlockType } from '../registration';
 import { getBlockContent } from '../serializer';
 import { getBlockAttributes, parseWithGrammar } from '../parser';
 import normaliseBlocks from './normalise-blocks';
@@ -122,6 +122,25 @@ function htmlToBlocks( { html, rawTransforms } ) {
 	} );
 }
 
+function pasteBlocks( content ) {
+	return parseWithGrammar( content ).map( ( block ) => {
+		const { name } = block;
+		const blockType = getBlockType( name );
+		return {
+			...block,
+			attributes: mapValues( block.attributes, ( value, key ) => {
+				const attributeType = blockType.attributes[ key ];
+
+				if ( attributeType.source === 'html' ) {
+					return filterInlineHTML( value );
+				}
+
+				return value;
+			} ),
+		};
+	} );
+}
+
 /**
  * Converts an HTML string to known blocks. Strips everything else.
  *
@@ -162,7 +181,7 @@ export function pasteHandler( {
 		const content = HTML ? HTML : plainText;
 
 		if ( content.indexOf( '<!-- wp:' ) !== -1 ) {
-			return parseWithGrammar( content );
+			return pasteBlocks( content );
 		}
 	}
 
