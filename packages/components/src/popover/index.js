@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import mergeRefs from 'react-merge-refs';
 
 /**
  * WordPress dependencies
@@ -16,6 +15,7 @@ import {
 	useResizeObserver,
 	useFocusOnMount,
 	__experimentalUseFocusOutside as useFocusOutside,
+	useMergeRefs,
 } from '@wordpress/compose';
 import { close } from '@wordpress/icons';
 
@@ -418,6 +418,7 @@ const Popover = ( {
 	] );
 
 	const focusOnMountRef = useFocusOnMount( focusOnMount );
+	const mergedRefs = useMergeRefs( containerRef, focusOnMountRef );
 	const focusOutsideProps = useFocusOutside( handleOnFocusOutside );
 
 	// Event handlers
@@ -517,7 +518,7 @@ const Popover = ( {
 			{ ...contentProps }
 			onKeyDown={ maybeClose }
 			{ ...focusOutsideProps }
-			ref={ mergeRefs( [ containerRef, focusOnMountRef ] ) }
+			ref={ mergedRefs }
 			tabIndex="-1"
 		>
 			{ isExpanded && <ScrollLock /> }
