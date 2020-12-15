@@ -117,14 +117,6 @@ Opt-in prop to show popovers fullscreen on mobile, pass `false` in this prop to 
  - Type: `String`
  - Required: No
 
- ### noArrow
-
- Set this to hide the arrow which visually indicates what the popover is anchored to. Note that the arrow will not display if `position` is set to `"middle center"`.
-
- - Type: `Boolean`
- - Required: No
- - Default: `true`
-
 ### anchorRect
 
 A custom `DOMRect` object at which to position the popover. `anchorRect` is used when the position (custom `DOMRect` object) of the popover needs to be fixed at one location all the time.

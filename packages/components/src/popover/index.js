@@ -205,13 +205,8 @@ const Popover = ( {
 	onKeyDown,
 	children,
 	className,
-	noArrow = true,
 	isAlternate,
-	// Disable reason: We generate the `...contentProps` rest as remainder
-	// of props which aren't explicitly handled by this component.
-	/* eslint-disable no-unused-vars */
 	position = 'bottom right',
-	range,
 	focusOnMount = 'firstElement',
 	anchorRef,
 	shouldAnchorIncludePadding,
@@ -226,7 +221,6 @@ const Popover = ( {
 	__unstableObserveElement,
 	__unstableBoundaryParent,
 	__unstableForcePosition,
-	/* eslint-enable no-unused-vars */
 	...contentProps
 } ) => {
 	const anchorRefFallback = useRef( null );
@@ -237,11 +231,9 @@ const Popover = ( {
 	const slot = useSlot( __unstableSlotName );
 	const isExpanded = expandOnMobile && isMobileViewport;
 	const [ containerResizeListener, contentSize ] = useResizeObserver();
-	noArrow = isExpanded || noArrow;
 
 	useLayoutEffect( () => {
 		if ( isExpanded ) {
-			setClass( containerRef.current, 'is-without-arrow', noArrow );
 			setClass( containerRef.current, 'is-alternate', isAlternate );
 			setAttribute( containerRef.current, 'data-x-axis' );
 			setAttribute( containerRef.current, 'data-y-axis' );
@@ -327,11 +319,6 @@ const Popover = ( {
 				setStyle( containerRef.current, 'left', popoverLeft + 'px' );
 			}
 
-			setClass(
-				containerRef.current,
-				'is-without-arrow',
-				noArrow || ( xAxis === 'center' && yAxis === 'middle' )
-			);
 			setClass( containerRef.current, 'is-alternate', isAlternate );
 			setAttribute( containerRef.current, 'data-x-axis', xAxis );
 			setAttribute( containerRef.current, 'data-y-axis', yAxis );
@@ -521,7 +508,6 @@ const Popover = ( {
 				animateClassName,
 				{
 					'is-expanded': isExpanded,
-					'is-without-arrow': noArrow,
 					'is-alternate': isAlternate,
 				}
 			) }
