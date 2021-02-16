@@ -1,6 +1,12 @@
-/** @typedef {import('@octokit/rest')} GitHub */
-/** @typedef {import('@octokit/rest').IssuesListForRepoResponseItem} IssuesListForRepoResponseItem */
-/** @typedef {import('@octokit/rest').IssuesListMilestonesForRepoResponseItem} OktokitIssuesListMilestonesForRepoResponseItem */
+/** @typedef {import('@octokit/rest').Octokit} GitHub */
+/** @typedef {import('@octokit/types').Endpoints} Endpoints */
+/** @typedef { Endpoints["GET /repos/{owner}/{repo}/issues"]["response"] } listIssuesResponse  */
+/** @typedef { Endpoints["GET /repos/{owner}/{repo}/milestones"]["response"] } listMilestonesResponse  */
+
+/**
+ * @template T
+ * @typedef {import('@octokit/types').GetResponseDataTypeFromEndpointMethod<T>} GetResponseDataTypeFromEndpointMethod
+ */
 
 /**
  * @typedef {"open"|"closed"|"all"} IssueState
@@ -14,18 +20,13 @@
  * @param {string} repo    Repository name.
  * @param {string} title   Milestone title.
  *
- * @return {Promise<OktokitIssuesListMilestonesForRepoResponseItem|void>} Promise resolving to milestone, if exists.
+ * @return {Promise<listMilestonesResponse["data"]|undefined>} Promise resolving to milestone, if exists.
  */
 async function getMilestoneByTitle( octokit, owner, repo, title ) {
-	const options = octokit.issues.listMilestonesForRepo.endpoint.merge( {
-		owner,
-		repo,
-	} );
-
-	/**
-	 * @type {AsyncIterableIterator<import('@octokit/rest').Response<import('@octokit/rest').IssuesListMilestonesForRepoResponse>>}
-	 */
-	const responses = octokit.paginate.iterator( options );
+	const responses = octokit.paginate.iterator(
+		octokit.issues.listMilestones,
+		{ owner, repo }
+	);
 
 	for await ( const response of responses ) {
 		const milestones = response.data;
@@ -35,6 +36,7 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
 			}
 		}
 	}
+	return undefined;
 }
 
 /**
@@ -47,7 +49,7 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
  * @param {IssueState} [state]       Optional issue state.
  * @param {string}     [closedSince] Optional timestamp.
  *
- * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to pull
+ * @return {Promise<listIssuesResponse["data"]>} Promise resolving to pull
  *                                                    requests for the given
  *                                                    milestone.
  */
@@ -69,13 +71,10 @@ async function getIssuesByMilestone(
 		} ),
 	} );
 
-	/**
-	 * @type {AsyncIterableIterator<import('@octokit/rest').Response<import('@octokit/rest').IssuesListForRepoResponse>>}
-	 */
 	const responses = octokit.paginate.iterator( options );
 
 	/**
-	 * @type {import('@octokit/rest').IssuesListForRepoResponse}
+	 * @type {GetResponseDataTypeFromEndpointMethod<typeof octokit.issues.listForRepo>}
 	 */
 	const pulls = [];
 
