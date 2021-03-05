@@ -7,11 +7,6 @@
 /* eslint-enable jsdoc/valid-types */
 
 /**
- * @template T
- * @typedef {import('@octokit/types').GetResponseDataTypeFromEndpointMethod<T>} GetResponseDataTypeFromEndpointMethod
- */
-
-/**
  * @typedef {"open"|"closed"|"all"} IssueState
  */
 
@@ -52,7 +47,7 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
  * @param {IssueState} [state]       Optional issue state.
  * @param {string}     [closedSince] Optional timestamp.
  *
- * @return {Promise<Issue>} Promise resolving to pull requests for the given
+ * @return {Promise<Issue[]>} Promise resolving to pull requests for the given
  *                          milestone.
  */
 async function getIssuesByMilestone(
@@ -76,7 +71,7 @@ async function getIssuesByMilestone(
 	const responses = octokit.paginate.iterator( options );
 
 	/**
-	 * @type {GetResponseDataTypeFromEndpointMethod<typeof octokit.issues.listForRepo>}
+	 * @type {Issue[]}
 	 */
 	const pulls = [];
 
