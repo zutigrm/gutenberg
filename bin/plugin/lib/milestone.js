@@ -1,7 +1,10 @@
 /** @typedef {import('@octokit/rest').Octokit} GitHub */
 /** @typedef {import('@octokit/types').Endpoints} Endpoints */
+
+/* eslint-disable jsdoc/valid-types */
 /** @typedef {import('@octokit/openapi-types').components["schemas"]["issue"]} Issue */
 /** @typedef {import('@octokit/openapi-types').components["schemas"]["milestone"]} Milestone */
+/* eslint-enable jsdoc/valid-types */
 
 /**
  * @template T
