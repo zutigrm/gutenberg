@@ -58,7 +58,7 @@ async function getIssuesByMilestone(
 	state,
 	closedSince
 ) {
-	const options = octokit.issues.listForRepo.endpoint.merge( {
+	const responses = octokit.paginate.iterator( octokit.issues.listForRepo, {
 		owner,
 		repo,
 		milestone,
@@ -67,8 +67,6 @@ async function getIssuesByMilestone(
 			since: closedSince,
 		} ),
 	} );
-
-	const responses = octokit.paginate.iterator( options );
 
 	/**
 	 * @type {Issue[]}
