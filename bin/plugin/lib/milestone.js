@@ -84,15 +84,7 @@ async function getIssuesByMilestone(
 		return pulls.filter(
 			( pull ) =>
 				pull.closed_at &&
-				closedSinceTimestamp <
-					new Date(
-						// The ugly `as unknown as string` cast is required because of
-						// https://github.com/octokit/plugin-rest-endpoint-methods.js/issues/64
-						// Fixed in Octokit v18.1.1, see https://github.com/WordPress/gutenberg/pull/29043
-						/** @type {string} */ (
-							/** @type {unknown} */ ( pull.closed_at )
-						)
-					)
+				closedSinceTimestamp < new Date( pull.closed_at )
 		);
 	}
 
