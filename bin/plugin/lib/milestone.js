@@ -1,6 +1,6 @@
 /** @typedef {import('@octokit/rest').Octokit} GitHub */
 /** @typedef {import('@octokit/types').Endpoints} Endpoints */
-/** @typedef { Endpoints["GET /repos/{owner}/{repo}/issues"]["response"] } listIssuesResponse  */
+/** @typedef {import('@octokit/openapi-types').components["schemas"]["issue"]} Issue */
 /** @typedef {import('@octokit/openapi-types').components["schemas"]["milestone"]} Milestone */
 
 /**
@@ -49,9 +49,8 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
  * @param {IssueState} [state]       Optional issue state.
  * @param {string}     [closedSince] Optional timestamp.
  *
- * @return {Promise<listIssuesResponse["data"]>} Promise resolving to pull
- *                                                    requests for the given
- *                                                    milestone.
+ * @return {Promise<Issue>} Promise resolving to pull requests for the given
+ *                          milestone.
  */
 async function getIssuesByMilestone(
 	octokit,
