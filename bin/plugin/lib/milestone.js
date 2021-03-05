@@ -1,7 +1,7 @@
 /** @typedef {import('@octokit/rest').Octokit} GitHub */
 /** @typedef {import('@octokit/types').Endpoints} Endpoints */
 /** @typedef { Endpoints["GET /repos/{owner}/{repo}/issues"]["response"] } listIssuesResponse  */
-/** @typedef { Endpoints["GET /repos/{owner}/{repo}/milestones"]["response"] } listMilestonesResponse  */
+/** @typedef {import('@octokit/openapi-types').components["schemas"]["milestone"]} Milestone */
 
 /**
  * @template T
@@ -20,7 +20,7 @@
  * @param {string} repo    Repository name.
  * @param {string} title   Milestone title.
  *
- * @return {Promise<listMilestonesResponse["data"]|undefined>} Promise resolving to milestone, if exists.
+ * @return {Promise<Milestone|undefined>} Promise resolving to milestone, if exists.
  */
 async function getMilestoneByTitle( octokit, owner, repo, title ) {
 	const responses = octokit.paginate.iterator(
