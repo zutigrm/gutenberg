@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useEffect, useRef, useCallback } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, useSelectForCallbacks } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -74,7 +74,7 @@ export default function useMultiSelection( ref ) {
 		hasMultiSelection,
 		selectedBlockClientId,
 	} = useSelect( selector, [] );
-	const { getBlockParents } = useSelect( blockEditorStore );
+	const { getBlockParents } = useSelectForCallbacks( blockEditorStore );
 	const {
 		startMultiSelect,
 		stopMultiSelect,

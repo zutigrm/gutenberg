@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useEffect } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, useSelectForCallbacks } from '@wordpress/data';
 import {
 	useShortcut,
 	store as keyboardShortcutsStore,
@@ -15,7 +15,9 @@ import { __ } from '@wordpress/i18n';
 import { store as editPostStore } from '../../store';
 
 function KeyboardShortcuts() {
-	const { getBlockSelectionStart } = useSelect( 'core/block-editor' );
+	const { getBlockSelectionStart } = useSelectForCallbacks(
+		'core/block-editor'
+	);
 	const {
 		getEditorMode,
 		isEditorSidebarOpened,

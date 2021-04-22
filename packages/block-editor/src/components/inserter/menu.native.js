@@ -6,7 +6,7 @@ import { View } from 'react-native';
  * WordPress dependencies
  */
 import { useEffect, useState, useCallback } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, useSelectForCallbacks } from '@wordpress/data';
 import {
 	createBlock,
 	rawHandler,
@@ -73,10 +73,12 @@ function InserterMenu( {
 			destinationRootClientId: targetRootClientId,
 		};
 	} );
-	const { getBlockOrder, getBlockCount, canInsertBlockType } = useSelect(
-		blockEditorStore
-	);
-	const { getBlockType } = useSelect( blocksStore );
+	const {
+		getBlockOrder,
+		getBlockCount,
+		canInsertBlockType,
+	} = useSelectForCallbacks( blockEditorStore );
+	const { getBlockType } = useSelectForCallbacks( blocksStore );
 
 	useEffect( () => {
 		// Show/Hide insertion point on Mount/Dismount

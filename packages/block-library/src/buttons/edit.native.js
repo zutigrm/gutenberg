@@ -15,7 +15,7 @@ import {
 } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
 import { useResizeObserver } from '@wordpress/compose';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useSelect, useSelectForCallbacks } from '@wordpress/data';
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { alignmentHelpers } from '@wordpress/components';
 
@@ -65,7 +65,7 @@ export default function ButtonsEdit( {
 		},
 		[ clientId ]
 	);
-	const { getBlockOrder } = useSelect( blockEditorStore );
+	const { getBlockOrder } = useSelectForCallbacks( blockEditorStore );
 	const { insertBlock, removeBlock, selectBlock } = useDispatch(
 		blockEditorStore
 	);

@@ -8,7 +8,7 @@ import classnames from 'classnames';
  */
 import { dragHandle } from '@wordpress/icons';
 import { Button, Flex, FlexItem } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, useSelectForCallbacks } from '@wordpress/data';
 import { useEffect, useRef } from '@wordpress/element';
 import {
 	BACKSPACE,
@@ -127,7 +127,7 @@ function BlockSelectionButton( { clientId, rootClientId, blockElement } ) {
 		getBlockIndex,
 		getBlockRootClientId,
 		getClientIdsOfDescendants,
-	} = useSelect( blockEditorStore );
+	} = useSelectForCallbacks( blockEditorStore );
 	const {
 		selectBlock,
 		clearSelectedBlock,

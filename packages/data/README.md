@@ -793,17 +793,36 @@ any price in the state for that currency is retrieved. If the currency prop
 doesn't change and other props are passed in that do change, the price will
 not change because the dependency is just the currency.
 
-When data is only used in an event callback, the data should not be retrieved
-on render, so it may be useful to get the selectors function instead.
+_Parameters_
 
-**Don't use `useSelect` this way when calling the selectors in the render
-function because your component won't re-render on a data change.**
+-   _\_mapSelect_ `Function`: Function called on every state change. The returned value is exposed to the component implementing this hook. The function receives the `registry.select` method on the first argument and the `registry` on the second argument.
+-   _deps_ `Array`: If provided, this memoizes the mapSelect so the same `mapSelect` is invoked on every state change unless the dependencies change.
+
+_Returns_
+
+-   `Function`: A custom react hook.
+
+<a name="useSelectForCallbacks" href="#useSelectForCallbacks">#</a> **useSelectForCallbacks**
+
+Custom react hook for retrieving registered selectors.
+
+In general, this custom React hook follows the
+[rules of hooks](https://reactjs.org/docs/hooks-rules.html).
+
+_Usage_
+
+When data is only used in an event callback, the data should not be retrieved
+on render, so it may be useful to get the selector functions.
+
+**Don't use `useSelectForCallbacks` when calling the selectors in the render
+function because your component won't re-render on a data change. Use
+`useSelect` instead.**
 
 ```js
-import { useSelect } from '@wordpress/data';
+import { useSelectForCallbacks } from '@wordpress/data';
 
 function Paste( { children } ) {
-  const { getSettings } = useSelect( 'my-shop' );
+  const { getSettings } = useSelectForCallbacks( 'my-shop' );
   function onPaste() {
     // Do something with the settings.
     const settings = getSettings();
@@ -814,8 +833,7 @@ function Paste( { children } ) {
 
 _Parameters_
 
--   _\_mapSelect_ `Function|WPDataStore|string`: Function called on every state change. The returned value is exposed to the component implementing this hook. The function receives the `registry.select` method on the first argument and the `registry` on the second argument. When a store key is passed, all selectors for the store will be returned. This is only meant for usage of these selectors in event callbacks, not for data needed to create the element tree.
--   _deps_ `Array`: If provided, this memoizes the mapSelect so the same `mapSelect` is invoked on every state change unless the dependencies change.
+-   _storeNameOrDefinition_ `string|WPDataStore`: The name of the store or its definition from which to retrieve selectors.
 
 _Returns_
 

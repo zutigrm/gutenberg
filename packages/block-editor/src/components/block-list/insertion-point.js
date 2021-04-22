@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, useSelectForCallbacks } from '@wordpress/data';
 import {
 	useState,
 	useEffect,
@@ -281,7 +281,7 @@ export default function useInsertionPoint( ref ) {
 			selectedRootClientId: insertionPoint.rootClientId,
 		};
 	}, [] );
-	const { getBlockListSettings } = useSelect( blockEditorStore );
+	const { getBlockListSettings } = useSelectForCallbacks( blockEditorStore );
 
 	const onMouseMove = useCallback(
 		( event ) => {

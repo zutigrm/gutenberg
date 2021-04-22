@@ -11,7 +11,7 @@ import {
 	__experimentalGetBlockLabel as getBlockLabel,
 	getBlockType,
 } from '@wordpress/blocks';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useSelectForCallbacks } from '@wordpress/data';
 import {
 	Dropdown,
 	Button,
@@ -28,7 +28,7 @@ function getBlockDisplayText( block ) {
 }
 
 function useSecondaryText() {
-	const { getBlock } = useSelect( 'core/block-editor' );
+	const { getBlock } = useSelectForCallbacks( 'core/block-editor' );
 	const activeEntityBlockId = useSelect(
 		( select ) =>
 			select(
