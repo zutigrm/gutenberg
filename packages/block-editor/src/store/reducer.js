@@ -716,6 +716,36 @@ const withSaveReusableBlock = ( reducer ) => ( state, action ) => {
 	return reducer( state, action );
 };
 
+const withSafeHTML = ( reducer ) => ( prevState, action ) => {
+	const state = reducer( prevState, action );
+
+	for ( const clientId in state.attributes ) {
+		const attributes = state.attributes[ clientId ];
+
+		for ( const key in attributes ) {
+			const value = attributes[ key ];
+
+			if ( typeof value === 'string' && value.indexOf( '<' ) !== -1 ) {
+				attributes[ key ] = value.replace(
+					/<([a-z]+)([^>]*)>/gi,
+					( match, p1, p2 ) => {
+						const pieces = p2
+							.split( ' ' )
+							.filter(
+								( piece ) => ! piece.trim().startsWith( 'on' )
+							);
+
+						const start = p1 === 'script' ? '&lt;' : '<';
+						return start + p1 + pieces.join( ' ' ) + '>';
+					}
+				);
+			}
+		}
+	}
+
+	return state;
+};
+
 /**
  * Reducer returning the blocks state.
  *
@@ -732,7 +762,8 @@ export const blocks = flow(
 	withReplaceInnerBlocks, // needs to be after withInnerBlocksRemoveCascade
 	withBlockReset,
 	withPersistentBlockChange,
-	withIgnoredBlockChange
+	withIgnoredBlockChange,
+	withSafeHTML
 )( {
 	byClientId( state = {}, action ) {
 		switch ( action.type ) {
