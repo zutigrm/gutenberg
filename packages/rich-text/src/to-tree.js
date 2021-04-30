@@ -10,6 +10,14 @@ import {
 	ZWNBSP,
 } from './special-characters';
 
+function filterOnAttributes( attributes ) {
+	for ( const name in attributes ) {
+		if ( name.startsWith( 'on' ) ) {
+			delete attributes[ name ];
+		}
+	}
+}
+
 /**
  * Converts a format object to information that can be used to create an element
  * from (type, attributes and object).
@@ -46,6 +54,7 @@ function fromFormat( {
 			elementAttributes = { ...attributes, ...elementAttributes };
 		}
 
+		filterOnAttributes( elementAttributes );
 		return { type, attributes: elementAttributes, object };
 	}
 
@@ -71,6 +80,7 @@ function fromFormat( {
 		}
 	}
 
+	filterOnAttributes( elementAttributes );
 	return {
 		type: formatType.tagName,
 		object: formatType.object,
