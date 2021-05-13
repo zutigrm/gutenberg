@@ -10,7 +10,12 @@ import { omit } from 'lodash';
 import { RawHTML, useRef, useCallback, forwardRef } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { children as childrenSource } from '@wordpress/blocks';
-import { useInstanceId, useMergeRefs } from '@wordpress/compose';
+import {
+	useInstanceId,
+	useMergeRefs,
+	__experimentalUseFocusOutside as useFocusOutside,
+	useRefEffect,
+} from '@wordpress/compose';
 import {
 	__unstableUseRichText as useRichText,
 	__unstableCreateElement,
@@ -68,8 +73,10 @@ function RichTextWrapper(
 		__unstableEmbedURLOnPaste,
 		__unstableDisableFormats: disableFormats,
 		disableLineBreaks,
-		unstableOnFocus,
 		__unstableAllowPrefixTransformations,
+		unstableOnFocus,
+		__experimentalOnFocus = unstableOnFocus,
+		__experimentalOnFocusOutside,
 		...props
 	},
 	forwardedRef
@@ -301,6 +308,10 @@ function RichTextWrapper(
 	function onKeyDown( event ) {
 		const { keyCode } = event;
 
+		if ( anchorRef.current !== event.target ) {
+			return;
+		}
+
 		if ( event.defaultPrevented ) {
 			return;
 		}
@@ -337,9 +348,79 @@ function RichTextWrapper(
 		}
 	}
 
+	const onFocusRef = useRef();
+	onFocusRef.current = __experimentalOnFocus;
+	const focusOutsideProps = useFocusOutside( __experimentalOnFocusOutside );
 	const TagName = tagName;
 	const content = (
-		<>
+		<TagName
+			// Overridable props.
+			role="textbox"
+			aria-multiline={ true }
+			aria-label={ placeholder }
+			{ ...props }
+			{ ...autocompleteProps }
+			{ ...focusOutsideProps }
+			ref={ useMergeRefs( [
+				autocompleteProps.ref,
+				props.ref,
+				richTextRef,
+				useRefEffect( ( element ) => {
+					function _onFocus() {
+						onFocusRef.current();
+					}
+					element.addEventListener( 'focus', _onFocus );
+					return () => {
+						element.addEventListener( 'focus', _onFocus );
+					};
+				}, [] ),
+				useInputRules( {
+					value,
+					onChange,
+					__unstableAllowPrefixTransformations,
+					formatTypes,
+					onReplace,
+				} ),
+				useUndoAutomaticChange(),
+				usePasteHandler( {
+					isSelected,
+					disableFormats,
+					onChange,
+					value,
+					formatTypes,
+					tagName,
+					onReplace,
+					onSplit,
+					splitValue,
+					__unstableEmbedURLOnPaste,
+					multilineTag,
+					preserveWhiteSpace,
+					pastePlainText,
+				} ),
+				useEnter( {
+					removeEditorOnlyFormats,
+					value,
+					onReplace,
+					onSplit,
+					multiline,
+					onChange,
+					disableLineBreaks,
+					splitValue,
+					onSplitAtEnd,
+				} ),
+				anchorRef,
+				forwardedRef,
+			] ) }
+			// Do not set the attribute if disabled.
+			contentEditable={ disabled ? undefined : true }
+			suppressContentEditableWarning={ ! disabled }
+			className={ classnames(
+				'block-editor-rich-text__editable',
+				props.className,
+				'rich-text'
+			) }
+			onKeyDown={ onKeyDown }
+		>
 			{ children && children( { value, onChange, onFocus } ) }
 			{ isSelected && <RemoveBrowserShortcuts /> }
 			{ isSelected && autocompleteProps.children }
@@ -358,66 +439,7 @@ function RichTextWrapper(
 					anchorRef={ anchorRef.current }
 				/>
 			) }
-			<TagName
-				// Overridable props.
-				role="textbox"
-				aria-multiline={ true }
-				aria-label={ placeholder }
-				{ ...props }
-				{ ...autocompleteProps }
-				ref={ useMergeRefs( [
-					autocompleteProps.ref,
-					props.ref,
-					richTextRef,
-					useInputRules( {
-						value,
-						onChange,
-						__unstableAllowPrefixTransformations,
-						formatTypes,
-						onReplace,
-					} ),
-					useUndoAutomaticChange(),
-					usePasteHandler( {
-						isSelected,
-						disableFormats,
-						onChange,
-						value,
-						formatTypes,
-						tagName,
-						onReplace,
-						onSplit,
-						splitValue,
-						__unstableEmbedURLOnPaste,
-						multilineTag,
-						preserveWhiteSpace,
-						pastePlainText,
-					} ),
-					useEnter( {
-						removeEditorOnlyFormats,
-						value,
-						onReplace,
-						onSplit,
-						multiline,
-						onChange,
-						disableLineBreaks,
-						splitValue,
-						onSplitAtEnd,
-					} ),
-					anchorRef,
-					forwardedRef,
-				] ) }
-				// Do not set the attribute if disabled.
-				contentEditable={ disabled ? undefined : true }
-				suppressContentEditableWarning={ ! disabled }
-				className={ classnames(
-					'block-editor-rich-text__editable',
-					props.className,
-					'rich-text'
-				) }
-				onFocus={ unstableOnFocus }
-				onKeyDown={ onKeyDown }
-			/>
-		</>
+		</TagName>
 	);
 
 	if ( ! wrapperClassName ) {

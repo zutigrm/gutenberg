@@ -147,12 +147,6 @@ export default function Image( {
 	// Check if the cover block is registered.
 	const coverBlockExists = !! getBlockType( 'core/cover' );
 
-	useEffect( () => {
-		if ( ! isSelected ) {
-			setCaptionFocused( false );
-		}
-	}, [ isSelected ] );
-
 	// If an image is externally hosted, try to fetch the image data. This may
 	// fail if the image host doesn't allow CORS with the domain. If it works,
 	// we can enable a button in the toolbar to upload the image.
@@ -201,18 +195,6 @@ export default function Image( {
 		// This is the HTML title attribute, separate from the media object
 		// title.
 		setAttributes( { title: value } );
-	}
-
-	function onFocusCaption() {
-		if ( ! captionFocused ) {
-			setCaptionFocused( true );
-		}
-	}
-
-	function onImageClick() {
-		if ( captionFocused ) {
-			setCaptionFocused( false );
-		}
 	}
 
 	function updateAlt( newAlt ) {
@@ -417,7 +399,6 @@ export default function Image( {
 			<img
 				src={ temporaryURL || url }
 				alt={ defaultedAlt }
-				onClick={ onImageClick }
 				onError={ () => onImageError() }
 				onLoad={ ( event ) => {
 					setNaturalSize(
@@ -564,7 +545,10 @@ export default function Image( {
 					aria-label={ __( 'Image caption text' ) }
 					placeholder={ __( 'Add caption' ) }
 					value={ caption }
-					unstableOnFocus={ onFocusCaption }
+					__experimentalOnFocus={ () => setCaptionFocused( true ) }
+					__experimentalOnFocusOutside={ () =>
+						setCaptionFocused( false )
+					}
 					onChange={ ( value ) =>
 						setAttributes( { caption: value } )
 					}
