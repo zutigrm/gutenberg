@@ -4,7 +4,6 @@
 import { RangeControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-const DEFAULT_COLUMNS = 1;
 const MIN_COLUMNS = 1;
 const MAX_COLUMNS = 5;
 
@@ -21,7 +20,6 @@ export default function ColumnCountControl( { value, onChange } ) {
 	return (
 		<RangeControl
 			allowReset={ true }
-			initialPosition={ DEFAULT_COLUMNS }
 			label={ __( 'Text columns' ) }
 			max={ MAX_COLUMNS }
 			min={ MIN_COLUMNS }
