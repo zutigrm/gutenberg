@@ -237,6 +237,21 @@ class WP_Theme_JSON_Resolver_Gutenberg {
 		return $theme_json;
 	}
 
+	public static function get_block_data() {
+		$registry = WP_Block_Type_Registry::get_instance();
+		$blocks   = $registry->get_all_registered();
+		$config   = array( 'version' => 1 );
+		foreach( $blocks as $block_name => $block_type ) {
+			if ( isset( $block_type->supports['blockStyles'] ) ) {
+				$config['styles']['blocks'][ $block_name ] = $block_type->supports['blockStyles'];
+			}
+		}
+
+		// Core here means it's the lower level part of the styles chain.
+		// It can be a core or a third-party block.
+		return new WP_Theme_JSON( $config, 'core' );
+	}
+
 	/**
 	 * Return core's origin config.
 	 *
@@ -410,6 +425,7 @@ class WP_Theme_JSON_Resolver_Gutenberg {
 		$theme_support_data = WP_Theme_JSON_Gutenberg::get_from_editor_settings( $settings );
 
 		$result = new WP_Theme_JSON_Gutenberg();
+		$result->merge( self::get_block_data() );
 		$result->merge( self::get_core_data() );
 		$result->merge( self::get_theme_data( $theme_support_data ) );
 
