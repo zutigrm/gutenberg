@@ -64,12 +64,15 @@ export default function Dropdown( {
 	function closeIfFocusOutside() {
 		const { ownerDocument } = containerRef.current;
 		const dialog = ownerDocument.activeElement.closest( '[role="dialog"]' );
+
 		if (
-			! containerRef.current.contains( ownerDocument.activeElement ) &&
-			( ! dialog || dialog.contains( containerRef.current ) )
+			containerRef.current.contains( ownerDocument.activeElement ) ||
+			( dialog && dialog.contains( containerRef.current ) )
 		) {
-			close();
+			return;
 		}
+
+		close();
 	}
 
 	function close() {
@@ -84,14 +87,17 @@ export default function Dropdown( {
 	return (
 		<div
 			className={ classnames( 'components-dropdown', className ) }
+			// Safari sometimes moves focus to a focusable parent when clicking
+			// a button. By making this div focusable, we can detect if the
+			// toggle has been clicked in Safari for `closeIfFocusOutside`.
+			tabIndex={ -1 }
 			ref={ containerRef }
 		>
 			{ renderToggle( args ) }
 			{ isOpen && (
 				<Popover
 					position={ position }
-					onClose={ close }
-					onFocusOutside={ closeIfFocusOutside }
+					onClose={ closeIfFocusOutside }
 					expandOnMobile={ expandOnMobile }
 					headerTitle={ headerTitle }
 					focusOnMount={ focusOnMount }
