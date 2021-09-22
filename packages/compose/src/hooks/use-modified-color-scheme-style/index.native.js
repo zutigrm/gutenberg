@@ -11,7 +11,7 @@ function useModifiedColorSchemeStyle( baseStyles, modifierStates = {} ) {
 				( _modifierStates, modifier ) => ( {
 					..._modifierStates,
 					...{
-						[ modifier ]: modifierStates[ modifier ],
+						[ modifier ]: [ modifierStates[ modifier ] ].flat(),
 						[ `${ modifier }-dark` ]: [
 							...[ modifierStates[ modifier ] ].flat(),
 							isDark,
