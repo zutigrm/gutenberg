@@ -28,7 +28,8 @@ function selectModifiedStyles( styles, modifier ) {
 }
 
 function isModifierEnabled( modifier, states ) {
-	return states[ modifier ]?.every( ( truthy ) => truthy );
+	const dependencies = [ states[ modifier ] ].flat();
+	return dependencies.every( ( truthy ) => truthy );
 }
 
 function mergeStyles( styles, styleUpdates ) {

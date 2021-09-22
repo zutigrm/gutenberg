@@ -15,7 +15,10 @@ import {
  * WordPress dependencies
  */
 import { useState, useRef, useEffect } from '@wordpress/element';
-import { useModifiedStyle } from '@wordpress/compose';
+import {
+	useModifiedStyle,
+	useModifiedColorSchemeStyle,
+} from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { Button, Gridicons } from '@wordpress/components';
 import {
@@ -67,10 +70,8 @@ function SearchControl( {
 		};
 	}, [] );
 
-	const styles = useModifiedStyle( baseStyles, {
-		active: [ isActive ],
-		dark: [ isDark ],
-		'active-dark': [ isActive, isDark ],
+	const styles = useModifiedColorSchemeStyle( baseStyles, {
+		active: isActive,
 	} );
 
 	const {
