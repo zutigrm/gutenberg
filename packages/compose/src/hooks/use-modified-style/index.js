@@ -71,7 +71,7 @@ function useModifiedStyle( baseStyles, modifierStates ) {
 			isModifierEnabled( modifier, modifierStates );
 		const activeModifiers = modifiers.filter( enabledModifiers );
 		const updatedStyles = activeModifiers.reduce( updateStyles, {
-			...styles,
+			...baseStyles,
 		} );
 
 		setStyles( updatedStyles );
