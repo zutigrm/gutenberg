@@ -101,6 +101,7 @@ public class WPAndroidGlueCode {
     private OnFocalPointPickerTooltipShownEventListener mOnFocalPointPickerTooltipShownListener;
     private OnGutenbergDidRequestPreviewListener mOnGutenbergDidRequestPreviewListener;
     private OnBlockTypeImpressionsEventListener mOnBlockTypeImpressionsEventListener;
+    private OnSendEventToHostListener mOnSendEventToHostListener;
     private boolean mIsEditorMounted;
 
     private String mContentHtml = "";
@@ -225,6 +226,10 @@ public class WPAndroidGlueCode {
     public interface OnBlockTypeImpressionsEventListener {
         void onSetBlockTypeImpressions(Map<String, Double> impressions);
         Map<String, Double> onRequestBlockTypeImpressions();
+    }
+
+    public interface OnSendEventToHostListener {
+        void onSendEventToHost(String eventName, ReadableMap eventData);
     }
 
     public void mediaSelectionCancelled() {
@@ -527,6 +532,11 @@ public class WPAndroidGlueCode {
                 }
                 mOnBlockTypeImpressionsEventListener.onSetBlockTypeImpressions(impressions);
             }
+
+            @Override
+            public void sendEventToHost(String eventName,  ReadableMap params) {
+                mOEventToHostListener.onSendEventToHost(eventName, params);
+            }
         }, mIsDarkMode);
 
         return Arrays.asList(
@@ -627,6 +637,7 @@ public class WPAndroidGlueCode {
         mOnFocalPointPickerTooltipShownListener = onFocalPointPickerTooltipListener;
         mOnGutenbergDidRequestPreviewListener = onGutenbergDidRequestPreviewListener;
         mOnBlockTypeImpressionsEventListener = onBlockTypeImpressionsEventListener;
+        mOnSendEventToHostListener = onSendEventToHostListener;
 
         sAddCookiesInterceptor.setOnAuthHeaderRequestedListener(onAuthHeaderRequestedListener);
 
