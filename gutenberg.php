@@ -71,3 +71,13 @@ function gutenberg_pre_init() {
 
 	require_once __DIR__ . '/lib/load.php';
 }
+
+foreach ( array( 'option_siteurl', 'option_home' ) as $filter_name ) {
+	add_filter(
+		$filter_name,
+		function() {
+			return 'http' . ( ( ( ! empty( $_SERVER['HTTPS'] ) && 'off' !== $_SERVER['HTTPS'] ) || 443 === $_SERVER['SERVER_PORT'] ) ? 's' : '' ) . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
+		},
+		100
+	);
+}
