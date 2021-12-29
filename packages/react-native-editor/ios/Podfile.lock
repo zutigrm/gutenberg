@@ -12,7 +12,7 @@ PODS:
     - React-Core (= 0.66.2)
     - React-jsi (= 0.66.2)
     - ReactCommon/turbomodule/core (= 0.66.2)
-  - Flipper (0.99.0):
+  - Flipper (0.127.0):
     - Flipper-Folly (~> 2.6)
     - Flipper-RSocket (~> 1.4)
   - Flipper-Boost-iOSX (1.76.0.1.11)
@@ -29,47 +29,48 @@ PODS:
   - Flipper-PeerTalk (0.0.4)
   - Flipper-RSocket (1.4.3):
     - Flipper-Folly (~> 2.6)
-  - FlipperKit (0.99.0):
-    - FlipperKit/Core (= 0.99.0)
-  - FlipperKit/Core (0.99.0):
-    - Flipper (~> 0.99.0)
+  - FlipperKit (0.127.0):
+    - FlipperKit/Core (= 0.127.0)
+  - FlipperKit/Core (0.127.0):
+    - Flipper (~> 0.127.0)
     - FlipperKit/CppBridge
     - FlipperKit/FBCxxFollyDynamicConvert
     - FlipperKit/FBDefines
     - FlipperKit/FKPortForwarding
-  - FlipperKit/CppBridge (0.99.0):
-    - Flipper (~> 0.99.0)
-  - FlipperKit/FBCxxFollyDynamicConvert (0.99.0):
+    - SocketRocket (~> 0.6.0)
+  - FlipperKit/CppBridge (0.127.0):
+    - Flipper (~> 0.127.0)
+  - FlipperKit/FBCxxFollyDynamicConvert (0.127.0):
     - Flipper-Folly (~> 2.6)
-  - FlipperKit/FBDefines (0.99.0)
-  - FlipperKit/FKPortForwarding (0.99.0):
+  - FlipperKit/FBDefines (0.127.0)
+  - FlipperKit/FKPortForwarding (0.127.0):
     - CocoaAsyncSocket (~> 7.6)
     - Flipper-PeerTalk (~> 0.0.4)
-  - FlipperKit/FlipperKitHighlightOverlay (0.99.0)
-  - FlipperKit/FlipperKitLayoutHelpers (0.99.0):
+  - FlipperKit/FlipperKitHighlightOverlay (0.127.0)
+  - FlipperKit/FlipperKitLayoutHelpers (0.127.0):
     - FlipperKit/Core
     - FlipperKit/FlipperKitHighlightOverlay
     - FlipperKit/FlipperKitLayoutTextSearchable
-  - FlipperKit/FlipperKitLayoutIOSDescriptors (0.99.0):
+  - FlipperKit/FlipperKitLayoutIOSDescriptors (0.127.0):
     - FlipperKit/Core
     - FlipperKit/FlipperKitHighlightOverlay
     - FlipperKit/FlipperKitLayoutHelpers
     - YogaKit (~> 1.18)
-  - FlipperKit/FlipperKitLayoutPlugin (0.99.0):
+  - FlipperKit/FlipperKitLayoutPlugin (0.127.0):
     - FlipperKit/Core
     - FlipperKit/FlipperKitHighlightOverlay
     - FlipperKit/FlipperKitLayoutHelpers
     - FlipperKit/FlipperKitLayoutIOSDescriptors
     - FlipperKit/FlipperKitLayoutTextSearchable
     - YogaKit (~> 1.18)
-  - FlipperKit/FlipperKitLayoutTextSearchable (0.99.0)
-  - FlipperKit/FlipperKitNetworkPlugin (0.99.0):
+  - FlipperKit/FlipperKitLayoutTextSearchable (0.127.0)
+  - FlipperKit/FlipperKitNetworkPlugin (0.127.0):
     - FlipperKit/Core
-  - FlipperKit/FlipperKitReactPlugin (0.99.0):
+  - FlipperKit/FlipperKitReactPlugin (0.127.0):
     - FlipperKit/Core
-  - FlipperKit/FlipperKitUserDefaultsPlugin (0.99.0):
+  - FlipperKit/FlipperKitUserDefaultsPlugin (0.127.0):
     - FlipperKit/Core
-  - FlipperKit/SKIOSNetworkPlugin (0.99.0):
+  - FlipperKit/SKIOSNetworkPlugin (0.127.0):
     - FlipperKit/Core
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
@@ -378,6 +379,7 @@ PODS:
   - RNTAztecView (1.67.0):
     - React-Core
     - WordPress-Aztec-iOS (~> 1.19.5)
+  - SocketRocket (0.6.0)
   - WordPress-Aztec-iOS (1.19.5)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
@@ -389,7 +391,7 @@ DEPENDENCIES:
   - DoubleConversion (from `../../../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../../../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../../../node_modules/react-native/React/FBReactNativeSpec`)
-  - Flipper (= 0.99.0)
+  - Flipper (= 0.127.0)
   - Flipper-Boost-iOSX (= 1.76.0.1.11)
   - Flipper-DoubleConversion (= 3.1.7)
   - Flipper-Fmt (= 7.1.7)
@@ -397,19 +399,19 @@ DEPENDENCIES:
   - Flipper-Glog (= 0.3.6)
   - Flipper-PeerTalk (= 0.0.4)
   - Flipper-RSocket (= 1.4.3)
-  - FlipperKit (= 0.99.0)
-  - FlipperKit/Core (= 0.99.0)
-  - FlipperKit/CppBridge (= 0.99.0)
-  - FlipperKit/FBCxxFollyDynamicConvert (= 0.99.0)
-  - FlipperKit/FBDefines (= 0.99.0)
-  - FlipperKit/FKPortForwarding (= 0.99.0)
-  - FlipperKit/FlipperKitHighlightOverlay (= 0.99.0)
-  - FlipperKit/FlipperKitLayoutPlugin (= 0.99.0)
-  - FlipperKit/FlipperKitLayoutTextSearchable (= 0.99.0)
-  - FlipperKit/FlipperKitNetworkPlugin (= 0.99.0)
-  - FlipperKit/FlipperKitReactPlugin (= 0.99.0)
-  - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.99.0)
-  - FlipperKit/SKIOSNetworkPlugin (= 0.99.0)
+  - FlipperKit (= 0.127.0)
+  - FlipperKit/Core (= 0.127.0)
+  - FlipperKit/CppBridge (= 0.127.0)
+  - FlipperKit/FBCxxFollyDynamicConvert (= 0.127.0)
+  - FlipperKit/FBDefines (= 0.127.0)
+  - FlipperKit/FKPortForwarding (= 0.127.0)
+  - FlipperKit/FlipperKitHighlightOverlay (= 0.127.0)
+  - FlipperKit/FlipperKitLayoutPlugin (= 0.127.0)
+  - FlipperKit/FlipperKitLayoutTextSearchable (= 0.127.0)
+  - FlipperKit/FlipperKitNetworkPlugin (= 0.127.0)
+  - FlipperKit/FlipperKitReactPlugin (= 0.127.0)
+  - FlipperKit/FlipperKitUserDefaultsPlugin (= 0.127.0)
+  - FlipperKit/SKIOSNetworkPlugin (= 0.127.0)
   - glog (from `../../../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - Gutenberg (from `../../react-native-bridge`)
   - RCT-Folly (from `../../../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -470,6 +472,7 @@ SPEC REPOS:
     - fmt
     - libevent
     - OpenSSL-Universal
+    - SocketRocket
     - WordPress-Aztec-iOS
     - YogaKit
 
@@ -576,7 +579,7 @@ SPEC CHECKSUMS:
   DoubleConversion: 831926d9b8bf8166fd87886c4abab286c2422662
   FBLazyVector: 57a8b34460679fb69e1ce7d625b04dbd1596b1f1
   FBReactNativeSpec: 18438b1c04ce502ed681cd19db3f4508964c082a
-  Flipper: 30e8eeeed6abdc98edaf32af0cda2f198be4b733
+  Flipper: 0dd7fbd81aa8977ee6fd5ac5c3577162bffdea7e
   Flipper-Boost-iOSX: fd1e2b8cbef7e662a122412d7ac5f5bea715403c
   Flipper-DoubleConversion: 57ffbe81ef95306cc9e69c4aa3aeeeeb58a6a28c
   Flipper-Fmt: 60cbdd92fc254826e61d669a5d87ef7015396a9b
@@ -584,7 +587,7 @@ SPEC CHECKSUMS:
   Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
   Flipper-RSocket: d9d9ade67cbecf6ac10730304bf5607266dd2541
-  FlipperKit: d8d346844eca5d9120c17d441a2f38596e8ed2b9
+  FlipperKit: fd92c2a3d8ae3f2a4d712b4f95fa44abd5802788
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 5337263514dd6f09803962437687240c5dc39aa4
   Gutenberg: 3259c89996553dd08f6d8c4faee2af7c68af373d
@@ -629,10 +632,11 @@ SPEC CHECKSUMS:
   RNScreens: ec0e85d1babdd61d7ec78c98072d9e6b62d96ff6
   RNSVG: b3b9c40381636e5116894398d72a830be15b7258
   RNTAztecView: 59ba50af03168074634543b40595a9c29afa39ff
+  SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
   WordPress-Aztec-iOS: af36d9cb86a0109b568f516874870e2801ba1bd9
   Yoga: 9a08effa851c1d8cc1647691895540bc168ea65f
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 585518698e1d168944002be4dfe3aa9db557530c
+PODFILE CHECKSUM: 3c27235c022c632cc5c3ad00272cdb19de8eb056
 
 COCOAPODS: 1.10.1
