@@ -100,6 +100,19 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = false
 
 /**
+ * The preferred build flavor of JavaScriptCore.
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US.  Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
+def jscFlavor = 'org.webkit:android-jsc:+'
+
+/**
  * Whether to enable the Hermes VM.
  *
  * This should be set on project.ext.react and mirrored here.  If it is not set
@@ -129,10 +142,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        ndk { 
-            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "mips" 
-            
-        } 
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "mips"
+        }
     }
     splits {
         abi {
@@ -143,6 +155,14 @@ android {
         }
     }
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+            if (nativeArchitectures) {
+                ndk {
+                    abiFilters nativeArchitectures.split(',')
+                }
+            }
+        }
         release {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -198,6 +218,14 @@ dependencies {
 
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
+    }
+
+    if (enableHermes) {
+//        def hermesPath = "../../../../node_modules/hermes-engine/android/";
+//        debugImplementation files(hermesPath + "hermes-debug.aar")
+//        releaseImplementation files(hermesPath + "hermes-release.aar")
+    } else {
+        implementation jscFlavor
     }
 }
 
