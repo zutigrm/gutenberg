@@ -110,8 +110,6 @@ function gutenberg_render_elements_support_footer( $pre_render, $block ) {
 			echo $style;
 		}
 	);
-
-	return $content;
 }
 
 
