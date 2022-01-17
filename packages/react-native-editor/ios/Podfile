@@ -25,7 +25,7 @@ target 'GutenbergDemo' do
   #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable the next line.
-  use_flipper!({'Flipper' => '0.127.0'})
+  use_flipper!({'Flipper' => '0.128.4'})
 
   # If you use `use_frameworks!` in your Podfile,
   # uncomment the below $static_framework array and also
