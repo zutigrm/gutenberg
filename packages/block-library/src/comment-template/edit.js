@@ -122,9 +122,14 @@ export default function CommentTemplateEdit( {
 
 	const { rawComments, blocks } = useSelect(
 		( select ) => {
+			// Set empty rawComments in order to show the default placeholders in inner blocks.
+			if ( ! postId ) {
+				return {
+					rawComments: [ {} ],
+				};
+			}
 			const { getEntityRecords } = select( coreStore );
 			const { getBlocks } = select( blockEditorStore );
-
 			return {
 				rawComments: getEntityRecords( 'root', 'comment', {
 					post: postId,

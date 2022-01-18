@@ -1,0 +1,17 @@
+.wp-block-comment-author-avatar {
+	min-height: 100%;
+	min-width: 100%;
+	.components-placeholder__illustration {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		stroke: currentColor;
+		stroke-dasharray: 3;
+		opacity: 0.4;
+		border: $border-width dashed currentColor;
+	}
+}

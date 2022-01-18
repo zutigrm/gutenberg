@@ -8,7 +8,8 @@ import {
 } from '@wordpress/block-editor';
 import { PanelBody, ResizableBox, RangeControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
-import { __, _x, isRTL } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
+import { SVG, Path } from '@wordpress/primitives';
 
 export default function Edit( {
 	attributes,
@@ -17,6 +18,18 @@ export default function Edit( {
 	isSelected,
 } ) {
 	const { height, width } = attributes;
+
+	const placeholderIllustration = (
+		<SVG
+			className="components-placeholder__illustration"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			preserveAspectRatio
+		>
+			<Path vectorEffect="non-scaling-stroke" d="M24 24 0 0" />
+		</SVG>
+	);
 
 	const [ avatars ] = useEntityProp(
 		'root',
@@ -59,7 +72,7 @@ export default function Edit( {
 		</InspectorControls>
 	);
 
-	const displayAvatar = avatarUrls ? (
+	const displayAvatar = (
 		<ResizableBox
 			size={ {
 				width,
@@ -82,16 +95,16 @@ export default function Edit( {
 			minWidth={ minSize }
 			maxWidth={ maxSizeBuffer }
 		>
-			<img
-				src={ avatarUrls[ avatarUrls.length - 1 ] }
-				alt={ `${ authorName } ${ __( 'Avatar' ) }` }
-				{ ...blockProps }
-			/>
+			{ avatarUrls ? (
+				<img
+					src={ avatarUrls[ avatarUrls.length - 1 ] }
+					alt={ `${ authorName } ${ __( 'Avatar' ) }` }
+					{ ...blockProps }
+				/>
+			) : (
+				<div { ...blockProps }>{ placeholderIllustration }</div>
+			) }
 		</ResizableBox>
-	) : (
-		<p { ...blockProps }>
-			{ _x( 'Comment Author Avatar', 'block title' ) }
-		</p>
 	);
 
 	return (
