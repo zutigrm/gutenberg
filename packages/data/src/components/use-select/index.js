@@ -174,7 +174,6 @@ export default function useSelect( mapSelect, deps ) {
 		}
 
 		latestMapSelect.current = _mapSelect;
-		latestMapOutput.current = mapOutput;
 		latestMapOutputError.current = undefined;
 		isMountedAndNotUnsubscribing.current = true;
 
@@ -186,6 +185,14 @@ export default function useSelect( mapSelect, deps ) {
 			latestIsAsync.current = isAsync;
 			renderQueue.flush( queueContext );
 		}
+	} );
+
+	useIsomorphicLayoutEffect( () => {
+		if ( ! hasMappingFunction ) {
+			return;
+		}
+
+		latestMapOutput.current = mapOutput;
 	}, [ mapOutput ] );
 
 	useIsomorphicLayoutEffect( () => {
