@@ -49,11 +49,13 @@ module.exports = {
 		jsdoc: {
 			mode: 'typescript',
 		},
+		'import/internal-regex': null,
+		'import/resolver': require.resolve( './tools/eslint/import-resolver' ),
 	},
 	rules: {
 		'jest/expect-expect': 'off',
 		'@wordpress/dependency-group': 'error',
-		'@wordpress/gutenberg-phase': 'error',
+		'@wordpress/is-gutenberg-plugin': 'error',
 		'@wordpress/react-no-unsafe-timeout': 'error',
 		'@wordpress/i18n-text-domain': [
 			'error',
@@ -62,7 +64,7 @@ module.exports = {
 			},
 		],
 		'@wordpress/no-unsafe-wp-apis': 'off',
-		'@wordpress/data-no-store-string-literals': 'warn',
+		'@wordpress/data-no-store-string-literals': 'error',
 		'import/default': 'error',
 		'import/named': 'error',
 		'no-restricted-imports': [
@@ -70,14 +72,14 @@ module.exports = {
 			{
 				paths: [
 					{
+						name: 'framer-motion',
+						message:
+							'Please use the Framer Motion API through `@wordpress/components` instead.',
+					},
+					{
 						name: 'lodash',
 						importNames: [ 'memoize' ],
 						message: 'Please use `memize` instead.',
-					},
-					{
-						name: 'react',
-						message:
-							'Please use React API through `@wordpress/element` instead.',
 					},
 					{
 						name: 'reakit',
@@ -95,6 +97,24 @@ module.exports = {
 						message:
 							'`puppeteer-testing-library` is still experimental.',
 					},
+					{
+						name: '@emotion/css',
+						message:
+							'Please use `@emotion/react` and `@emotion/styled` in order to maintain iframe support. As a replacement for the `cx` function, please use the `useCx` hook defined in `@wordpress/components` instead.',
+					},
+				],
+			},
+		],
+		'@typescript-eslint/no-restricted-imports': [
+			'error',
+			{
+				paths: [
+					{
+						name: 'react',
+						message:
+							'Please use React API through `@wordpress/element` instead.',
+						allowTypeImports: true,
+					},
 				],
 			},
 		],
@@ -108,12 +128,6 @@ module.exports = {
 					'ImportDeclaration[source.value=/^@wordpress\\u002F.+\\u002F/]',
 				message:
 					'Path access on WordPress dependencies is not allowed.',
-			},
-			{
-				selector:
-					'ImportDeclaration[source.value=/^react-spring(?!\\u002Fweb.cjs)/]',
-				message:
-					'The react-spring dependency must specify CommonJS bundle: react-spring/web.cjs',
 			},
 			{
 				selector:
@@ -170,10 +184,17 @@ module.exports = {
 				...developmentFiles,
 			],
 			rules: {
+				'import/default': 'off',
 				'import/no-extraneous-dependencies': 'off',
 				'import/no-unresolved': 'off',
 				'import/named': 'off',
 				'@wordpress/data-no-store-string-literals': 'off',
+			},
+		},
+		{
+			files: [ 'packages/react-native-*/**/*.js' ],
+			settings: {
+				'import/ignore': [ 'react-native' ], // Workaround for https://github.com/facebook/react-native/issues/28549
 			},
 		},
 		{

@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 1.4.0 (2022-01-27)
+
+### Enhancement
+
+-   Speed up scaffolding process by omitting WordPress dependencies in the template ([#37639](https://github.com/WordPress/gutenberg/pull/37639)).
+-   Update link to block registration reference ([#37674](https://github.com/WordPress/gutenberg/pull/37674))
+
+## 1.3.0 (2021-07-21)
+
+### Enhancement
+
+-   Plugin scaffolded requires WordPress 5.8 now ([#33252](https://github.com/WordPress/gutenberg/pull/33252).
+-   Scaffolded block is now registered from `block.json` with the `register_block_type` helper ([#33252](https://github.com/WordPress/gutenberg/pull/33252)).
+
 ## 1.2.0 (2021-04-06)
 
 ### Enhancement

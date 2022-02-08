@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * External dependencies
  */
@@ -11,19 +12,15 @@ import {
 	useState,
 	useLayoutEffect,
 	forwardRef,
+	createContext,
+	useContext,
 } from '@wordpress/element';
 import { getRectangleFromRange } from '@wordpress/dom';
-import { ESCAPE } from '@wordpress/keycodes';
-import deprecated from '@wordpress/deprecated';
 import {
 	useViewportMatch,
 	useResizeObserver,
-	useFocusOnMount,
-	__experimentalUseFocusOutside as useFocusOutside,
-	useConstrainedTabbing,
-	useFocusReturn,
 	useMergeRefs,
-	useRefEffect,
+	__experimentalUseDialog as useDialog,
 } from '@wordpress/compose';
 import { close } from '@wordpress/icons';
 
@@ -42,6 +39,8 @@ import { getAnimateClassName } from '../animate';
  * @type {string}
  */
 const SLOT_NAME = 'Popover';
+
+const slotNameContext = createContext();
 
 function computeAnchorRect(
 	anchorRefFallback,
@@ -132,7 +131,11 @@ function computeAnchorRect(
 	}
 
 	const { parentNode } = anchorRefFallback.current;
-	const rect = parentNode.getBoundingClientRect();
+	const rect = offsetIframe(
+		parentNode.getBoundingClientRect(),
+		parentNode.ownerDocument,
+		container
+	);
 
 	if ( shouldAnchorIncludePadding ) {
 		return rect;
@@ -254,7 +257,6 @@ const Popover = (
 		getAnchorRect,
 		expandOnMobile,
 		animate = true,
-		onClickOutside,
 		onFocusOutside,
 		__unstableStickyBoundaryElement,
 		__unstableSlotName = SLOT_NAME,
@@ -262,6 +264,7 @@ const Popover = (
 		__unstableBoundaryParent,
 		__unstableForcePosition,
 		__unstableForceXAlignment,
+		__unstableEditorCanvasWrapper,
 		/* eslint-enable no-unused-vars */
 		...contentProps
 	},
@@ -272,7 +275,8 @@ const Popover = (
 	const containerRef = useRef();
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const [ animateOrigin, setAnimateOrigin ] = useState();
-	const slot = useSlot( __unstableSlotName );
+	const slotName = useContext( slotNameContext ) || __unstableSlotName;
+	const slot = useSlot( slotName );
 	const isExpanded = expandOnMobile && isMobileViewport;
 	const [ containerResizeListener, contentSize ] = useResizeObserver();
 	noArrow = isExpanded || noArrow;
@@ -331,9 +335,7 @@ const Popover = (
 
 			let boundaryElement;
 			if ( __unstableBoundaryParent ) {
-				boundaryElement = containerRef.current.closest(
-					'.popover-slot'
-				)?.parentNode;
+				boundaryElement = containerRef.current.parentElement;
 			}
 
 			const usedContentSize = ! contentSize.height
@@ -356,7 +358,8 @@ const Popover = (
 				relativeOffsetTop,
 				boundaryElement,
 				__unstableForcePosition,
-				__unstableForceXAlignment
+				__unstableForceXAlignment,
+				__unstableEditorCanvasWrapper
 			);
 
 			if (
@@ -457,11 +460,11 @@ const Popover = (
 			defaultView.cancelAnimationFrame( rafId );
 
 			if ( anchorDocument && anchorDocument !== ownerDocument ) {
-				anchorDocument.defaultView.removeEventListener(
+				anchorDocument.defaultView?.removeEventListener(
 					'resize',
 					refresh
 				);
-				anchorDocument.defaultView.removeEventListener(
+				anchorDocument.defaultView?.removeEventListener(
 					'scroll',
 					refresh,
 					true
@@ -485,97 +488,23 @@ const Popover = (
 		__unstableBoundaryParent,
 	] );
 
-	// Event handlers for closing the popover.
-	const closeEventRef = useRefEffect(
-		( node ) => {
-			function maybeClose( event ) {
-				// Close on escape.
-				if ( event.keyCode === ESCAPE && onClose ) {
-					event.stopPropagation();
-					onClose();
-				}
-			}
-
-			node.addEventListener( 'keydown', maybeClose );
-
-			return () => {
-				node.removeEventListener( 'keydown', maybeClose );
-			};
-		},
-		[ onClose ]
-	);
-
-	const constrainedTabbingRef = useConstrainedTabbing();
-	const focusReturnRef = useFocusReturn();
-	const focusOnMountRef = useFocusOnMount( focusOnMount );
-	const focusOutsideProps = useFocusOutside( handleOnFocusOutside );
-	const mergedRefs = useMergeRefs( [
-		ref,
-		containerRef,
-		// Don't register the event at all if there's no onClose callback.
-		onClose ? closeEventRef : null,
-		focusOnMount ? constrainedTabbingRef : null,
-		focusOnMount ? focusReturnRef : null,
-		focusOnMount ? focusOnMountRef : null,
-	] );
-
-	/**
-	 * Shims an onFocusOutside callback to be compatible with a deprecated
-	 * onClickOutside prop function, if provided.
-	 *
-	 * @param {FocusEvent} event Focus event from onFocusOutside.
-	 */
-	function handleOnFocusOutside( event ) {
-		// Defer to given `onFocusOutside` if specified. Call `onClose` only if
-		// both `onFocusOutside` and `onClickOutside` are unspecified. Doing so
-		// assures backwards-compatibility for prior `onClickOutside` default.
-		if ( onFocusOutside ) {
+	const onDialogClose = ( type, event ) => {
+		// Ideally the popover should have just a single onClose prop and
+		// not three props that potentially do the same thing.
+		if ( type === 'focus-outside' && onFocusOutside ) {
 			onFocusOutside( event );
-			return;
-		} else if ( ! onClickOutside ) {
-			if ( onClose ) {
-				onClose();
-			}
-			return;
+		} else if ( onClose ) {
+			onClose();
 		}
+	};
 
-		// Simulate MouseEvent using FocusEvent#relatedTarget as emulated click
-		// target. MouseEvent constructor is unsupported in Internet Explorer.
-		let clickEvent;
-		try {
-			clickEvent = new window.MouseEvent( 'click' );
-		} catch ( error ) {
-			clickEvent = document.createEvent( 'MouseEvent' );
-			clickEvent.initMouseEvent(
-				'click',
-				true,
-				true,
-				window,
-				0,
-				0,
-				0,
-				0,
-				0,
-				false,
-				false,
-				false,
-				false,
-				0,
-				null
-			);
-		}
+	const [ dialogRef, dialogProps ] = useDialog( {
+		focusOnMount,
+		__unstableOnClose: onDialogClose,
+		onClose: onDialogClose,
+	} );
 
-		Object.defineProperty( clickEvent, 'target', {
-			get: () => event.relatedTarget,
-		} );
-
-		deprecated( 'Popover onClickOutside prop', {
-			since: '5.3',
-			alternative: 'onFocusOutside',
-		} );
-
-		onClickOutside( clickEvent );
-	}
+	const mergedRefs = useMergeRefs( [ containerRef, dialogRef, ref ] );
 
 	/** @type {false | string} */
 	const animateClassName =
@@ -603,8 +532,8 @@ const Popover = (
 				}
 			) }
 			{ ...contentProps }
-			{ ...focusOutsideProps }
 			ref={ mergedRefs }
+			{ ...dialogProps }
 			tabIndex="-1"
 		>
 			{ isExpanded && <ScrollLock /> }
@@ -630,7 +559,7 @@ const Popover = (
 	);
 
 	if ( slot.ref ) {
-		content = <Fill name={ __unstableSlotName }>{ content }</Fill>;
+		content = <Fill name={ slotName }>{ content }</Fill>;
 	}
 
 	if ( anchorRef || anchorRect ) {
@@ -654,5 +583,6 @@ function PopoverSlot( { name = SLOT_NAME }, ref ) {
 }
 
 PopoverContainer.Slot = forwardRef( PopoverSlot );
+PopoverContainer.__unstableSlotNameProvider = slotNameContext.Provider;
 
 export default PopoverContainer;

@@ -1,16 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	find,
-	get,
-	has,
-	isString,
-	pick,
-	mapValues,
-	includes,
-	some,
-} from 'lodash';
+import { find, get, has, isString, includes, some } from 'lodash';
 import createSelector from 'rememo';
 
 /**
@@ -19,7 +10,6 @@ import createSelector from 'rememo';
 import {
 	getFreeformContentHandlerName,
 	getDefaultBlockName,
-	isUnmodifiedDefaultBlock,
 	__unstableSerializeAndClean,
 } from '@wordpress/blocks';
 import { isInTheFuture, getDate } from '@wordpress/date';
@@ -43,7 +33,7 @@ import {
 } from './constants';
 import { getPostRawValue } from './reducer';
 import { cleanForSlug } from '../utils/url';
-import { getTemplatePartIcon } from './utils/get-template-part-icon';
+import { getTemplatePartIcon } from '../utils/get-template-part-icon';
 
 /**
  * Shared reference to an empty object for cases where it is important to avoid
@@ -286,41 +276,6 @@ export const getPostEdits = createRegistrySelector( ( select ) => ( state ) => {
 		) || EMPTY_OBJECT
 	);
 } );
-
-/**
- * Returns a new reference when edited values have changed. This is useful in
- * inferring where an edit has been made between states by comparison of the
- * return values using strict equality.
- *
- * @deprecated since Gutenberg 6.5.0.
- *
- * @example
- *
- * ```
- * const hasEditOccurred = (
- *    getReferenceByDistinctEdits( beforeState ) !==
- *    getReferenceByDistinctEdits( afterState )
- * );
- * ```
- *
- * @param {Object} state Editor state.
- *
- * @return {*} A value whose reference will change only when an edit occurs.
- */
-export const getReferenceByDistinctEdits = createRegistrySelector(
-	( select ) => (/* state */) => {
-		deprecated(
-			"`wp.data.select( 'core/editor' ).getReferenceByDistinctEdits`",
-			{
-				since: '5.4',
-				alternative:
-					"`wp.data.select( 'core' ).getReferenceByDistinctEdits`",
-			}
-		);
-
-		return select( coreStore ).getReferenceByDistinctEdits();
-	}
-);
 
 /**
  * Returns an attribute value of the saved post.
@@ -679,63 +634,6 @@ export const isEditedPostAutosaveable = createRegistrySelector(
 );
 
 /**
- * Returns the current autosave, or null if one is not set (i.e. if the post
- * has yet to be autosaved, or has been saved or published since the last
- * autosave).
- *
- * @deprecated since 5.6. Callers should use the `getAutosave( postType, postId, userId )`
- * 			   selector from the '@wordpress/core-data' package.
- *
- * @param {Object} state Editor state.
- *
- * @return {?Object} Current autosave, if exists.
- */
-export const getAutosave = createRegistrySelector( ( select ) => ( state ) => {
-	deprecated( "`wp.data.select( 'core/editor' ).getAutosave()`", {
-		since: '5.3',
-		alternative:
-			"`wp.data.select( 'core' ).getAutosave( postType, postId, userId )`",
-	} );
-
-	const postType = getCurrentPostType( state );
-	const postId = getCurrentPostId( state );
-	const currentUserId = get( select( coreStore ).getCurrentUser(), [ 'id' ] );
-	const autosave = select( coreStore ).getAutosave(
-		postType,
-		postId,
-		currentUserId
-	);
-	return mapValues( pick( autosave, AUTOSAVE_PROPERTIES ), getPostRawValue );
-} );
-
-/**
- * Returns the true if there is an existing autosave, otherwise false.
- *
- * @deprecated since 5.6. Callers should use the `getAutosave( postType, postId, userId )` selector
- *             from the '@wordpress/core-data' package and check for a truthy value.
- *
- * @param {Object} state Global application state.
- *
- * @return {boolean} Whether there is an existing autosave.
- */
-export const hasAutosave = createRegistrySelector( ( select ) => ( state ) => {
-	deprecated( "`wp.data.select( 'core/editor' ).hasAutosave()`", {
-		since: '5.3',
-		alternative:
-			"`!! wp.data.select( 'core' ).getAutosave( postType, postId, userId )`",
-	} );
-
-	const postType = getCurrentPostType( state );
-	const postId = getCurrentPostId( state );
-	const currentUserId = get( select( coreStore ).getCurrentUser(), [ 'id' ] );
-	return !! select( coreStore ).getAutosave(
-		postType,
-		postId,
-		currentUserId
-	);
-} );
-
-/**
  * Return true if the post being edited is being scheduled. Preferring the
  * unsaved status values.
  *
@@ -772,7 +670,7 @@ export function isEditedPostDateFloating( state ) {
 
 	// This should be the status of the persisted post
 	// It shouldn't use the "edited" status otherwise it breaks the
-	// infered post data floating status
+	// inferred post data floating status
 	// See https://github.com/WordPress/gutenberg/issues/28083
 	const status = getCurrentPost( state ).status;
 	if (
@@ -801,6 +699,29 @@ export const isSavingPost = createRegistrySelector( ( select ) => ( state ) => {
 		postId
 	);
 } );
+
+/**
+ * Returns true if non-post entities are currently being saved, or false otherwise.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {boolean} Whether non-post entities are being saved.
+ */
+export const isSavingNonPostEntityChanges = createRegistrySelector(
+	( select ) => ( state ) => {
+		const entitiesBeingSaved = select(
+			coreStore
+		).__experimentalGetEntitiesBeingSaved();
+		const { type, id } = getCurrentPost( state );
+		return some(
+			entitiesBeingSaved,
+			( entityRecord ) =>
+				entityRecord.kind !== 'postType' ||
+				entityRecord.name !== type ||
+				entityRecord.key !== id
+		);
+	}
+);
 
 /**
  * Returns true if a previous post save was attempted successfully, or false
@@ -867,7 +788,7 @@ export function isPreviewingPost( state ) {
 	if ( ! isSavingPost( state ) ) {
 		return false;
 	}
-	return !! state.saving.options.isPreview;
+	return !! get( state.saving, [ 'options', 'isPreview' ] );
 }
 
 /**
@@ -883,7 +804,12 @@ export function getEditedPostPreviewLink( state ) {
 	}
 
 	let previewLink = getAutosaveAttribute( state, 'preview_link' );
-	if ( ! previewLink ) {
+	// Fix for issue: https://github.com/WordPress/gutenberg/issues/33616
+	// If the post is draft, ignore the preview link from the autosave record,
+	// because the preview could be a stale autosave if the post was switched from
+	// published to draft.
+	// See: https://github.com/WordPress/gutenberg/pull/37952
+	if ( ! previewLink || 'draft' === getCurrentPost( state ).status ) {
 		previewLink = getEditedPostAttribute( state, 'link' );
 		if ( previewLink ) {
 			previewLink = addQueryArgs( previewLink, { preview: true } );
@@ -950,42 +876,6 @@ export function getSuggestedPostFormat( state ) {
 		default:
 			return null;
 	}
-}
-
-/**
- * Returns a set of blocks which are to be used in consideration of the post's
- * generated save content.
- *
- * @deprecated since Gutenberg 6.2.0.
- *
- * @param {Object} state Editor state.
- *
- * @return {WPBlock[]} Filtered set of blocks for save.
- */
-export function getBlocksForSerialization( state ) {
-	deprecated( '`core/editor` getBlocksForSerialization selector', {
-		since: '5.3',
-		alternative: 'getEditorBlocks',
-		hint: 'Blocks serialization pre-processing occurs at save time',
-	} );
-
-	const blocks = state.editor.present.blocks.value;
-
-	// WARNING: Any changes to the logic of this function should be verified
-	// against the implementation of isEditedPostEmpty, which bypasses this
-	// function for performance' sake, in an assumption of this current logic
-	// being irrelevant to the optimized condition of emptiness.
-
-	// A single unmodified default block is assumed to be equivalent to an
-	// empty post.
-	const isSingleUnmodifiedDefaultBlock =
-		blocks.length === 1 && isUnmodifiedDefaultBlock( blocks[ 0 ] );
-
-	if ( isSingleUnmodifiedDefaultBlock ) {
-		return [];
-	}
-
-	return blocks;
 }
 
 /**
@@ -1246,8 +1136,7 @@ export function getEditorBlocks( state ) {
  */
 export function getEditorSelectionStart( state ) {
 	deprecated( "select('core/editor').getEditorSelectionStart", {
-		since: '10.0',
-		plugin: 'Gutenberg',
+		since: '5.8',
 		alternative: "select('core/editor').getEditorSelection",
 	} );
 	return getEditedPostAttribute( state, 'selection' )?.selectionStart;
@@ -1263,8 +1152,7 @@ export function getEditorSelectionStart( state ) {
  */
 export function getEditorSelectionEnd( state ) {
 	deprecated( "select('core/editor').getEditorSelectionStart", {
-		since: '10.0',
-		plugin: 'Gutenberg',
+		since: '5.8',
 		alternative: "select('core/editor').getEditorSelection",
 	} );
 	return getEditedPostAttribute( state, 'selection' )?.selectionEnd;
@@ -1338,6 +1226,7 @@ function getBlockEditorSelector( name ) {
 		deprecated( "`wp.data.select( 'core/editor' )." + name + '`', {
 			since: '5.3',
 			alternative: "`wp.data.select( 'core/block-editor' )." + name + '`',
+			version: '6.2',
 		} );
 
 		return select( blockEditorStore )[ name ]( ...args );
@@ -1370,13 +1259,6 @@ export const getBlock = getBlockEditorSelector( 'getBlock' );
  * @see getBlocks in core/block-editor store.
  */
 export const getBlocks = getBlockEditorSelector( 'getBlocks' );
-
-/**
- * @see __unstableGetBlockWithoutInnerBlocks in core/block-editor store.
- */
-export const __unstableGetBlockWithoutInnerBlocks = getBlockEditorSelector(
-	'__unstableGetBlockWithoutInnerBlocks'
-);
 
 /**
  * @see getClientIdsOfDescendants in core/block-editor store.
@@ -1703,7 +1585,7 @@ export const __experimentalGetDefaultTemplatePartAreas = createSelector(
  * Returns a default template type searched by slug.
  *
  * @param {Object} state Global application state.
- * @param {string} slug The template type slug.
+ * @param {string} slug  The template type slug.
  *
  * @return {Object} The template type.
  */
@@ -1717,7 +1599,7 @@ export const __experimentalGetDefaultTemplateType = createSelector(
  * Given a template entity, return information about it which is ready to be
  * rendered, such as the title, description, and icon.
  *
- * @param {Object} state Global application state.
+ * @param {Object} state    Global application state.
  * @param {Object} template The template for which we need information.
  * @return {Object} Information about the template, including title, description, and icon.
  */
@@ -1748,3 +1630,20 @@ export function __experimentalGetTemplateInfo( state, template ) {
 		icon: templateIcon,
 	};
 }
+
+/**
+ * Returns a post type label depending on the current post.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {string|undefined} The post type label if available, otherwise undefined.
+ */
+export const getPostTypeLabel = createRegistrySelector(
+	( select ) => ( state ) => {
+		const currentPostType = getCurrentPostType( state );
+		const postType = select( coreStore ).getPostType( currentPostType );
+		// Disable reason: Post type labels object is shaped like this.
+		// eslint-disable-next-line camelcase
+		return postType?.labels?.singular_name;
+	}
+);

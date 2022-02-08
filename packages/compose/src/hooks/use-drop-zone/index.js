@@ -33,14 +33,14 @@ function useFreshRef( value ) {
 /**
  * A hook to facilitate drag and drop handling.
  *
- * @param {Object} props Named parameters.
- * @param {boolean} props.isDisabled Whether or not to disable the drop zone.
- * @param {(e: DragEvent) => void} props.onDragStart Called when dragging has started.
- * @param {(e: DragEvent) => void} props.onDragEnter Called when the zone is entered.
- * @param {(e: DragEvent) => void} props.onDragOver Called when the zone is moved within.
- * @param {(e: DragEvent) => void} props.onDragLeave Called when the zone is left.
- * @param {(e: MouseEvent) => void} props.onDragEnd Called when dragging has ended.
- * @param {(e: DragEvent) => void} props.onDrop Called when dropping in the zone.
+ * @param {Object}                  props             Named parameters.
+ * @param {boolean}                 props.isDisabled  Whether or not to disable the drop zone.
+ * @param {(e: DragEvent) => void}  props.onDragStart Called when dragging has started.
+ * @param {(e: DragEvent) => void}  props.onDragEnter Called when the zone is entered.
+ * @param {(e: DragEvent) => void}  props.onDragOver  Called when the zone is moved within.
+ * @param {(e: DragEvent) => void}  props.onDragLeave Called when the zone is left.
+ * @param {(e: MouseEvent) => void} props.onDragEnd   Called when dragging has ended.
+ * @param {(e: DragEvent) => void}  props.onDrop      Called when dropping in the zone.
  *
  * @return {import('react').RefCallback<HTMLElement>} Ref callback to be passed to the drop zone element.
  */
@@ -70,6 +70,36 @@ export default function useDropZone( {
 
 			const { ownerDocument } = element;
 
+			/**
+			 * Checks if an element is in the drop zone.
+			 *
+			 * @param {EventTarget|null} targetToCheck
+			 *
+			 * @return {boolean} True if in drop zone, false if not.
+			 */
+			function isElementInZone( targetToCheck ) {
+				const { defaultView } = ownerDocument;
+				if (
+					! targetToCheck ||
+					! defaultView ||
+					! ( targetToCheck instanceof defaultView.HTMLElement ) ||
+					! element.contains( targetToCheck )
+				) {
+					return false;
+				}
+
+				/** @type {HTMLElement|null} */
+				let elementToCheck = targetToCheck;
+
+				do {
+					if ( elementToCheck.dataset.isDropZone ) {
+						return elementToCheck === element;
+					}
+				} while ( ( elementToCheck = elementToCheck.parentElement ) );
+
+				return false;
+			}
+
 			function maybeDragStart( /** @type {DragEvent} */ event ) {
 				if ( isDragging ) {
 					return;
@@ -81,6 +111,13 @@ export default function useDropZone( {
 					'dragenter',
 					maybeDragStart
 				);
+
+				// Note that `dragend` doesn't fire consistently for file and
+				// HTML drag events where the drag origin is outside the browser
+				// window. In Firefox it may also not fire if the originating
+				// node is removed.
+				ownerDocument.addEventListener( 'dragend', maybeDragEnd );
+				ownerDocument.addEventListener( 'mousemove', maybeDragEnd );
 
 				if ( onDragStartRef.current ) {
 					onDragStartRef.current( event );
@@ -124,11 +161,7 @@ export default function useDropZone( {
 				// leaving the drop zone, which means the `relatedTarget`
 				// (element that has been entered) should be outside the drop
 				// zone.
-				if (
-					element.contains(
-						/** @type {Node} */ ( event.relatedTarget )
-					)
-				) {
+				if ( isElementInZone( event.relatedTarget ) ) {
 					return;
 				}
 
@@ -168,33 +201,31 @@ export default function useDropZone( {
 				isDragging = false;
 
 				ownerDocument.addEventListener( 'dragenter', maybeDragStart );
+				ownerDocument.removeEventListener( 'dragend', maybeDragEnd );
+				ownerDocument.removeEventListener( 'mousemove', maybeDragEnd );
 
 				if ( onDragEndRef.current ) {
 					onDragEndRef.current( event );
 				}
 			}
 
+			element.dataset.isDropZone = 'true';
 			element.addEventListener( 'drop', onDrop );
 			element.addEventListener( 'dragenter', onDragEnter );
 			element.addEventListener( 'dragover', onDragOver );
 			element.addEventListener( 'dragleave', onDragLeave );
-			// Note that `dragend` doesn't fire consistently for file and HTML
-			// drag events where the drag origin is outside the browser window.
-			// In Firefox it may also not fire if the originating node is
-			// removed.
-			ownerDocument.addEventListener( 'dragend', maybeDragEnd );
-			ownerDocument.addEventListener( 'mouseup', maybeDragEnd );
 			// The `dragstart` event doesn't fire if the drag started outside
 			// the document.
 			ownerDocument.addEventListener( 'dragenter', maybeDragStart );
 
 			return () => {
+				delete element.dataset.isDropZone;
 				element.removeEventListener( 'drop', onDrop );
 				element.removeEventListener( 'dragenter', onDragEnter );
 				element.removeEventListener( 'dragover', onDragOver );
 				element.removeEventListener( 'dragleave', onDragLeave );
 				ownerDocument.removeEventListener( 'dragend', maybeDragEnd );
-				ownerDocument.removeEventListener( 'mouseup', maybeDragEnd );
+				ownerDocument.removeEventListener( 'mousemove', maybeDragEnd );
 				ownerDocument.addEventListener( 'dragenter', maybeDragStart );
 			};
 		},

@@ -47,7 +47,7 @@ describe( 'Gallery', () => {
 		const filename = await upload( '.wp-block-gallery input[type="file"]' );
 
 		const regex = new RegExp(
-			`<!-- wp:gallery {"ids":\\[\\d+\\],"linkTo":"none"} -->\\s*<figure class="wp-block-gallery columns-1 is-cropped"><ul class="blocks-gallery-grid"><li class="blocks-gallery-item"><figure><img src="[^"]+\\/${ filename }\\.png" alt="" data-id="\\d+" data-link=".+" class="wp-image-\\d+"\\/><\\/figure><\\/li><\\/ul><\\/figure>\\s*<!-- \\/wp:gallery -->`
+			`<!-- wp:gallery {\\"linkTo\\":\\"none\\"} -->\\s*<figure class=\\"wp-block-gallery has-nested-images columns-default is-cropped\\"><!-- wp:image {\\"id\\":\\d+,\\"sizeSlug\\":\\"full\\",\\"linkDestination\\":\\"none\\"} -->\\s*<figure class=\\"wp-block-image size-full\\"><img src=\\"[^"]+\/${ filename }\.png\\" alt=\\"\\" class=\\"wp-image-\\d+\\"\/><\/figure>\\s*<!-- \/wp:image --><\/figure>\\s*<!-- \/wp:gallery -->`
 		);
 		expect( await getEditedPostContent() ).toMatch( regex );
 	} );
@@ -57,8 +57,13 @@ describe( 'Gallery', () => {
 
 		await insertBlock( 'Gallery' );
 		await upload( '.wp-block-gallery input[type="file"]' );
+		await page.waitForSelector( '.wp-block-gallery .wp-block-image' );
 
-		await page.click( '.wp-block-gallery>.blocks-gallery-caption' );
+		// The newly added image gets the focus, so refocus parent Gallery
+		// block before trying to edit caption.
+		await clickButton( 'Gallery' );
+
+		await page.click( '.wp-block-gallery .blocks-gallery-caption' );
 		await page.keyboard.type( galleryCaption );
 
 		expect( await getEditedPostContent() ).toMatch(
@@ -71,7 +76,7 @@ describe( 'Gallery', () => {
 		await upload( '.wp-block-gallery input[type="file"]' );
 
 		const figureElement = await page.waitForSelector(
-			'.blocks-gallery-item figure'
+			'.wp-block-gallery .wp-block-image'
 		);
 
 		await figureElement.click();

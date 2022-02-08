@@ -32,29 +32,11 @@ import {
  * Returns an action generator used in signalling that editor has initialized with
  * the specified post object and editor settings.
  *
- * @param {Object} post      Post object.
- * @param {Object} edits     Initial edited attributes object.
- * @param {Array?} template  Block Template.
+ * @param {Object} post     Post object.
+ * @param {Object} edits    Initial edited attributes object.
+ * @param {Array?} template Block Template.
  */
 export function* setupEditor( post, edits, template ) {
-	// In order to ensure maximum of a single parse during setup, edits are
-	// included as part of editor setup action. Assume edited content as
-	// canonical if provided, falling back to post.
-	let content;
-	if ( has( edits, [ 'content' ] ) ) {
-		content = edits.content;
-	} else {
-		content = post.content.raw;
-	}
-
-	let blocks = parse( content );
-
-	// Apply a template for new posts only, if exists.
-	const isNewPost = post.status === 'auto-draft';
-	if ( isNewPost && template ) {
-		blocks = synchronizeBlocksWithTemplate( blocks, template );
-	}
-
 	yield resetPost( post );
 	yield {
 		type: 'SETUP_EDITOR',
@@ -62,10 +44,25 @@ export function* setupEditor( post, edits, template ) {
 		edits,
 		template,
 	};
-	yield resetEditorBlocks( blocks, {
-		__unstableShouldCreateUndoLevel: false,
-	} );
 	yield setupEditorState( post );
+	// Apply a template for new posts only, if exists.
+	const isNewPost = post.status === 'auto-draft';
+	if ( isNewPost && template ) {
+		// In order to ensure maximum of a single parse during setup, edits are
+		// included as part of editor setup action. Assume edited content as
+		// canonical if provided, falling back to post.
+		let content;
+		if ( has( edits, [ 'content' ] ) ) {
+			content = edits.content;
+		} else {
+			content = post.content.raw;
+		}
+		let blocks = parse( content );
+		blocks = synchronizeBlocksWithTemplate( blocks, template );
+		yield resetEditorBlocks( blocks, {
+			__unstableShouldCreateUndoLevel: false,
+		} );
+	}
 	if (
 		edits &&
 		Object.keys( edits ).some(
@@ -101,34 +98,6 @@ export function resetPost( post ) {
 		type: 'RESET_POST',
 		post,
 	};
-}
-
-/**
- * Returns an action object used in signalling that the latest autosave of the
- * post has been received, by initialization or autosave.
- *
- * @deprecated since 5.6. Callers should use the `receiveAutosaves( postId, autosave )`
- * 			   selector from the '@wordpress/core-data' package.
- *
- * @param {Object} newAutosave Autosave post object.
- *
- * @return {Object} Action object.
- */
-export function* resetAutosave( newAutosave ) {
-	deprecated( 'resetAutosave action (`core/editor` store)', {
-		since: '5.3',
-		alternative: 'receiveAutosaves action (`core` store)',
-	} );
-
-	const postId = yield controls.select( STORE_NAME, 'getCurrentPostId' );
-	yield controls.dispatch(
-		coreStore.name,
-		'receiveAutosaves',
-		postId,
-		newAutosave
-	);
-
-	return { type: '__INERT__' };
 }
 
 /**
@@ -169,7 +138,7 @@ export function __experimentalRequestPostUpdateFinish( options = {} ) {
 export function updatePost() {
 	deprecated( "wp.data.dispatch( 'core/editor' ).updatePost", {
 		since: '5.7',
-		alternative: 'User the core entitires store instead',
+		alternative: 'Use the core entities store instead',
 	} );
 	return {
 		type: 'DO_NOTHING',
@@ -180,7 +149,7 @@ export function updatePost() {
  * Returns an action object used to setup the editor state when first opening
  * an editor.
  *
- * @param {Object} post   Post object.
+ * @param {Object} post Post object.
  *
  * @return {Object} Action object.
  */
@@ -203,7 +172,7 @@ export function setupEditorState( post ) {
 export function* editPost( edits, options ) {
 	const { id, type } = yield controls.select( STORE_NAME, 'getCurrentPost' );
 	yield controls.dispatch(
-		coreStore.name,
+		coreStore,
 		'editEntityRecord',
 		'postType',
 		type,
@@ -239,7 +208,7 @@ export function* savePost( options = {} ) {
 	edits = {
 		id: previousRecord.id,
 		...( yield controls.select(
-			coreStore.name,
+			coreStore,
 			'getEntityRecordNonTransientEdits',
 			'postType',
 			previousRecord.type,
@@ -248,7 +217,7 @@ export function* savePost( options = {} ) {
 		...edits,
 	};
 	yield controls.dispatch(
-		coreStore.name,
+		coreStore,
 		'saveEntityRecord',
 		'postType',
 		previousRecord.type,
@@ -258,7 +227,7 @@ export function* savePost( options = {} ) {
 	yield __experimentalRequestPostUpdateFinish( options );
 
 	const error = yield controls.select(
-		coreStore.name,
+		coreStore,
 		'getLastEntitySaveError',
 		'postType',
 		previousRecord.type,
@@ -286,7 +255,7 @@ export function* savePost( options = {} ) {
 			previousPost: previousRecord,
 			post: updatedRecord,
 			postType: yield controls.resolveSelect(
-				coreStore.name,
+				coreStore,
 				'getPostType',
 				updatedRecord.type
 			),
@@ -303,7 +272,7 @@ export function* savePost( options = {} ) {
 		// considered for change detection.
 		if ( ! options.isAutosave ) {
 			yield controls.dispatch(
-				blockEditorStore.name,
+				blockEditorStore,
 				'__unstableMarkLastChangeAsPersistent'
 			);
 		}
@@ -320,7 +289,7 @@ export function* refreshPost() {
 		'getCurrentPostType'
 	);
 	const postType = yield controls.resolveSelect(
-		coreStore.name,
+		coreStore,
 		'getPostType',
 		postTypeSlug
 	);
@@ -343,7 +312,7 @@ export function* trashPost() {
 		'getCurrentPostType'
 	);
 	const postType = yield controls.resolveSelect(
-		coreStore.name,
+		coreStore,
 		'getPostType',
 		postTypeSlug
 	);
@@ -422,7 +391,7 @@ export function* autosave( { local = false, ...options } = {} ) {
  * @yield {Object} Action object.
  */
 export function* redo() {
-	yield controls.dispatch( coreStore.name, 'redo' );
+	yield controls.dispatch( coreStore, 'redo' );
 }
 
 /**
@@ -431,7 +400,7 @@ export function* redo() {
  * @yield {Object} Action object.
  */
 export function* undo() {
-	yield controls.dispatch( coreStore.name, 'undo' );
+	yield controls.dispatch( coreStore, 'undo' );
 }
 
 /**
@@ -447,7 +416,7 @@ export function createUndoLevel() {
 /**
  * Returns an action object used to lock the editor.
  *
- * @param {Object}  lock Details about the post lock status, user, and nonce.
+ * @param {Object} lock Details about the post lock status, user, and nonce.
  *
  * @return {Object} Action object.
  */
@@ -485,7 +454,7 @@ export function disablePublishSidebar() {
 /**
  * Returns an action object used to signal that post saving is locked.
  *
- * @param  {string} lockName The lock name.
+ * @param {string} lockName The lock name.
  *
  * @example
  * ```
@@ -535,7 +504,7 @@ export function lockPostSaving( lockName ) {
 /**
  * Returns an action object used to signal that post saving is unlocked.
  *
- * @param  {string} lockName The lock name.
+ * @param {string} lockName The lock name.
  *
  * @example
  * ```
@@ -555,7 +524,7 @@ export function unlockPostSaving( lockName ) {
 /**
  * Returns an action object used to signal that post autosaving is locked.
  *
- * @param  {string} lockName The lock name.
+ * @param {string} lockName The lock name.
  *
  * @example
  * ```
@@ -575,7 +544,7 @@ export function lockPostAutosaving( lockName ) {
 /**
  * Returns an action object used to signal that post autosaving is unlocked.
  *
- * @param  {string} lockName The lock name.
+ * @param {string} lockName The lock name.
  *
  * @example
  * ```
@@ -611,7 +580,7 @@ export function* resetEditorBlocks( blocks, options = {} ) {
 		);
 		const noChange =
 			( yield controls.select(
-				coreStore.name,
+				coreStore,
 				'getEditedEntityRecord',
 				'postType',
 				type,
@@ -619,7 +588,7 @@ export function* resetEditorBlocks( blocks, options = {} ) {
 			) ).blocks === edits.blocks;
 		if ( noChange ) {
 			return yield controls.dispatch(
-				coreStore.name,
+				coreStore,
 				'__unstableCreateUndoLevel',
 				'postType',
 				type,
@@ -660,8 +629,9 @@ const getBlockEditorAction = ( name ) =>
 			since: '5.3',
 			alternative:
 				"`wp.data.dispatch( 'core/block-editor' )." + name + '`',
+			version: '6.2',
 		} );
-		yield controls.dispatch( blockEditorStore.name, name, ...args );
+		yield controls.dispatch( blockEditorStore, name, ...args );
 	};
 
 /**

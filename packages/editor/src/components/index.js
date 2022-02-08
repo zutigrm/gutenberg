@@ -11,6 +11,7 @@ export { default as EditorKeyboardShortcutsRegister } from './global-keyboard-sh
 export { default as EditorHistoryRedo } from './editor-history/redo';
 export { default as EditorHistoryUndo } from './editor-history/undo';
 export { default as EditorNotices } from './editor-notices';
+export { default as EditorSnackbars } from './editor-snackbars';
 export { default as EntitiesSavedStates } from './entities-saved-states';
 export { default as ErrorBoundary } from './error-boundary';
 export { default as LocalAutosaveMonitor } from './local-autosave-monitor';
@@ -47,6 +48,8 @@ export { default as PostSticky } from './post-sticky';
 export { default as PostStickyCheck } from './post-sticky/check';
 export { default as PostSwitchToDraftButton } from './post-switch-to-draft-button';
 export { default as PostTaxonomies } from './post-taxonomies';
+export { default as PostTaxonomiesFlatTermSelector } from './post-taxonomies/flat-term-selector';
+export { default as PostTaxonomiesHierarchicalTermSelector } from './post-taxonomies/hierarchical-term-selector';
 export { default as PostTaxonomiesCheck } from './post-taxonomies/check';
 export { default as PostTextEditor } from './post-text-editor';
 export { default as PostTitle } from './post-title';
@@ -57,6 +60,7 @@ export { default as PostVisibility } from './post-visibility';
 export { default as PostVisibilityLabel } from './post-visibility/label';
 export { default as PostVisibilityCheck } from './post-visibility/check';
 export { default as TableOfContents } from './table-of-contents';
+export { default as ThemeSupportCheck } from './theme-support-check';
 export { default as UnsavedChangesWarning } from './unsaved-changes-warning';
 export { default as WordCount } from './word-count';
 

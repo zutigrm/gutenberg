@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useRef } from '@wordpress/element';
+import { useCallback, useRef } from '@wordpress/element';
 import { useViewportMatch } from '@wordpress/compose';
 import {
 	ToolSelector,
@@ -11,7 +11,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { PinnedItems } from '@wordpress/interface';
 import { _x, __ } from '@wordpress/i18n';
 import { listView, plus } from '@wordpress/icons';
-import { Button } from '@wordpress/components';
+import { Button, ToolbarItem } from '@wordpress/components';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { store as editorStore } from '@wordpress/editor';
 import { store as coreStore } from '@wordpress/core-data';
@@ -27,6 +27,10 @@ import DocumentActions from './document-actions';
 import TemplateDetails from '../template-details';
 import { store as editSiteStore } from '../../store';
 
+const preventDefault = ( event ) => {
+	event.preventDefault();
+};
+
 export default function Header( {
 	openEntitiesSavedStates,
 	isEntitiesSavedStatesOpen,
@@ -41,6 +45,7 @@ export default function Header( {
 		isListViewOpen,
 		listViewShortcut,
 		isLoaded,
+		isVisualMode,
 	} = useSelect( ( select ) => {
 		const {
 			__experimentalGetPreviewDeviceType,
@@ -48,6 +53,7 @@ export default function Header( {
 			getEditedPostId,
 			isInserterOpened,
 			isListViewOpened,
+			getEditorMode,
 		} = select( editSiteStore );
 		const { getEditedEntityRecord } = select( coreStore );
 		const { __experimentalGetTemplateInfo: getTemplateInfo } = select(
@@ -58,15 +64,11 @@ export default function Header( {
 		const postType = getEditedPostType();
 		const postId = getEditedPostId();
 		const record = getEditedEntityRecord( 'postType', postType, postId );
-		const _entityTitle =
-			'wp_template' === postType
-				? getTemplateInfo( record ).title
-				: record?.slug;
 		const _isLoaded = !! postId;
 
 		return {
 			deviceType: __experimentalGetPreviewDeviceType(),
-			entityTitle: _entityTitle,
+			entityTitle: getTemplateInfo( record ).title,
 			isLoaded: _isLoaded,
 			template: record,
 			templateType: postType,
@@ -75,6 +77,7 @@ export default function Header( {
 			listViewShortcut: getShortcutRepresentation(
 				'core/edit-site/toggle-list-view'
 			),
+			isVisualMode: getEditorMode() === 'visual',
 		};
 	}, [] );
 
@@ -86,6 +89,22 @@ export default function Header( {
 
 	const isLargeViewport = useViewportMatch( 'medium' );
 
+	const openInserter = useCallback( () => {
+		if ( isInserterOpen ) {
+			// Focusing the inserter button closes the inserter popover
+			inserterButton.current.focus();
+		} else {
+			setIsInserterOpened( true );
+		}
+	}, [ isInserterOpen, setIsInserterOpened ] );
+
+	const toggleListView = useCallback(
+		() => setIsListViewOpened( ! isListViewOpen ),
+		[ setIsListViewOpened, isListViewOpen ]
+	);
+
+	const isFocusMode = templateType === 'wp_template_part';
+
 	return (
 		<div className="edit-site-header">
 			<div className="edit-site-header_start">
@@ -95,17 +114,9 @@ export default function Header( {
 						variant="primary"
 						isPressed={ isInserterOpen }
 						className="edit-site-header-toolbar__inserter-toggle"
-						onMouseDown={ ( event ) => {
-							event.preventDefault();
-						} }
-						onClick={ () => {
-							if ( isInserterOpen ) {
-								// Focusing the inserter button closes the inserter popover
-								inserterButton.current.focus();
-							} else {
-								setIsInserterOpened( true );
-							}
-						} }
+						disabled={ ! isVisualMode }
+						onMouseDown={ preventDefault }
+						onClick={ openInserter }
 						icon={ plus }
 						label={ _x(
 							'Toggle block inserter',
@@ -114,18 +125,20 @@ export default function Header( {
 					/>
 					{ isLargeViewport && (
 						<>
-							<ToolSelector />
+							<ToolbarItem
+								as={ ToolSelector }
+								disabled={ ! isVisualMode }
+							/>
 							<UndoButton />
 							<RedoButton />
 							<Button
 								className="edit-site-header-toolbar__list-view-toggle"
+								disabled={ ! isVisualMode }
 								icon={ listView }
 								isPressed={ isListViewOpen }
 								/* translators: button label text should, if possible, be under 16 characters. */
 								label={ __( 'List View' ) }
-								onClick={ () =>
-									setIsListViewOpened( ! isListViewOpen )
-								}
+								onClick={ toggleListView }
 								shortcut={ listViewShortcut }
 							/>
 						</>
@@ -134,35 +147,32 @@ export default function Header( {
 			</div>
 
 			<div className="edit-site-header_center">
-				{ 'wp_template' === templateType && (
-					<DocumentActions
-						entityTitle={ entityTitle }
-						entityLabel="template"
-						isLoaded={ isLoaded }
-					>
-						{ ( { onClose } ) => (
-							<TemplateDetails
-								template={ template }
-								onClose={ onClose }
-							/>
-						) }
-					</DocumentActions>
-				) }
-				{ 'wp_template_part' === templateType && (
-					<DocumentActions
-						entityTitle={ entityTitle }
-						entityLabel="template part"
-						isLoaded={ isLoaded }
-					/>
-				) }
+				<DocumentActions
+					entityTitle={ entityTitle }
+					entityLabel={
+						templateType === 'wp_template_part'
+							? 'template part'
+							: 'template'
+					}
+					isLoaded={ isLoaded }
+				>
+					{ ( { onClose } ) => (
+						<TemplateDetails
+							template={ template }
+							onClose={ onClose }
+						/>
+					) }
+				</DocumentActions>
 			</div>
 
 			<div className="edit-site-header_end">
 				<div className="edit-site-header__actions">
-					<PreviewOptions
-						deviceType={ deviceType }
-						setDeviceType={ setPreviewDeviceType }
-					/>
+					{ ! isFocusMode && (
+						<PreviewOptions
+							deviceType={ deviceType }
+							setDeviceType={ setPreviewDeviceType }
+						/>
+					) }
 					<SaveButton
 						openEntitiesSavedStates={ openEntitiesSavedStates }
 						isEntitiesSavedStatesOpen={ isEntitiesSavedStatesOpen }

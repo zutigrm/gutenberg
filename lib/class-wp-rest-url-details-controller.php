@@ -19,7 +19,7 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 	 * Constructs the controller.
 	 */
 	public function __construct() {
-		$this->namespace = '__experimental';
+		$this->namespace = 'wp-block-editor/v1';
 		$this->rest_base = 'url-details';
 	}
 
@@ -191,8 +191,19 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 	 * @return string|WP_Error The HTTP response from the remote URL, or an error.
 	 */
 	private function get_remote_url( $url ) {
+
+		// Provide a modified UA string to workaround web properties which block WordPress "Pingbacks".
+		// Why? The UA string used for pingback requests contains `WordPress/` which is very similar
+		// to that used as the default UA string by the WP HTTP API. Therefore requests from this
+		// REST endpoint are being unintentionally blocked as they are misidentified as pingback requests.
+		// By slightly modifying the UA string, but still retaining the "WordPress" identification (via "WP")
+		// we are able to work around this issue.
+		// Example UA string: `WP-URLDetails/5.9-alpha-51389 (+http://localhost:8888)`.
+		$modified_user_agent = 'WP-URLDetails/' . get_bloginfo( 'version' ) . ' (+' . get_bloginfo( 'url' ) . ')';
+
 		$args = array(
 			'limit_response_size' => 150 * KB_IN_BYTES,
+			'user-agent'          => $modified_user_agent,
 		);
 
 		/**
@@ -269,7 +280,7 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 
 		// If the icon is a data URL, return it.
 		$parsed_icon = parse_url( $icon );
-		if ( 'data' === $parsed_icon['scheme'] ) {
+		if ( isset( $parsed_icon['schema'] ) && 'data' === $parsed_icon['scheme'] ) {
 			return $icon;
 		}
 
@@ -299,7 +310,7 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 			return '';
 		}
 
-		$description = $this->get_metadata_from_meta_element( $meta_elements, 'name', '\bdescription\b' );
+		$description = $this->get_metadata_from_meta_element( $meta_elements, 'name', '(?:description|og:description)' );
 
 		// Bail out if description not found.
 		if ( '' === $description ) {
@@ -372,7 +383,7 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 	 * @return mixed The value from the cache.
 	 */
 	private function get_cache( $key ) {
-		return get_transient( $key );
+		return get_site_transient( $key );
 	}
 
 	/**
@@ -395,14 +406,14 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 		 */
 		$cache_expiration = apply_filters( 'rest_url_details_cache_expiration', $ttl );
 
-		return set_transient( $key, $data, $cache_expiration );
+		return set_site_transient( $key, $data, $cache_expiration );
 	}
 
 	/**
 	 * Retrieves the `<head>` section.
 	 *
 	 * @param string $html The string of HTML to parse.
-	 * @return string The `<head>..</head>` section on succes, or original HTML.
+	 * @return string The `<head>..</head>` section on success, or original HTML.
 	 */
 	private function get_document_head( $html ) {
 		$head_html = $html;
@@ -470,7 +481,7 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 		$pattern = '#<meta\s' .
 
 			/*
-			 * Alows for additional attributes before the content attribute.
+			 * Allows for additional attributes before the content attribute.
 			 * Searches for anything other than > symbol.
 			 */
 			'[^>]*' .
@@ -488,7 +499,7 @@ class WP_REST_URL_Details_Controller extends WP_REST_Controller {
 			'content=(["\']??)(.*)\1' .
 
 			/*
-			 * Alows for additional attributes after the content attribute.
+			 * Allows for additional attributes after the content attribute.
 			 * Searches for anything other than > symbol.
 			 */
 			'[^>]*' .

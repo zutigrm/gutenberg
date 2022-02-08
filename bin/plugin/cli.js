@@ -21,6 +21,7 @@ const catchException = ( command ) => {
  */
 const {
 	publishNpmLatestDistTag,
+	publishNpmBugfixLatestDistTag,
 	publishNpmNextDistTag,
 } = require( './commands/packages' );
 const { getReleaseChangelog } = require( './commands/changelog' );
@@ -35,6 +36,14 @@ program
 	.action( catchException( publishNpmLatestDistTag ) );
 
 program
+	.command( 'publish-npm-packages-bugfix-latest' )
+	.alias( 'npm-bugfix' )
+	.description(
+		'Publishes bugfixes for packages to npm (latest dist-tag, production version)'
+	)
+	.action( catchException( publishNpmBugfixLatestDistTag ) );
+
+program
 	.command( 'publish-npm-packages-next' )
 	.alias( 'npm-next' )
 	.description(
@@ -46,7 +55,7 @@ program
 	.command( 'release-plugin-changelog' )
 	.alias( 'changelog' )
 	.option( '-m, --milestone <milestone>', 'Milestone' )
-	.option( '-t, --token <token>', 'Github token' )
+	.option( '-t, --token <token>', 'GitHub token' )
 	.option(
 		'-u, --unreleased',
 		"Only include PRs that haven't been included in a release yet"

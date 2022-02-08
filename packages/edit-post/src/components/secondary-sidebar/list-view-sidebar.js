@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import {
-	__experimentalBlockNavigationTree as BlockNavigationTree,
+	__experimentalListView as ListView,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
@@ -32,10 +32,11 @@ export default function ListViewSidebar() {
 	}
 
 	const focusOnMountRef = useFocusOnMount( 'firstElement' );
-	const focusReturnRef = useFocusReturn();
+	const headerFocusReturnRef = useFocusReturn();
+	const contentFocusReturnRef = useFocusReturn();
 	function closeOnEscape( event ) {
-		if ( event.keyCode === ESCAPE ) {
-			event.stopPropagation();
+		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
+			event.preventDefault();
 			setIsListViewOpened( false );
 		}
 	}
@@ -50,21 +51,28 @@ export default function ListViewSidebar() {
 			className="edit-post-editor__list-view-panel"
 			onKeyDown={ closeOnEscape }
 		>
-			<div className="edit-post-editor__list-view-panel-header">
-				<strong id={ labelId }>{ __( 'List view' ) }</strong>
+			<div
+				className="edit-post-editor__list-view-panel-header"
+				ref={ headerFocusReturnRef }
+			>
+				<strong id={ labelId }>{ __( 'List View' ) }</strong>
 				<Button
 					icon={ closeSmall }
-					label={ __( 'Close list view sidebar' ) }
+					label={ __( 'Close List View Sidebar' ) }
 					onClick={ () => setIsListViewOpened( false ) }
 				/>
 			</div>
 			<div
 				className="edit-post-editor__list-view-panel-content"
-				ref={ useMergeRefs( [ focusReturnRef, focusOnMountRef ] ) }
+				ref={ useMergeRefs( [
+					contentFocusReturnRef,
+					focusOnMountRef,
+				] ) }
 			>
-				<BlockNavigationTree
+				<ListView
 					onSelect={ selectEditorBlock }
 					showNestedBlocks
+					__experimentalFeatures
 					__experimentalPersistentListViewFeatures
 				/>
 			</div>

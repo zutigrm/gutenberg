@@ -9,18 +9,24 @@ import classnames from 'classnames';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import ColorGradientControl from '../components/colors-gradients/control';
+import ColorGradientSettingsDropdown from '../components/colors-gradients/dropdown';
+import useMultipleOriginColorsAndGradients from '../components/colors-gradients/use-multiple-origin-colors-and-gradients';
 import {
 	getColorClassName,
 	getColorObjectByColorValue,
 	getColorObjectByAttributeValues,
 } from '../components/colors';
 import useSetting from '../components/use-setting';
-import { hasBorderSupport, shouldSkipSerialization } from './border';
+import {
+	hasBorderSupport,
+	removeBorderAttribute,
+	shouldSkipSerialization,
+} from './border';
 import { cleanEmptyObject } from './utils';
 
 // Defining empty array here instead of inline avoids unnecessary re-renders of
@@ -36,20 +42,51 @@ const EMPTY_ARRAY = [];
  * inspector controls. If they share the same block attributes it should not
  * matter.
  *
- * @param  {Object} props Block properties.
- * @return {WPElement}    Border color edit element.
+ * @param {Object} props Block properties.
+ *
+ * @return {WPElement} Border color edit element.
  */
 export function BorderColorEdit( props ) {
 	const {
 		attributes: { borderColor, style },
 		setAttributes,
 	} = props;
-	const colors = useSetting( 'color.palette' ) || EMPTY_ARRAY;
-	const disableCustomColors = ! useSetting( 'color.custom' );
-	const disableCustomGradients = ! useSetting( 'color.customGradient' );
+	const colorGradientSettings = useMultipleOriginColorsAndGradients();
+	const availableColors = colorGradientSettings.colors.reduce(
+		( colors, origin ) => colors.concat( origin.colors ),
+		[]
+	);
+	const { color: customBorderColor } = style?.border || {};
+	const [ colorValue, setColorValue ] = useState(
+		() =>
+			getColorObjectByAttributeValues(
+				availableColors,
+				borderColor,
+				customBorderColor
+			)?.color
+	);
+
+	// Detect changes in the color attributes and update the colorValue to keep the
+	// UI in sync. This is necessary for situations when border controls interact with
+	// each other: eg, setting the border width to zero causes the color and style
+	// selections to be cleared.
+	useEffect( () => {
+		setColorValue(
+			getColorObjectByAttributeValues(
+				availableColors,
+				borderColor,
+				customBorderColor
+			)?.color
+		);
+	}, [ borderColor, customBorderColor, availableColors ] );
 
 	const onChangeColor = ( value ) => {
-		const colorObject = getColorObjectByColorValue( colors, value );
+		setColorValue( value );
+
+		const colorObject = getColorObjectByColorValue(
+			availableColors,
+			value
+		);
 		const newStyle = {
 			...style,
 			border: {
@@ -67,25 +104,67 @@ export function BorderColorEdit( props ) {
 		} );
 	};
 
+	const settings = [
+		{
+			label: __( 'Color' ),
+			onColorChange: onChangeColor,
+			colorValue,
+			clearable: false,
+		},
+	];
 	return (
-		<ColorGradientControl
-			label={ __( 'Border color' ) }
-			value={ borderColor || style?.border?.color }
-			colors={ colors }
-			gradients={ undefined }
-			disableCustomColors={ disableCustomColors }
-			disableCustomGradients={ disableCustomGradients }
-			onColorChange={ onChangeColor }
+		<ColorGradientSettingsDropdown
+			settings={ settings }
+			disableCustomColors
+			disableCustomGradients
+			__experimentalHasMultipleOrigins
+			__experimentalIsRenderedInSidebar
+			enableAlpha
+			{ ...colorGradientSettings }
 		/>
 	);
+}
+
+/**
+ * Checks if there is a current value in the border color block support
+ * attributes.
+ *
+ * @param {Object} props Block props.
+ * @return {boolean}     Whether or not the block has a border color value set.
+ */
+export function hasBorderColorValue( props ) {
+	const {
+		attributes: { borderColor, style },
+	} = props;
+
+	return !! borderColor || !! style?.border?.color;
+}
+
+/**
+ * Resets the border color block support attributes. This can be used when
+ * disabling the border color support controls for a block via a progressive
+ * discovery panel.
+ *
+ * @param {Object} props               Block props.
+ * @param {Object} props.attributes    Block's attributes.
+ * @param {Object} props.setAttributes Function to set block's attributes.
+ */
+export function resetBorderColor( { attributes = {}, setAttributes } ) {
+	const { style } = attributes;
+
+	setAttributes( {
+		borderColor: undefined,
+		style: removeBorderAttribute( style, 'color' ),
+	} );
 }
 
 /**
  * Filters registered block settings, extending attributes to include
  * `borderColor` if needed.
  *
- * @param  {Object} settings Original block settings.
- * @return {Object}          Updated block settings.
+ * @param {Object} settings Original block settings.
+ *
+ * @return {Object} Updated block settings.
  */
 function addAttributes( settings ) {
 	if ( ! hasBorderSupport( settings, 'color' ) ) {
@@ -112,10 +191,11 @@ function addAttributes( settings ) {
 /**
  * Override props assigned to save component to inject border color.
  *
- * @param  {Object} props      Additional props applied to save element.
- * @param  {Object} blockType  Block type definition.
- * @param  {Object} attributes Block's attributes
- * @return {Object}            Filtered props to apply to save element.
+ * @param {Object} props      Additional props applied to save element.
+ * @param {Object} blockType  Block type definition.
+ * @param {Object} attributes Block's attributes.
+ *
+ * @return {Object} Filtered props to apply to save element.
  */
 function addSaveProps( props, blockType, attributes ) {
 	if (
@@ -145,7 +225,8 @@ function addSaveProps( props, blockType, attributes ) {
  * classnames to the block edit wrapper.
  *
  * @param {Object} settings Original block settings.
- * @return {Object}         Filtered block settings.
+ *
+ * @return {Object} Filtered block settings.
  */
 function addEditProps( settings ) {
 	if (
@@ -173,8 +254,9 @@ function addEditProps( settings ) {
  * This adds inline styles for color palette colors.
  * Ideally, this is not needed and themes should load their palettes on the editor.
  *
- * @param  {Function} BlockListBlock Original component
- * @return {Function}                Wrapped component
+ * @param {Function} BlockListBlock Original component.
+ *
+ * @return {Function} Wrapped component.
  */
 export const withBorderColorPaletteStyles = createHigherOrderComponent(
 	( BlockListBlock ) => ( props ) => {

@@ -15,7 +15,6 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 import { ifMatchingAction, replaceAction } from './utils';
 import { reducer as queriedDataReducer } from './queried-data';
 import { defaultEntities, DEFAULT_ENTITY_KEY } from './entities';
-import { reducer as locksReducer } from './locks';
 
 /**
  * Reducer managing terms state. Keyed by taxonomy slug, the value is either
@@ -121,19 +120,36 @@ export function currentTheme( state = undefined, action ) {
 }
 
 /**
- * Reducer managing installed themes.
+ * Reducer managing the current global styles id.
  *
- * @param {Object} state  Current state.
+ * @param {string} state  Current state.
  * @param {Object} action Dispatched action.
  *
- * @return {Object} Updated state.
+ * @return {string} Updated state.
  */
-export function themes( state = {}, action ) {
+export function currentGlobalStylesId( state = undefined, action ) {
 	switch ( action.type ) {
-		case 'RECEIVE_CURRENT_THEME':
+		case 'RECEIVE_CURRENT_GLOBAL_STYLES_ID':
+			return action.id;
+	}
+
+	return state;
+}
+
+/**
+ * Reducer managing the theme base global styles.
+ *
+ * @param {string} state  Current state.
+ * @param {Object} action Dispatched action.
+ *
+ * @return {string} Updated state.
+ */
+export function themeBaseGlobalStyles( state = {}, action ) {
+	switch ( action.type ) {
+		case 'RECEIVE_THEME_GLOBAL_STYLES':
 			return {
 				...state,
-				[ action.currentTheme.stylesheet ]: action.currentTheme,
+				[ action.stylesheet ]: action.globalStyles,
 			};
 	}
 
@@ -141,19 +157,19 @@ export function themes( state = {}, action ) {
 }
 
 /**
- * Reducer managing theme supports data.
+ * Reducer managing the theme global styles variations.
  *
- * @param {Object} state  Current state.
+ * @param {string} state  Current state.
  * @param {Object} action Dispatched action.
  *
- * @return {Object} Updated state.
+ * @return {string} Updated state.
  */
-export function themeSupports( state = {}, action ) {
+export function themeGlobalStyleVariations( state = {}, action ) {
 	switch ( action.type ) {
-		case 'RECEIVE_THEME_SUPPORTS':
+		case 'RECEIVE_THEME_GLOBAL_STYLE_VARIATIONS':
 			return {
 				...state,
-				...action.themeSupports,
+				[ action.stylesheet ]: action.variations,
 			};
 	}
 
@@ -167,7 +183,7 @@ export function themeSupports( state = {}, action ) {
  *  - Editing
  *  - Saving
  *
- * @param {Object} entityConfig  Entity config.
+ * @param {Object} entityConfig Entity config.
  *
  * @return {Function} Reducer.
  */
@@ -197,6 +213,11 @@ function entity( entityConfig ) {
 			edits: ( state = {}, action ) => {
 				switch ( action.type ) {
 					case 'RECEIVE_ITEMS':
+						const context = action?.query?.context ?? 'default';
+						if ( context !== 'default' ) {
+							return state;
+						}
+
 						const nextState = { ...state };
 
 						for ( const record of action.items ) {
@@ -430,7 +451,16 @@ export function undo( state = UNDO_INITIAL_STATE, action ) {
 					// to continue as if we were creating an explicit undo level. This
 					// will result in an extra undo level being appended with the flattened
 					// undo values.
+					// We also have to take into account if the `lastEditAction` had opted out
+					// of being tracked in undo history, like the action that persists the latest
+					// content right before saving. In that case we have to update the `lastEditAction`
+					// to avoid returning early before applying the existing flattened undos.
 					isCreateUndoLevel = true;
+					if ( ! lastEditAction.meta.undo ) {
+						lastEditAction.meta.undo = {
+							edits: {},
+						};
+					}
 					action = lastEditAction;
 				} else {
 					return nextState;
@@ -523,8 +553,8 @@ export function embedPreviews( state = {}, action ) {
  * State which tracks whether the user can perform an action on a REST
  * resource.
  *
- * @param  {Object} state  Current state.
- * @param  {Object} action Dispatched action.
+ * @param {Object} state  Current state.
+ * @param {Object} action Dispatched action.
  *
  * @return {Object} Updated state.
  */
@@ -543,8 +573,8 @@ export function userPermissions( state = {}, action ) {
 /**
  * Reducer returning autosaves keyed by their parent's post id.
  *
- * @param  {Object} state  Current state.
- * @param  {Object} action Dispatched action.
+ * @param {Object} state  Current state.
+ * @param {Object} action Dispatched action.
  *
  * @return {Object} Updated state.
  */
@@ -566,14 +596,14 @@ export default combineReducers( {
 	terms,
 	users,
 	currentTheme,
+	currentGlobalStylesId,
 	currentUser,
+	themeGlobalStyleVariations,
+	themeBaseGlobalStyles,
 	taxonomies,
-	themes,
-	themeSupports,
 	entities,
 	undo,
 	embedPreviews,
 	userPermissions,
 	autosaves,
-	locks: locksReducer,
 } );

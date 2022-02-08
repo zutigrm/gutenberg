@@ -18,9 +18,11 @@ export * from './colors';
 export * from './gradients';
 export * from './font-sizes';
 export { AlignmentControl, AlignmentToolbar } from './alignment-control';
-export { default as InnerBlocks } from './inner-blocks';
-export { default as InspectorAdvancedControls } from './inspector-advanced-controls';
-export { default as InspectorControls } from './inspector-controls';
+export { default as InnerBlocks, useInnerBlocksProps } from './inner-blocks';
+export {
+	default as InspectorControls,
+	InspectorAdvancedControls,
+} from './inspector-controls';
 export {
 	JustifyToolbar,
 	JustifyContentControl,
@@ -33,6 +35,7 @@ export {
 	RichTextToolbarButton,
 	__unstableRichTextInputEvent,
 } from './rich-text';
+export { default as MediaReplaceFlow } from './media-replace-flow';
 export { default as MediaPlaceholder } from './media-placeholder';
 export {
 	default as MediaUpload,
@@ -52,6 +55,7 @@ export { default as __experimentalPanelColorGradientSettings } from './colors-gr
 export { default as useSetting } from './use-setting';
 export { default as __experimentalUseNoRecursiveRenders } from './use-no-recursive-renders';
 export { default as Warning } from './warning';
+export { default as ContrastChecker } from './contrast-checker';
 
 export {
 	BottomSheetSettings,

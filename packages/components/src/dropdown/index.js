@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * External dependencies
  */
@@ -26,19 +27,20 @@ function useObservableState( initialState, onStateChange ) {
 	];
 }
 
-export default function Dropdown( {
-	renderContent,
-	renderToggle,
-	position = 'bottom right',
-	className,
-	contentClassName,
-	expandOnMobile,
-	headerTitle,
-	focusOnMount,
-	popoverProps,
-	onClose,
-	onToggle,
-} ) {
+export default function Dropdown( props ) {
+	const {
+		renderContent,
+		renderToggle,
+		position = 'bottom right',
+		className,
+		contentClassName,
+		expandOnMobile,
+		headerTitle,
+		focusOnMount,
+		popoverProps,
+		onClose,
+		onToggle,
+	} = props;
 	const containerRef = useRef();
 	const [ isOpen, setIsOpen ] = useObservableState( false, onToggle );
 
@@ -85,6 +87,10 @@ export default function Dropdown( {
 		<div
 			className={ classnames( 'components-dropdown', className ) }
 			ref={ containerRef }
+			// Some UAs focus the closest focusable parent when the toggle is
+			// clicked. Making this div focusable ensures such UAs will focus
+			// it and `closeIfFocusOutside` can tell if the toggle was clicked.
+			tabIndex="-1"
 		>
 			{ renderToggle( args ) }
 			{ isOpen && (

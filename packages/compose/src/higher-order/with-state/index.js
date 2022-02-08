@@ -15,19 +15,20 @@ import createHigherOrderComponent from '../../utils/create-higher-order-componen
  *
  * @deprecated Use `useState` instead.
  *
- * @param {?Object} initialState Optional initial state of the component.
+ * @param {any} initialState Optional initial state of the component.
  *
- * @return {WPComponent} Wrapped component.
+ * @return {any} A higher order component wrapper accepting a component that takes the state props + its own props + `setState` and returning a component that only accepts the own props.
  */
 export default function withState( initialState = {} ) {
 	deprecated( 'wp.compose.withState', {
+		since: '5.8',
 		alternative: 'wp.element.useState',
 	} );
 
 	return createHigherOrderComponent( ( OriginalComponent ) => {
 		return class WrappedComponent extends Component {
-			constructor() {
-				super( ...arguments );
+			constructor( /** @type {any} */ props ) {
+				super( props );
 
 				this.setState = this.setState.bind( this );
 

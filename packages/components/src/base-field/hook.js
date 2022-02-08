@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { cx } from 'emotion';
-
-/**
  * WordPress dependencies
  */
 import { useMemo } from '@wordpress/element';
@@ -15,11 +10,12 @@ import { useContextSystem } from '../ui/context';
 import { useControlGroupContext } from '../ui/control-group';
 import { useFlex } from '../flex';
 import * as styles from './styles';
+import { useCx } from '../utils/hooks/use-cx';
 
 /**
  * @typedef OwnProps
  * @property {boolean} [hasError=false] Renders an error.
- * @property {boolean} [disabled] Whether the field is disabled.
+ * @property {boolean} [disabled]       Whether the field is disabled.
  * @property {boolean} [isInline=false] Renders as an inline element (layout).
  * @property {boolean} [isSubtle=false] Renders a subtle variant.
  */
@@ -27,7 +23,7 @@ import * as styles from './styles';
 /** @typedef {import('../flex/types').FlexProps & OwnProps} Props */
 
 /**
- * @param {import('../ui/context').PolymorphicComponentProps<Props, 'div'>} props
+ * @param {import('../ui/context').WordPressComponentProps<Props, 'div'>} props
  */
 export function useBaseField( props ) {
 	const {
@@ -42,6 +38,7 @@ export function useBaseField( props ) {
 	} = useContextSystem( props, 'BaseField' );
 
 	const { styles: controlGroupStyles } = useControlGroupContext();
+	const cx = useCx();
 
 	const classes = useMemo(
 		() =>
@@ -53,7 +50,7 @@ export function useBaseField( props ) {
 				isInline && styles.inline,
 				className
 			),
-		[ className, controlGroupStyles, hasError, isInline, isSubtle ]
+		[ className, controlGroupStyles, cx, hasError, isInline, isSubtle ]
 	);
 
 	return {

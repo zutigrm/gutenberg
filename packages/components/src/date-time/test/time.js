@@ -47,13 +47,13 @@ describe( 'TimePicker', () => {
 		fireEvent.change( hoursInput, { target: { value: '12' } } );
 		fireEvent.blur( hoursInput );
 
-		expect( onChangeSpy ).toHaveBeenCalledWith( '2018-12-22T12:00:00' );
+		expect( onChangeSpy ).toHaveBeenCalledWith( '2018-12-22T00:00:00' );
 		onChangeSpy.mockClear();
 
 		fireEvent.change( minutesInput, { target: { value: '35' } } );
 		fireEvent.blur( minutesInput );
 
-		expect( onChangeSpy ).toHaveBeenCalledWith( '2018-12-22T12:35:00' );
+		expect( onChangeSpy ).toHaveBeenCalledWith( '2018-12-22T00:35:00' );
 		onChangeSpy.mockClear();
 	} );
 
@@ -169,6 +169,36 @@ describe( 'TimePicker', () => {
 		expect( onChangeSpy ).toHaveBeenCalledWith( '1986-10-18T11:00:00' );
 	} );
 
+	it( 'should allow to set the time correctly when the PM period is selected', () => {
+		const onChangeSpy = jest.fn();
+
+		render(
+			<TimePicker
+				currentTime="1986-10-18T11:00:00"
+				onChange={ onChangeSpy }
+				is12Hour
+			/>
+		);
+
+		const pmButton = screen.getByText( 'PM' );
+		fireEvent.click( pmButton );
+
+		const hoursInput = screen.getByLabelText( 'Hours' );
+		fireEvent.change( hoursInput, { target: { value: '6' } } );
+		fireEvent.blur( hoursInput );
+
+		// When clicking on 'PM', we expect the time to be 11pm
+		expect( onChangeSpy ).toHaveBeenNthCalledWith(
+			1,
+			'1986-10-18T23:00:00'
+		);
+		// When changing the hours to '6', we expect the time to be 6pm
+		expect( onChangeSpy ).toHaveBeenNthCalledWith(
+			2,
+			'1986-10-18T18:00:00'
+		);
+	} );
+
 	it( 'should truncate at the minutes on change', () => {
 		const onChangeSpy = jest.fn();
 
@@ -248,7 +278,7 @@ describe( 'TimePicker', () => {
 			screen.getByLabelText( 'Day' )
 		);
 
-		expect( monthInputIndex < dayInputIndex ).toBe( true );
+		expect( monthInputIndex > dayInputIndex ).toBe( true );
 
 		rerender(
 			<form aria-label="form">
@@ -269,7 +299,7 @@ describe( 'TimePicker', () => {
 			screen.getByLabelText( 'Day' )
 		);
 
-		expect( monthInputIndex > dayInputIndex ).toBe( true );
+		expect( monthInputIndex < dayInputIndex ).toBe( true );
 	} );
 
 	it( 'Should set a time when passed a null currentTime', () => {

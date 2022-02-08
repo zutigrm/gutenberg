@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// eslint-disable-next-line no-restricted-imports
 import type { ReactNode, ReactNodeArray } from 'react';
 
 /**
@@ -12,7 +11,7 @@ import { Children, isValidElement } from '@wordpress/element';
 /**
  * Gets a collection of available children elements from a React component's children prop.
  *
- * @param children
+ * @param  children
  *
  * @return An array of available children.
  */

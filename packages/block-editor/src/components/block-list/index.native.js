@@ -24,7 +24,7 @@ import { __ } from '@wordpress/i18n';
  */
 import styles from './style.scss';
 import BlockListAppender from '../block-list-appender';
-import BlockListItem from './block-list-item.native';
+import BlockListItem from './block-list-item';
 import { store as blockEditorStore } from '../../store';
 
 const BlockListContext = createContext();
@@ -47,6 +47,7 @@ const getStyles = (
 	const computedStyles = [
 		isStackedHorizontally && styles.horizontal,
 		horizontalAlignment && styles[ `is-aligned-${ horizontalAlignment }` ],
+		styles.overflowVisible,
 	];
 	stylesMemo[ styleName ] = computedStyles;
 	return computedStyles;
@@ -130,6 +131,7 @@ export class BlockList extends Component {
 			onDeleteBlock,
 			contentStyle,
 			renderAppender,
+			gridProperties,
 		} = this.props;
 		const { blockWidth, positionList } = this.state;
 		if (
@@ -139,7 +141,8 @@ export class BlockList extends Component {
 			this.extraData.contentStyle !== contentStyle ||
 			this.extraData.renderAppender !== renderAppender ||
 			this.extraData.blockWidth !== blockWidth ||
-			this.extraData.positionList !== positionList
+			this.extraData.positionList !== positionList ||
+			this.extraData.gridProperties !== gridProperties
 		) {
 			this.extraData = {
 				parentWidth,
@@ -149,6 +152,7 @@ export class BlockList extends Component {
 				renderAppender,
 				blockWidth,
 				positionList,
+				gridProperties,
 			};
 		}
 		return this.extraData;
@@ -245,6 +249,7 @@ export class BlockList extends Component {
 				style={ containerStyle }
 				onAccessibilityEscape={ clearSelectedBlock }
 				onLayout={ this.onLayout }
+				testID="block-list-wrapper"
 			>
 				<KeyboardAwareFlatList
 					{ ...( Platform.OS === 'android'
@@ -324,9 +329,11 @@ export class BlockList extends Component {
 			onDeleteBlock,
 			rootClientId,
 			isStackedHorizontally,
+			blockClientIds,
 			parentWidth,
 			marginVertical = styles.defaultBlock.marginTop,
 			marginHorizontal = styles.defaultBlock.marginLeft,
+			gridProperties,
 		} = this.props;
 		const { blockWidth, positionList } = this.state;
 		return (
@@ -347,6 +354,8 @@ export class BlockList extends Component {
 				blockWidth={ blockWidth }
 				positionList={ positionList }
 				onSetItemPosition={ this.onSetItemPosition }
+				gridProperties={ gridProperties }
+				items={ blockClientIds }
 			/>
 		);
 	}

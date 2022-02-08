@@ -12,12 +12,14 @@ import {
 	Text,
 } from 'react-native';
 import { map, uniq } from 'lodash';
+
 /**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { useRef, useEffect } from '@wordpress/element';
 import { usePreferredColorSchemeStyle } from '@wordpress/compose';
+
 /**
  * Internal dependencies
  */
@@ -217,6 +219,7 @@ function ColorPalette( {
 			onScrollBeginDrag={ () => shouldEnableBottomSheetScroll( false ) }
 			onScrollEndDrag={ () => shouldEnableBottomSheetScroll( true ) }
 			ref={ scrollViewRef }
+			testID="color-palette"
 		>
 			{ shouldShowCustomIndicator && (
 				<View
@@ -264,6 +267,7 @@ function ColorPalette( {
 								selected: isSelected( color ),
 							} }
 							accessibilityHint={ color }
+							testID={ color }
 						>
 							<Animated.View
 								style={ {

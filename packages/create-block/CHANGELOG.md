@@ -2,6 +2,54 @@
 
 ## Unreleased
 
+### New Features
+
+-    Automatically add a `"env": "wp-env"` entry to scripts when the `--wp-env` is passed or when a template sets `wpEnv` to `true` ([#38530](https://github.com/WordPress/gutenberg/pull/38530)).
+-    Introduce the `customScripts` property to allow templates to define additional scripts ([#38535](https://github.com/WordPress/gutenberg/pull/38535)).
+
+## 2.8.0 (2022-01-27)
+
+### New Features
+
+-   Integrated a new `plugin-zip` command to create a zip file for a WordPress plugin ([#37687](https://github.com/WordPress/gutenberg/pull/37687)).
+-   Add support for handling block templates with the `blockTemplatesPath` field in the external template configuration ([#37612](https://github.com/WordPress/gutenberg/pull/37612)).
+-   Add a new field `folderName` for setting the location for the `block.json` file and other optional block files generated from block templates included in the folder set with the `blockTemplatesPath` setting ([#37612](https://github.com/WordPress/gutenberg/pull/37612)).
+
+### Enhancement
+
+-   Speed up scaffolding process by omitting WordPress dependencies in the template ([#37639](https://github.com/WordPress/gutenberg/pull/37639)).
+-   Update link to block registration reference ([#37674](https://github.com/WordPress/gutenberg/pull/37674))
+
+### Internal
+
+-   The bundled `npm-package-arg` dependency has been updated from requiring `^8.0.1` to requiring `^8.1.5` ([#37395](https://github.com/WordPress/gutenberg/pull/37395)).
+
+## 2.7.0 (2021-11-07)
+
+### New Features
+
+-   Add $schema definition to generated `block.json` file.
+
+## 2.6.0 (2021-10-22)
+
+### New Features
+
+-   Add passing local directories to --template. ([#35645](https://github.com/WordPress/gutenberg/pull/35645))
+-   Add `slugPascalCase` to the list of variables that can be used in templates ([#35462](https://github.com/WordPress/gutenberg/pull/35462))
+
+## 2.5.0 (2021-07-21)
+
+### Enhancements
+
+-   Add support for the new `version` field in the `block.json` metadata file ([#33075](https://github.com/WordPress/gutenberg/pull/33075)).
+
+## 2.4.0 (2021-07-21)
+
+### Enhancement
+
+-   Plugin scaffolded with the `esnext` template requires WordPress 5.8 now ([#33252](https://github.com/WordPress/gutenberg/pull/33252).
+-   Block scaffolded with the `esnext` template is now registered from `block.json` with the `register_block_type` helper ([#33252](https://github.com/WordPress/gutenberg/pull/33252)).
+
 ## 2.3.0 (2021-04-29)
 
 ### Enhancement

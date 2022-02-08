@@ -11,6 +11,7 @@ import { useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { store as blockEditorStore } from '../../store';
+import { preventEventDiscovery } from './prevent-event-discovery';
 
 export function useInputRules( props ) {
 	const {
@@ -60,7 +61,7 @@ export function useInputRules( props ) {
 		}
 
 		function onInput( event ) {
-			const { inputType } = event;
+			const { inputType, type } = event;
 			const {
 				value,
 				onChange,
@@ -69,7 +70,7 @@ export function useInputRules( props ) {
 			} = propsRef.current;
 
 			// Only run input rules when inserting text.
-			if ( inputType !== 'insertText' ) {
+			if ( inputType !== 'insertText' && type !== 'compositionend' ) {
 				return;
 			}
 
@@ -85,7 +86,7 @@ export function useInputRules( props ) {
 
 					return accumlator;
 				},
-				value
+				preventEventDiscovery( value )
 			);
 
 			if ( transformed !== value ) {
@@ -99,8 +100,10 @@ export function useInputRules( props ) {
 		}
 
 		element.addEventListener( 'input', onInput );
+		element.addEventListener( 'compositionend', onInput );
 		return () => {
 			element.removeEventListener( 'input', onInput );
+			element.removeEventListener( 'compositionend', onInput );
 		};
 	}, [] );
 }

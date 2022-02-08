@@ -26,7 +26,7 @@ import Icon from '../icon';
  * @param {Object}    props.preview        Preview to be rendered in the placeholder.
  * @param {boolean}   props.isColumnLayout Whether a column layout should be used.
  *
- * @return {Object}       The rendered placeholder.
+ * @return {Object} The rendered placeholder.
  */
 function Placeholder( {
 	icon,
@@ -73,12 +73,14 @@ function Placeholder( {
 				<Icon icon={ icon } />
 				{ label }
 			</div>
-			{ !! instructions && (
-				<div className="components-placeholder__instructions">
-					{ instructions }
-				</div>
-			) }
-			<div className={ fieldsetClasses }>{ children }</div>
+			<fieldset className={ fieldsetClasses }>
+				{ !! instructions && (
+					<legend className="components-placeholder__instructions">
+						{ instructions }
+					</legend>
+				) }
+				{ children }
+			</fieldset>
 		</div>
 	);
 }

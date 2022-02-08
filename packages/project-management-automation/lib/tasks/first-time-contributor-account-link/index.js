@@ -5,7 +5,7 @@ const debug = require( '../../debug' );
 const getAssociatedPullRequest = require( '../../get-associated-pull-request' );
 const hasWordPressProfile = require( '../../has-wordpress-profile' );
 
-/** @typedef {import('@actions/github').GitHub} GitHub */
+/** @typedef {ReturnType<import('@actions/github').getOctokit>} GitHub */
 /** @typedef {import('@octokit/webhooks').WebhookPayloadPush} WebhookPayloadPush */
 /** @typedef {import('../../get-associated-pull-request').WebhookPayloadPushCommit} WebhookPayloadPushCommit */
 
@@ -57,6 +57,15 @@ async function firstTimeContributorAccountLink( payload, octokit ) {
 		return;
 	}
 
+	const { data: user } = await octokit.rest.users.getByUsername( {
+		username: commit.author.username,
+	} );
+
+	if ( user.type === 'Bot' ) {
+		debug( 'first-time-contributor-account-link: User is a bot. Aborting' );
+		return;
+	}
+
 	const repo = payload.repository.name;
 	const owner = payload.repository.owner.login;
 	const author = commit.author.username;
@@ -65,7 +74,7 @@ async function firstTimeContributorAccountLink( payload, octokit ) {
 		`first-time-contributor-account-link: Searching for commits in ${ owner }/${ repo } by @${ author }`
 	);
 
-	const { data: commits } = await octokit.repos.listCommits( {
+	const { data: commits } = await octokit.rest.repos.listCommits( {
 		owner,
 		repo,
 		author,
@@ -86,9 +95,11 @@ async function firstTimeContributorAccountLink( payload, octokit ) {
 	try {
 		hasProfile = await hasWordPressProfile( author );
 	} catch ( error ) {
-		debug(
-			`first-time-contributor-account-link: Error retrieving from profile API:\n\n${ error.toString() }`
-		);
+		if ( error instanceof Object ) {
+			debug(
+				`first-time-contributor-account-link: Error retrieving from profile API:\n\n${ error.toString() }`
+			);
+		}
 		return;
 	}
 
@@ -103,7 +114,7 @@ async function firstTimeContributorAccountLink( payload, octokit ) {
 		'first-time-contributor-account-link: User not known. Adding comment to prompt for account link.'
 	);
 
-	await octokit.issues.createComment( {
+	await octokit.rest.issues.createComment( {
 		owner,
 		repo,
 		issue_number: pullRequest,

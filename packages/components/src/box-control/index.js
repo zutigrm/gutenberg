@@ -17,6 +17,7 @@ import Button from '../button';
 import { FlexItem, FlexBlock } from '../flex';
 import AllInputControl from './all-input-control';
 import InputControls from './input-controls';
+import AxialInputControls from './axial-input-controls';
 import BoxControlIcon from './icon';
 import { Text } from '../text';
 import LinkedButton from './linked-button';
@@ -26,9 +27,11 @@ import {
 	Header,
 	HeaderControlWrapper,
 } from './styles/box-control-styles';
+import { parseUnit } from '../unit-control/utils';
 import {
 	DEFAULT_VALUES,
 	DEFAULT_VISUALIZER_VALUES,
+	getInitialSide,
 	isValuesMixed,
 	isValuesDefined,
 } from './utils';
@@ -52,6 +55,7 @@ export default function BoxControl( {
 	values: valuesProp,
 	units,
 	sides,
+	splitOnAxis = false,
 	allowReset = true,
 	resetValues = DEFAULT_VALUES,
 } ) {
@@ -67,14 +71,26 @@ export default function BoxControl( {
 		! hasInitialValue || ! isValuesMixed( inputValues ) || hasOneSide
 	);
 
-	const [ side, setSide ] = useState( isLinked ? 'all' : 'top' );
+	const [ side, setSide ] = useState(
+		getInitialSide( isLinked, splitOnAxis )
+	);
+
+	// Tracking selected units via internal state allows filtering of CSS unit
+	// only values from being saved while maintaining preexisting unit selection
+	// behaviour. Filtering CSS only values prevents invalid style values.
+	const [ selectedUnits, setSelectedUnits ] = useState( {
+		top: parseUnit( valuesProp?.top )[ 1 ],
+		right: parseUnit( valuesProp?.right )[ 1 ],
+		bottom: parseUnit( valuesProp?.bottom )[ 1 ],
+		left: parseUnit( valuesProp?.left )[ 1 ],
+	} );
 
 	const id = useUniqueId( idProp );
 	const headingId = `${ id }-heading`;
 
 	const toggleLinked = () => {
 		setIsLinked( ! isLinked );
-		setSide( ! isLinked ? 'all' : 'top' );
+		setSide( getInitialSide( ! isLinked, splitOnAxis ) );
 	};
 
 	const handleOnFocus = ( event, { side: nextSide } ) => {
@@ -98,6 +114,7 @@ export default function BoxControl( {
 	const handleOnReset = () => {
 		onChange( resetValues );
 		setValues( resetValues );
+		setSelectedUnits( resetValues );
 		setIsDirty( false );
 	};
 
@@ -109,6 +126,8 @@ export default function BoxControl( {
 		onHoverOff: handleOnHoverOff,
 		isLinked,
 		units,
+		selectedUnits,
+		setSelectedUnits,
 		sides,
 		values: inputValues,
 	};
@@ -150,6 +169,11 @@ export default function BoxControl( {
 						/>
 					</FlexBlock>
 				) }
+				{ ! isLinked && splitOnAxis && (
+					<FlexBlock>
+						<AxialInputControls { ...inputControlProps } />
+					</FlexBlock>
+				) }
 				{ ! hasOneSide && (
 					<FlexItem>
 						<LinkedButton
@@ -159,7 +183,9 @@ export default function BoxControl( {
 					</FlexItem>
 				) }
 			</HeaderControlWrapper>
-			{ ! isLinked && <InputControls { ...inputControlProps } /> }
+			{ ! isLinked && ! splitOnAxis && (
+				<InputControls { ...inputControlProps } />
+			) }
 		</Root>
 	);
 }

@@ -40,7 +40,6 @@ import BlockInvalidWarning from './block-invalid-warning';
 import BlockMobileToolbar from '../block-mobile-toolbar';
 import { store as blockEditorStore } from '../../store';
 
-
 const emptyArray = [];
 function BlockForType( {
 	attributes,
@@ -58,15 +57,20 @@ function BlockForType( {
 	parentWidth,
 	wrapperProps,
 	blockWidth,
+	baseGlobalStyles,
 } ) {
 	const defaultColors = useSetting( 'color.palette' ) || emptyArray;
+	const fontSizes = useSetting( 'typography.fontSizes' ) || emptyArray;
 	const globalStyle = useGlobalStyles();
 	const mergedStyle = useMemo( () => {
 		return getMergedGlobalStyles(
+			baseGlobalStyles,
 			globalStyle,
 			wrapperProps.style,
 			attributes,
-			defaultColors
+			defaultColors,
+			name,
+			fontSizes
 		);
 	}, [
 		defaultColors,
@@ -93,7 +97,7 @@ function BlockForType( {
 				// Block level styles
 				wrapperProps={ wrapperProps }
 				// inherited styles merged with block level styles
-				mergedStyle={ mergedStyle }
+				style={ mergedStyle }
 				clientId={ clientId }
 				parentWidth={ parentWidth }
 				contentStyle={ contentStyle }
@@ -203,7 +207,7 @@ class BlockListBlock extends Component {
 			attributes,
 			order + 1
 		);
-		const { isFullWidth, isWider, isContainerRelated } = alignmentHelpers;
+		const { isFullWidth, isContainerRelated } = alignmentHelpers;
 		const accessible = ! ( isSelected || isInnerBlockSelected );
 		const screenWidth = Math.floor( Dimensions.get( 'window' ).width );
 		const isScreenWidthEqual = blockWidth === screenWidth;
@@ -267,13 +271,7 @@ class BlockListBlock extends Component {
 							/>
 						) }
 						<View
-							style={ [
-								styles.neutralToolbar,
-								! isFullWidthToolbar &&
-									isContainerRelated( name ) &&
-									isWider( screenWidth, 'mobile' ) &&
-									styles.containerToolbar,
-							] }
+							style={ styles.neutralToolbar }
 							ref={ this.anchorNodeRef }
 						>
 							{ isSelected && (
@@ -313,26 +311,27 @@ function getWrapperProps( value, getWrapperPropsFunction ) {
 }
 
 export default compose( [
-	withSelect( ( select, { clientId, rootClientId } ) => {
+	withSelect( ( select, { clientId } ) => {
 		const {
 			getBlockIndex,
+			getSettings,
 			isBlockSelected,
-			__unstableGetBlockWithoutInnerBlocks,
+			getBlock,
 			getSelectedBlockClientId,
 			getLowestCommonAncestorWithSelectedBlock,
 			getBlockParents,
 			hasSelectedInnerBlock,
 		} = select( blockEditorStore );
 
-		const order = getBlockIndex( clientId, rootClientId );
+		const order = getBlockIndex( clientId );
 		const isSelected = isBlockSelected( clientId );
 		const isInnerBlockSelected = hasSelectedInnerBlock( clientId );
-		const block = __unstableGetBlockWithoutInnerBlocks( clientId );
+		const block = getBlock( clientId );
 		const { name, attributes, isValid } = block || {};
 
 		const blockType = getBlockType( name || 'core/missing' );
-		const title = blockType.title;
-		const icon = blockType.icon;
+		const title = blockType?.title;
+		const icon = blockType?.icon;
 
 		const parents = getBlockParents( clientId, true );
 		const parentId = parents[ 0 ] || '';
@@ -363,6 +362,9 @@ export default compose( [
 			isDescendantOfParentSelected ||
 			isParentSelected ||
 			parentId === '';
+		const baseGlobalStyles = getSettings()
+			?.__experimentalGlobalStylesBaseStyles;
+
 		return {
 			icon,
 			name: name || 'core/missing',
@@ -376,6 +378,7 @@ export default compose( [
 			isParentSelected,
 			firstToSelectId,
 			isTouchable,
+			baseGlobalStyles,
 			wrapperProps: getWrapperProps(
 				attributes,
 				blockType.getEditWrapperProps

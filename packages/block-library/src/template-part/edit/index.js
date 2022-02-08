@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { isEmpty } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { useSelect } from '@wordpress/data';
@@ -17,7 +22,6 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as coreStore } from '@wordpress/core-data';
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -50,6 +54,7 @@ export default function TemplatePartEdit( {
 		defaultWrapper,
 		area,
 		enableSelection,
+		hasResolvedReplacements,
 	} = useSelect(
 		( select ) => {
 			const {
@@ -89,17 +94,24 @@ export default function TemplatePartEdit( {
 				  )
 				: false;
 
-			const defaultWrapperElement = select( editorStore )
+			// FIXME: @wordpress/block-library should not depend on @wordpress/editor.
+			// Blocks can be loaded into a *non-post* block editor.
+			// eslint-disable-next-line @wordpress/data-no-store-string-literals
+			const defaultWrapperElement = select( 'core/editor' )
 				.__experimentalGetDefaultTemplatePartAreas()
 				.find( ( { area: value } ) => value === _area )?.area_tag;
 
 			return {
 				innerBlocks: getBlocks( clientId ),
 				isResolved: hasResolvedEntity,
-				isMissing: hasResolvedEntity && ! entityRecord,
+				isMissing: hasResolvedEntity && isEmpty( entityRecord ),
 				defaultWrapper: defaultWrapperElement || 'div',
 				area: _area,
 				enableSelection: _enableSelection,
+				hasResolvedReplacements: hasFinishedResolution(
+					'getEntityRecords',
+					availableReplacementArgs
+				),
 			};
 		},
 		[ templatePartId, clientId ]
@@ -157,6 +169,7 @@ export default function TemplatePartEdit( {
 						clientId={ clientId }
 						setAttributes={ setAttributes }
 						enableSelection={ enableSelection }
+						hasResolvedReplacements={ hasResolvedReplacements }
 					/>
 				</TagName>
 			) }
@@ -171,9 +184,6 @@ export default function TemplatePartEdit( {
 								<ToolbarButton
 									aria-expanded={ isOpen }
 									onClick={ onToggle }
-									// Disable when open to prevent odd FireFox bug causing reopening.
-									// As noted in https://github.com/WordPress/gutenberg/pull/24990#issuecomment-689094119 .
-									disabled={ isOpen }
 								>
 									{ __( 'Replace' ) }
 								</ToolbarButton>
@@ -192,6 +202,7 @@ export default function TemplatePartEdit( {
 			) }
 			{ isEntityAvailable && (
 				<TemplatePartInnerBlocks
+					clientId={ clientId }
 					tagName={ TagName }
 					blockProps={ blockProps }
 					postId={ templatePartId }

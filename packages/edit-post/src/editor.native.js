@@ -30,6 +30,11 @@ class Editor extends Component {
 	constructor( props ) {
 		super( ...arguments );
 
+		// need to set this globally to avoid race with deprecations
+		// defaulting to true to avoid issues with a not-yet-cached value
+		const { galleryWithImageBlocks = true } = props;
+		window.wp.galleryBlockV2Enabled = galleryWithImageBlocks;
+
 		if ( props.initialHtmlModeEnabled && props.mode === 'visual' ) {
 			// enable html mode if the initial mode the parent wants it but we're not already in it
 			this.props.switchEditorMode( 'text' );
@@ -93,9 +98,15 @@ class Editor extends Component {
 
 		this.subscriptionParentFeaturedImageIdNativeUpdated = subscribeFeaturedImageIdNativeUpdated(
 			( payload ) => {
-				editEntityRecord( 'postType', postType, postId, {
-					featured_media: payload.featuredImageId,
-				} );
+				editEntityRecord(
+					'postType',
+					postType,
+					postId,
+					{ featured_media: payload.featuredImageId },
+					{
+						undoIgnore: true,
+					}
+				);
 			}
 		);
 	}

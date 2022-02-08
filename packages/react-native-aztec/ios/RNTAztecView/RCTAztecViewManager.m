@@ -2,6 +2,7 @@
 
 @interface RCT_EXTERN_MODULE(RCTAztecViewManager, NSObject)
 
+RCT_EXPORT_VIEW_PROPERTY(blockUseDefaultFont, BOOL)
 RCT_REMAP_VIEW_PROPERTY(text, contents, NSDictionary)
 RCT_EXPORT_VIEW_PROPERTY(onContentSizeChange, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onBackspace, RCTBubblingEventBlock)
@@ -27,6 +28,7 @@ RCT_EXPORT_VIEW_PROPERTY(maxWidth, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(fontFamily, NSString)
 RCT_EXPORT_VIEW_PROPERTY(fontSize, CGFloat)
 RCT_EXPORT_VIEW_PROPERTY(fontWeight, NSString)
+RCT_EXPORT_VIEW_PROPERTY(lineHeight, CGFloat)
 
 RCT_EXPORT_VIEW_PROPERTY(disableEditingMenu, BOOL)
 RCT_REMAP_VIEW_PROPERTY(textAlign, textAlignment, NSTextAlignment)

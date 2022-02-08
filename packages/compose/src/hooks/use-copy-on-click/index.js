@@ -15,10 +15,10 @@ import deprecated from '@wordpress/deprecated';
  *
  * @deprecated
  *
- * @param {import('react').RefObject<string | Element | NodeListOf<Element>>} ref Reference with the element.
- * @param {string|Function} text The text to copy.
- * @param {number} [timeout] Optional timeout to reset the returned
- *                                  state. 4 seconds by default.
+ * @param {import('react').RefObject<string | Element | NodeListOf<Element>>} ref       Reference with the element.
+ * @param {string|Function}                                                   text      The text to copy.
+ * @param {number}                                                            [timeout] Optional timeout to reset the returned
+ *                                                                                      state. 4 seconds by default.
  *
  * @return {boolean} Whether or not the text has been copied. Resets after the
  *                   timeout.
@@ -26,8 +26,7 @@ import deprecated from '@wordpress/deprecated';
 export default function useCopyOnClick( ref, text, timeout = 4000 ) {
 	/* eslint-enable jsdoc/no-undefined-types */
 	deprecated( 'wp.compose.useCopyOnClick', {
-		since: '10.3',
-		plugin: 'Gutenberg',
+		since: '5.8',
 		alternative: 'wp.compose.useCopyToClipboard',
 	} );
 

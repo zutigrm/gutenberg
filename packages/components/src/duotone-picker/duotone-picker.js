@@ -19,9 +19,11 @@ import CustomDuotoneBar from './custom-duotone-bar';
 import { getDefaultColors, getGradientFromCSSColors } from './utils';
 
 function DuotonePicker( {
+	clearable = true,
 	colorPalette,
 	duotonePalette,
 	disableCustomColors,
+	disableCustomDuotone,
 	value,
 	onChange,
 } ) {
@@ -29,6 +31,7 @@ function DuotonePicker( {
 		() => getDefaultColors( colorPalette ),
 		[ colorPalette ]
 	);
+
 	return (
 		<CircularOptionPicker
 			options={ duotonePalette.map( ( { colors, slug, name } ) => {
@@ -67,22 +70,25 @@ function DuotonePicker( {
 				);
 			} ) }
 			actions={
-				<CircularOptionPicker.ButtonAction
-					onClick={ () => onChange( undefined ) }
-				>
-					{ __( 'Clear' ) }
-				</CircularOptionPicker.ButtonAction>
+				!! clearable && (
+					<CircularOptionPicker.ButtonAction
+						onClick={ () => onChange( undefined ) }
+					>
+						{ __( 'Clear' ) }
+					</CircularOptionPicker.ButtonAction>
+				)
 			}
 		>
-			{ ! disableCustomColors && (
+			{ ! disableCustomColors && ! disableCustomDuotone && (
 				<CustomDuotoneBar value={ value } onChange={ onChange } />
 			) }
-			{ colorPalette && (
+			{ ! disableCustomDuotone && (
 				<ColorListPicker
 					labels={ [ __( 'Shadows' ), __( 'Highlights' ) ] }
 					colors={ colorPalette }
 					value={ value }
 					disableCustomColors={ disableCustomColors }
+					enableAlpha
 					onChange={ ( newColors ) => {
 						if ( ! newColors[ 0 ] ) {
 							newColors[ 0 ] = defaultDark;

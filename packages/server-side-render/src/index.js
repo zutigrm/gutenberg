@@ -16,6 +16,9 @@ import ServerSideRender from './server-side-render';
 const EMPTY_OBJECT = {};
 
 const ExportedServerSideRender = withSelect( ( select ) => {
+	// FIXME: @wordpress/server-side-render should not depend on @wordpress/editor.
+	// It is used by blocks that can be loaded into a *non-post* block editor.
+	// eslint-disable-next-line @wordpress/data-no-store-string-literals
 	const coreEditorSelect = select( 'core/editor' );
 	if ( coreEditorSelect ) {
 		const currentPostId = coreEditorSelect.getCurrentPostId();
@@ -47,6 +50,7 @@ const ExportedServerSideRender = withSelect( ( select ) => {
 if ( window && window.wp && window.wp.components ) {
 	window.wp.components.ServerSideRender = forwardRef( ( props, ref ) => {
 		deprecated( 'wp.components.ServerSideRender', {
+			version: '6.2',
 			since: '5.3',
 			alternative: 'wp.serverSideRender',
 		} );

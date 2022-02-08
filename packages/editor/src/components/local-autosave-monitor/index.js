@@ -51,14 +51,12 @@ function useAutosaveNotice() {
 		( select ) => ( {
 			postId: select( editorStore ).getCurrentPostId(),
 			isEditedPostNew: select( editorStore ).isEditedPostNew(),
-			getEditedPostAttribute: select( editorStore )
-				.getEditedPostAttribute,
 			hasRemoteAutosave: !! select( editorStore ).getEditorSettings()
 				.autosave,
 		} ),
 		[]
 	);
-	const { getEditedPostAttribute } = useSelect( 'core/editor' );
+	const { getEditedPostAttribute } = useSelect( editorStore );
 
 	const { createWarningNotice, removeNotice } = useDispatch( noticesStore );
 	const { editPost, resetEditorBlocks } = useDispatch( editorStore );
@@ -168,7 +166,7 @@ function useAutosavePurge() {
 
 function LocalAutosaveMonitor() {
 	const { autosave } = useDispatch( editorStore );
-	const deferedAutosave = useCallback( () => {
+	const deferredAutosave = useCallback( () => {
 		requestIdleCallback( () => autosave( { local: true } ) );
 	}, [] );
 	useAutosaveNotice();
@@ -185,7 +183,7 @@ function LocalAutosaveMonitor() {
 	return (
 		<AutosaveMonitor
 			interval={ localAutosaveInterval }
-			autosave={ deferedAutosave }
+			autosave={ deferredAutosave }
 		/>
 	);
 }

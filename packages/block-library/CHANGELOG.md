@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+### Breaking Change
+
+-   The `GUTENBERG_PHASE` environment variable has been renamed to `IS_GUTENBERG_PLUGIN` and is now a boolean ([#38202](https://github.com/WordPress/gutenberg/pull/38202)).
+
+### Bug Fix
+
+-   Removed unused `@wordpress/escape-html` and `@wordpress/is-shallow-equal` dependencies ([#38388](https://github.com/WordPress/gutenberg/pull/38388)).
+
+## 6.1.0 (2022-01-27)
+
+-   Code quality: Add block schema to each core block ([#35900](https://github.com/WordPress/gutenberg/pull/35900)).
+
+## 6.0.0 (2021-09-09)
+
+### Breaking Change
+
+-   Remove the background-colors, foreground-colors, and gradient-colors mixins.
+
+## 5.0.0 (2021-07-29)
+
+### Breaking Change
+
+-   Upgraded React components to work with v17.0 ([#29118](https://github.com/WordPress/gutenberg/pull/29118)). There are no new features in React v17.0 as explained in the [blog post](https://reactjs.org/blog/2020/10/20/react-v17.html).
+
+## 4.0.0 (2021-07-21)
+
+### Breaking Changes
+
+-   Removes the `core/legacy-widget` block. This is now in `@wordpress/widgets` via `registerLegacyWidgetBlock()`.
+
+### Bug Fixes
+
+-   Include missing attributes when upgrading embed block ([#33235](https://github.com/WordPress/gutenberg/pull/33235))
+
 ## 3.2.0 (2021-05-24)
 
 ### New Features

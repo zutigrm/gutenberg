@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 4.1.0 (2022-01-27)
+
+### Bug Fixes
+
+-   `getEntityRecords` no longer returns an empty array for unknown entities but returns `null` instead. `hasEntityRecords` now also returns `false` when the entity configuration is unknown. ([#36984](https://github.com/WordPress/gutenberg/pull/36984))
+
+## 4.0.0 (2021-07-29)
+
+### Breaking Change
+
+-   Upgraded React components to work with v17.0 ([#29118](https://github.com/WordPress/gutenberg/pull/29118)). There are no new features in React v17.0 as explained in the [blog post](https://reactjs.org/blog/2020/10/20/react-v17.html).
+
+## 3.2.0 (2021-07-21)
+
 ## 3.1.0 (2021-05-20)
 
 ## 3.0.0 (2021-05-14)

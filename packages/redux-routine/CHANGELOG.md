@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 4.3.0 (2022-01-27)
+
+## 4.2.0 (2021-07-21)
+
+### New Features
+
+-   Added and published TypeScript annotations
+
 ## 4.1.0 (2021-05-20)
 
 ## 4.0.0 (2021-05-14)

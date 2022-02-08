@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import SafeArea from 'react-native-safe-area';
+import { omit } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -41,7 +42,7 @@ import NavigationScreen from './bottom-sheet-navigation/navigation-screen';
 import NavigationContainer from './bottom-sheet-navigation/navigation-container';
 import KeyboardAvoidingView from './keyboard-avoiding-view';
 import BottomSheetSubSheet from './sub-sheet';
-import NavigationHeader from './navigation-header';
+import NavBar from './nav-bar';
 import { BottomSheetProvider } from './bottom-sheet-context';
 
 const DEFAULT_LAYOUT_ANIMATION = LayoutAnimation.Presets.easeInEaseOut;
@@ -90,11 +91,6 @@ class BottomSheet extends Component {
 			isMaxHeightSet: true,
 			isFullScreen: this.props.isFullScreen || false,
 		};
-
-		SafeArea.getSafeAreaInsetsForRootView().then(
-			this.onSafeAreaInsetsUpdate
-		);
-		Dimensions.addEventListener( 'change', this.onDimensionsChange );
 	}
 
 	keyboardShow( e ) {
@@ -149,9 +145,13 @@ class BottomSheet extends Component {
 			} );
 			this.lastLayoutAnimation = layoutAnimation;
 		} else {
-			this.performRegularLayoutAnimation( {
-				useLastLayoutAnimation: false,
-			} );
+			// TODO: Reinstate animations, possibly replacing `LayoutAnimation` with
+			// more nuanced `Animated` usage or replacing our custom `BottomSheet`
+			// with `@gorhom/bottom-sheet`. This animation was disabled to avoid a
+			// preexisting bug: https://git.io/JMPCV
+			// this.performRegularLayoutAnimation( {
+			// 	useLastLayoutAnimation: false,
+			// } );
 		}
 	}
 
@@ -177,6 +177,10 @@ class BottomSheet extends Component {
 	}
 
 	componentDidMount() {
+		SafeArea.getSafeAreaInsetsForRootView().then(
+			this.onSafeAreaInsetsUpdate
+		);
+
 		if ( Platform.OS === 'android' ) {
 			this.androidModalClosedSubscription = subscribeAndroidModalClosed(
 				() => {
@@ -184,6 +188,11 @@ class BottomSheet extends Component {
 				}
 			);
 		}
+
+		this.dimensionsChangeSubscription = Dimensions.addEventListener(
+			'change',
+			this.onDimensionsChange
+		);
 
 		// 'Will' keyboard events are not available on Android.
 		// Reference: https://reactnative.dev/docs/0.61/keyboard#addlistener
@@ -204,6 +213,7 @@ class BottomSheet extends Component {
 	}
 
 	componentWillUnmount() {
+		this.dimensionsChangeSubscription.remove();
 		this.keyboardShowListener.remove();
 		this.keyboardHideListener.remove();
 		if ( this.androidModalClosedSubscription ) {
@@ -214,10 +224,6 @@ class BottomSheet extends Component {
 		}
 		this.safeAreaEventSubscription.remove();
 		this.safeAreaEventSubscription = null;
-		SafeArea.removeEventListener(
-			'safeAreaInsetsForRootViewDidChange',
-			this.onSafeAreaInsetsUpdate
-		);
 	}
 
 	onSafeAreaInsetsUpdate( result ) {
@@ -251,16 +257,19 @@ class BottomSheet extends Component {
 				statusBarHeight -
 				this.headerHeight );
 
-		// On horizontal mode `maxHeight` has to be set on 90% of width
+		// In landscape orientation, set `maxHeight` to ~96% of the height
 		if ( width > height ) {
 			this.setState( {
-				maxHeight: Math.min( 0.9 * height, maxHeightWithOpenKeyboard ),
+				maxHeight: Math.min(
+					0.96 * height - this.headerHeight,
+					maxHeightWithOpenKeyboard
+				),
 			} );
-			//	On vertical mode `maxHeight` has to be set on 50% of width
+			// In portrait orientation, set `maxHeight` to ~59% of the height
 		} else {
 			this.setState( {
 				maxHeight: Math.min(
-					height / 2 - safeAreaBottomInset,
+					height * 0.59 - safeAreaBottomInset - this.headerHeight,
 					maxHeightWithOpenKeyboard
 				),
 			} );
@@ -276,7 +285,10 @@ class BottomSheet extends Component {
 		const { height } = nativeEvent.layout;
 		// The layout animation should only be triggered if the header
 		// height has changed after being mounted.
-		if ( this.headerHeight !== 0 && height !== this.headerHeight ) {
+		if (
+			this.headerHeight !== 0 &&
+			Math.round( height ) !== Math.round( this.headerHeight )
+		) {
 			this.performRegularLayoutAnimation( {
 				useLastLayoutAnimation: true,
 			} );
@@ -432,7 +444,7 @@ class BottomSheet extends Component {
 
 		let listStyle = {};
 		if ( isFullScreen ) {
-			listStyle = { flexGrow: 1 };
+			listStyle = { flexGrow: 1, flexShrink: 1 };
 		} else if ( isMaxHeightSet ) {
 			listStyle = { maxHeight };
 
@@ -482,6 +494,16 @@ class BottomSheet extends Component {
 			</>
 		);
 
+		const showDragIndicator = () => {
+			// if iOS or not fullscreen show the drag indicator
+			if ( Platform.OS === 'ios' || ! this.state.isFullScreen ) {
+				return true;
+			}
+
+			// Otherwise check the allowDragIndicator
+			return this.props.allowDragIndicator;
+		};
+
 		return (
 			<Modal
 				isVisible={ isVisible }
@@ -493,7 +515,7 @@ class BottomSheet extends Component {
 				backdropOpacity={ 0.2 }
 				onBackdropPress={ this.onCloseBottomSheet }
 				onBackButtonPress={ this.onHardwareButtonPress }
-				onSwipe={ this.onCloseBottomSheet }
+				onSwipeComplete={ this.onCloseBottomSheet }
 				onDismiss={ Platform.OS === 'ios' ? this.onDismiss : undefined }
 				onModalHide={
 					Platform.OS === 'android' ? this.onDismiss : undefined
@@ -508,7 +530,9 @@ class BottomSheet extends Component {
 					panResponder.panHandlers.onMoveShouldSetResponderCapture
 				}
 				onAccessibilityEscape={ this.onCloseBottomSheet }
-				{ ...rest }
+				// We need to prevent overwriting the onDismiss prop,
+				// for this reason it is excluded from the rest object.
+				{ ...omit( rest, 'onDismiss' ) }
 			>
 				<KeyboardAvoidingView
 					behavior={ Platform.OS === 'ios' && 'padding' }
@@ -527,8 +551,12 @@ class BottomSheet extends Component {
 					} }
 					keyboardVerticalOffset={ -safeAreaBottomInset }
 				>
-					<View onLayout={ this.onHeaderLayout }>
-						{ ! ( Platform.OS === 'android' && isFullScreen ) && (
+					<View
+						style={ styles.header }
+						onLayout={ this.onHeaderLayout }
+						testID={ `${ rest.testID || 'bottom-sheet' }-header` }
+					>
+						{ showDragIndicator() && (
 							<View style={ styles.dragIndicator } />
 						) }
 						{ ! hideHeader && getHeader() }
@@ -591,7 +619,7 @@ ThemedBottomSheet.getWidth = getWidth;
 ThemedBottomSheet.Button = Button;
 ThemedBottomSheet.Cell = Cell;
 ThemedBottomSheet.SubSheet = BottomSheetSubSheet;
-ThemedBottomSheet.NavigationHeader = NavigationHeader;
+ThemedBottomSheet.NavBar = NavBar;
 ThemedBottomSheet.CyclePickerCell = CyclePickerCell;
 ThemedBottomSheet.PickerCell = PickerCell;
 ThemedBottomSheet.SwitchCell = SwitchCell;

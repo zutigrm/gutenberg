@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 6.0.0 (2022-01-27)
+
+### Breaking changes
+
+   `OPTIONS` requests handled by the preloading middleware are now resolved as `window.Response` objects if you explicitly set `parse: false` (for consistency with how GET requests are resolved). They used to be resolved as `Plain Old JavaScript Objects`.
+
+## 5.2.5 (2021-11-07)
+
+### Internal
+
+-   Removed `getStablePath` function. Please use `normalizePath` from `@wordpress/url` package instead ([#35992](https://github.com/WordPress/gutenberg/pull/35992)).``
+
+## 5.2.0 (2021-07-21)
+
+### New feature
+
+-   `AbortError` being thrown by the default fetch handler can now be caught and handled separately in user-land. Add documentation about aborting a request ([#32530](https://github.com/WordPress/gutenberg/pull/32530)).
+
 ## 5.1.0 (2021-05-20)
 
 ## 5.0.0 (2021-05-14)
