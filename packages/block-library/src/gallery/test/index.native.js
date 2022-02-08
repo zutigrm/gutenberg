@@ -3,17 +3,21 @@
  */
 import {
 	act,
+	changeTextOfRichText,
+	fireEvent,
 	getEditorHtml,
 	initializeEditor,
-	fireEvent,
+	openBlockSettings,
+	setupCoreBlocks,
+	setupMediaPicker,
+	setupMediaUpload,
+	triggerBlockListLayout,
 	within,
 } from 'test/helpers';
 
 /**
  * WordPress dependencies
  */
-import { getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
-import { registerCoreBlocks } from '@wordpress/block-library';
 import { Platform } from '@wordpress/element';
 import {
 	getOtherMediaOptions,
@@ -28,12 +32,7 @@ import {
 	addGalleryBlock,
 	initializeWithGalleryBlock,
 	getGalleryItem,
-	setupMediaUpload,
 	generateGalleryBlock,
-	setCaption,
-	setupMediaPicker,
-	triggerGalleryLayout,
-	openBlockSettings,
 } from './helpers';
 
 const media = [
@@ -57,17 +56,7 @@ const media = [
 	},
 ];
 
-beforeAll( () => {
-	// Register all core blocks
-	registerCoreBlocks();
-} );
-
-afterAll( () => {
-	// Clean up registered blocks
-	getBlockTypes().forEach( ( block ) => {
-		unregisterBlockType( block.name );
-	} );
-} );
+setupCoreBlocks();
 
 describe( 'Gallery block', () => {
 	it( 'inserts block', async () => {
@@ -186,7 +175,7 @@ describe( 'Gallery block', () => {
 		const captionField = within(
 			getByA11yLabel( /Gallery caption. Empty/ )
 		).getByPlaceholderText( 'Add caption' );
-		setCaption(
+		changeTextOfRichText(
 			captionField,
 			'<strong>Bold</strong> <em>italic</em> <s>strikethrough</s> gallery caption'
 		);
@@ -211,7 +200,7 @@ describe( 'Gallery block', () => {
 		const captionField = within( galleryItem ).getByPlaceholderText(
 			'Add caption'
 		);
-		setCaption(
+		changeTextOfRichText(
 			captionField,
 			'<strong>Bold</strong> <em>italic</em> <s>strikethrough</s> image caption'
 		);
@@ -240,7 +229,7 @@ describe( 'Gallery block', () => {
 		await mediaPickerCallback( media[ 0 ], media[ 1 ] );
 
 		// Check that gallery items are visible
-		await triggerGalleryLayout( galleryBlock );
+		await triggerBlockListLayout( galleryBlock );
 		const galleryItem1 = getGalleryItem( galleryBlock, 1 );
 		const galleryItem2 = getGalleryItem( galleryBlock, 2 );
 		expect( galleryItem1 ).toBeVisible();
@@ -280,7 +269,7 @@ describe( 'Gallery block', () => {
 		await mediaPickerCallback( media[ 0 ], media[ 1 ] );
 
 		// Check that gallery items are visible
-		await triggerGalleryLayout( galleryBlock );
+		await triggerBlockListLayout( galleryBlock );
 		const galleryItem1 = getGalleryItem( galleryBlock, 1 );
 		const galleryItem2 = getGalleryItem( galleryBlock, 2 );
 		expect( galleryItem1 ).toBeVisible();
@@ -336,7 +325,7 @@ describe( 'Gallery block', () => {
 		await mediaPickerCallback( media[ 0 ] );
 
 		// Check gallery item is visible
-		await triggerGalleryLayout( galleryBlock );
+		await triggerBlockListLayout( galleryBlock );
 		const galleryItem = getGalleryItem( galleryBlock, 1 );
 		expect( galleryItem ).toBeVisible();
 
@@ -394,7 +383,7 @@ describe( 'Gallery block', () => {
 		);
 
 		// Check that gallery items are visible
-		await triggerGalleryLayout( galleryBlock );
+		await triggerBlockListLayout( galleryBlock );
 		const galleryItem1 = getGalleryItem( galleryBlock, 1 );
 		const galleryItem2 = getGalleryItem( galleryBlock, 2 );
 		expect( galleryItem1 ).toBeVisible();
@@ -434,7 +423,7 @@ describe( 'Gallery block', () => {
 		await mediaPickerCallback( media[ 0 ], media[ 1 ] );
 
 		// Check that gallery items are visible
-		await triggerGalleryLayout( galleryBlock );
+		await triggerBlockListLayout( galleryBlock );
 		const galleryItem1 = getGalleryItem( galleryBlock, 1 );
 		const galleryItem2 = getGalleryItem( galleryBlock, 2 );
 		expect( galleryItem1 ).toBeVisible();
@@ -535,7 +524,7 @@ describe( 'Gallery block', () => {
 		await mediaPickerCallback( otherAppsMedia[ 0 ], otherAppsMedia[ 1 ] );
 
 		// Check that gallery items are visible
-		await triggerGalleryLayout( galleryBlock );
+		await triggerBlockListLayout( galleryBlock );
 		const galleryItem1 = getGalleryItem( galleryBlock, 1 );
 		const galleryItem2 = getGalleryItem( galleryBlock, 2 );
 		expect( galleryItem1 ).toBeVisible();
