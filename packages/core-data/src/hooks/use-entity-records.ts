@@ -29,6 +29,7 @@ interface EntityRecordsResolution< RecordType > {
  * @param  kind      Kind of the requested entities.
  * @param  name      Name of the requested entities.
  * @param  queryArgs HTTP query for the requested entities.
+ *                   Resolves the specified entity record.
  *
  * @example
  * ```js
