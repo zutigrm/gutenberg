@@ -72,28 +72,10 @@ interface QuerySelectResponse {
  * @return {QuerySelectResponse} Queried data.
  */
 export default function __experimentalUseQuerySelect( mapQuerySelect, deps ) {
-	const { data, isResolving, hasResolved, ...rest } = useSelect(
-		( select, registry ) => {
-			const resolve = ( store ) => enrichSelectors( select( store ) );
-			return mapQuerySelect( resolve, registry );
-		},
-		deps
-	);
-
-	let status;
-	if ( isResolving ) {
-		status = Status.Resolving;
-	} else if ( hasResolved ) {
-		if ( data ) {
-			status = Status.Success;
-		} else {
-			status = Status.Error;
-		}
-	} else {
-		status = Status.Idle;
-	}
-
-	return { data, isResolving, hasResolved, status, ...rest };
+	return useSelect( ( select, registry ) => {
+		const resolve = ( store ) => enrichSelectors( select( store ) );
+		return mapQuerySelect( resolve, registry );
+	}, deps );
 }
 
 type QuerySelector = ( ...args ) => QuerySelectResponse;
@@ -140,9 +122,7 @@ const enrichSelectors = memoize( ( selectors ) => {
 					data,
 					status,
 					isResolving,
-					hasResolved:
-						! isResolving &&
-						hasFinishedResolution( selectorName, args ),
+					hasResolved,
 				};
 			},
 		} );
