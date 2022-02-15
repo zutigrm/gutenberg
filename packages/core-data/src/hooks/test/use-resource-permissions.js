@@ -17,7 +17,7 @@ import { act, render } from '@testing-library/react';
 import { store as coreDataStore } from '../../index';
 import useResourcePermissions from '../use-resource-permissions';
 
-describe( 'useEntityRecord', () => {
+describe( 'useResourcePermissions', () => {
 	let registry;
 	beforeEach( () => {
 		jest.useFakeTimers();
