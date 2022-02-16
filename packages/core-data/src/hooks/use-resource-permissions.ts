@@ -69,13 +69,13 @@ type ResourcePermissionsResolution< IdType > = [
  * application, the appropriate permissions and the resolution details will be retrieved from
  * the store state using `canUser()`, or resolved if missing.
  *
- * @return {ResourcePermissionsResolution<IdType>} Entity records data.
+ * @return Entity records data.
  * @template IdType
  */
 export default function __experimentalUseResourcePermissions< IdType = void >(
 	resource: string,
 	id: IdType
-) {
+): ResourcePermissionsResolution< IdType > {
 	return useQuerySelect(
 		( resolve ) => {
 			const { canUser } = resolve( coreStore );
