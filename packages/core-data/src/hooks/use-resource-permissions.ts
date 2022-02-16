@@ -22,15 +22,19 @@ interface ResolutionDetails {
 	 * Is the data still being resolved?
 	 */
 	isResolving: boolean;
-	/**
-	 * Is the data resolved by now?
-	 */
-	hasResolved: boolean;
 }
 
-type ResourcePermissionsResolution< IdType > = ResolutionDetails &
-	GlobalResourcePermissionsResolution &
-	( IdType extends void ? SpecificResourcePermissionsResolution : {} );
+/**
+ * Is the data resolved by now?
+ */
+type HasResolved = boolean;
+
+type ResourcePermissionsResolution< IdType > = [
+	HasResolved,
+	ResolutionDetails &
+		GlobalResourcePermissionsResolution &
+		( IdType extends void ? SpecificResourcePermissionsResolution : {} )
+];
 
 /**
  * Resolves resource permissions.
