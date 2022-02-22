@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { clamp } from 'lodash';
-
-/**
  * Parses and retrieves a number value.
  *
  * @param {unknown} value The incoming value.
@@ -62,19 +57,17 @@ function getPrecision( value ) {
 }
 
 /**
- * Clamps a value based on a min/max range with rounding
+ * Rounds a value to the nearest step offset by a minimum.
  *
  * @param {number} value The value.
  * @param {number} min   The minimum range.
- * @param {number} max   The maximum range.
  * @param {number} step  A multiplier for the value.
  *
  * @return {number} The rounded and clamped value.
  */
-export function roundClamp(
+export function ensureValidStep(
 	value = 0,
 	min = Infinity,
-	max = Infinity,
 	step = 1
 ) {
 	const baseValue = getNumber( value );
@@ -82,22 +75,18 @@ export function roundClamp(
 	const precision = Math.max( getPrecision( step ), getPrecision( min ) );
 	const realMin = min === Infinity ? 0 : min;
 
+	// If the step is not a factor of the minimum the minimum will be used to
+	// offset the step.
 	let tare = 0;
 	if ( realMin % stepValue ) {
 		tare = realMin;
 	}
 
-	let maxOnStep = max;
-	if ( max % stepValue || Math.abs( tare ) ) {
-		maxOnStep = Math.floor( ( max - tare ) / stepValue ) * stepValue + tare;
-	}
-
-	const rounded = Math.round( ( baseValue - tare ) / stepValue ) * stepValue;
-	const clampedValue = clamp( rounded + tare, min, maxOnStep );
+	const roundedToStep = Math.round( ( baseValue - tare ) / stepValue ) * stepValue;
 
 	return precision
-		? getNumber( clampedValue.toFixed( precision ) )
-		: clampedValue;
+		? getNumber( roundedToStep.toFixed( precision ) )
+		: roundedToStep;
 }
 
 /**
