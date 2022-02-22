@@ -94,10 +94,15 @@ export function NumberControl(
 				nextValue = subtract( nextValue, incrementalValue );
 			}
 
-			state.value = constrainValue(
-				nextValue,
-				enableShift ? incrementalValue : null
-			);
+			if ( nextValue < min || nextValue > max ) {
+				state.value = currentValue;
+			} else {
+				state.value = constrainValue(
+					nextValue,
+					enableShift ? incrementalValue : null
+				);
+			}
+
 		}
 
 		/**
