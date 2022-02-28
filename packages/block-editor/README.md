@@ -538,20 +538,6 @@ Undocumented declaration.
 
 Undocumented declaration.
 
-### searchItems
-
-Filters an item list given a search term.
-
-_Parameters_
-
--   _items_ `Array`: Item list
--   _searchInput_ `string`: Search input.
--   _config_ `Object`: Search Config.
-
-_Returns_
-
--   `Array`: Filtered item list.
-
 ### SETTINGS_DEFAULTS
 
 The default editor settings

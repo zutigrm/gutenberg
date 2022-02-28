@@ -10,7 +10,7 @@ import {
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useState, useMemo, useEffect, useRef } from '@wordpress/element';
-import { BlockIcon, searchItems } from '@wordpress/block-editor';
+import { BlockIcon } from '@wordpress/block-editor';
 import { useDebounce } from '@wordpress/compose';
 import { speak } from '@wordpress/a11y';
 
@@ -52,16 +52,22 @@ function BlockMenuItem( { block } ) {
 function ScreenBlockList() {
 	const [ filterValue, setFilterValue ] = useState( '' );
 	const debouncedSpeak = useDebounce( speak, 500 );
-	const blockTypes = useSelect( ( select ) => {
+	const { blockTypes, isMatchingSearchTerm } = useSelect( ( select ) => {
 		const { getBlockTypes } = select( blocksStore );
-		return getBlockTypes();
+		return {
+			blockTypes: getBlockTypes(),
+			isMatchingSearchTerm: select( blocksStore ).isMatchingSearchTerm,
+		};
 	}, [] );
 	const filteredBlockTypes = useMemo( () => {
 		if ( ! filterValue ) {
 			return blockTypes;
 		}
-		return searchItems( blockTypes, filterValue );
-	}, [ filterValue, blockTypes ] );
+		return blockTypes.filter( ( blockType ) =>
+			isMatchingSearchTerm( blockType, filterValue )
+		);
+	}, [ filterValue, blockTypes, isMatchingSearchTerm ] );
+
 	const blockTypesListRef = useRef();
 
 	// Announce search results on change
