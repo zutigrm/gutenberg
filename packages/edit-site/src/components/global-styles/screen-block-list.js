@@ -79,6 +79,10 @@ function ScreenBlockList() {
 		// filtered items can contain items that will eventually not
 		// render and there is no reliable way to detect when a child
 		// will return `null`.
+		// TODO: We should find a better way of handling this as it's
+		// fragile and depends on the number of rendered elements of `BlockMenuItem`,
+		// which is now one.
+		// @see https://github.com/WordPress/gutenberg/pull/39117#discussion_r816022116
 		const count = blockTypesListRef.current.childElementCount;
 		const resultsFoundMessage = sprintf(
 			/* translators: %d: number of results. */
