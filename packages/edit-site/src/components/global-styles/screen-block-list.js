@@ -1,13 +1,18 @@
 /**
  * WordPress dependencies
  */
-import { getBlockTypes } from '@wordpress/blocks';
-import { __ } from '@wordpress/i18n';
+import { store as blocksStore } from '@wordpress/blocks';
+import { __, sprintf, _n } from '@wordpress/i18n';
 import {
 	FlexItem,
+	SearchControl,
 	__experimentalHStack as HStack,
 } from '@wordpress/components';
-import { BlockIcon } from '@wordpress/block-editor';
+import { useSelect } from '@wordpress/data';
+import { useState, useMemo, useEffect, useRef } from '@wordpress/element';
+import { BlockIcon, searchItems } from '@wordpress/block-editor';
+import { useDebounce } from '@wordpress/compose';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -45,6 +50,38 @@ function BlockMenuItem( { block } ) {
 }
 
 function ScreenBlockList() {
+	const [ filterValue, setFilterValue ] = useState( '' );
+	const debouncedSpeak = useDebounce( speak, 500 );
+	const blockTypes = useSelect( ( select ) => {
+		const { getBlockTypes } = select( blocksStore );
+		return getBlockTypes();
+	}, [] );
+	const filteredBlockTypes = useMemo( () => {
+		if ( ! filterValue ) {
+			return blockTypes;
+		}
+		return searchItems( blockTypes, filterValue );
+	}, [ filterValue, blockTypes ] );
+	const blockTypesListRef = useRef();
+
+	// Announce search results on change
+	useEffect( () => {
+		if ( ! filterValue ) {
+			return;
+		}
+		// We extract the results from the wrapper div's `ref` because
+		// filtered items can contain items that will eventually not
+		// render and there is no reliable way to detect when a child
+		// will return `null`.
+		const count = blockTypesListRef.current.childElementCount;
+		const resultsFoundMessage = sprintf(
+			/* translators: %d: number of results. */
+			_n( '%d result found.', '%d results found.', count ),
+			count
+		);
+		debouncedSpeak( resultsFoundMessage, count );
+	}, [ filterValue, debouncedSpeak ] );
+
 	return (
 		<>
 			<ScreenHeader
@@ -53,12 +90,21 @@ function ScreenBlockList() {
 					'Customize the appearance of specific blocks and for the whole site.'
 				) }
 			/>
-			{ getBlockTypes().map( ( block ) => (
-				<BlockMenuItem
-					block={ block }
-					key={ 'menu-itemblock-' + block.name }
-				/>
-			) ) }
+			<SearchControl
+				className="edit-site-block-types-search"
+				onChange={ setFilterValue }
+				value={ filterValue }
+				label={ __( 'Search for blocks' ) }
+				placeholder={ __( 'Search' ) }
+			/>
+			<div ref={ blockTypesListRef }>
+				{ filteredBlockTypes.map( ( block ) => (
+					<BlockMenuItem
+						block={ block }
+						key={ 'menu-itemblock-' + block.name }
+					/>
+				) ) }
+			</div>
 		</>
 	);
 }
