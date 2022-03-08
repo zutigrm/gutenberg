@@ -32,8 +32,9 @@ export default function EditTemplatePartMenuButton() {
 
 function EditTemplatePartMenuItem( { selectedClientId, onClose } ) {
 	const { params } = useLocation();
-	const selectedTemplatePart = useSelect(
+	const { entity: selectedTemplatePart, block: selectedBlock } = useSelect(
 		( select ) => {
+			let entity;
 			const block = select( blockEditorStore ).getBlock(
 				selectedClientId
 			);
@@ -41,13 +42,27 @@ function EditTemplatePartMenuItem( { selectedClientId, onClose } ) {
 			if ( block && isTemplatePart( block ) ) {
 				const { theme, slug } = block.attributes;
 
-				return select( coreStore ).getEntityRecord(
+				entity = select( coreStore ).getEntityRecord(
 					'postType',
 					'wp_template_part',
 					// Ideally this should be an official public API.
 					`${ theme }//${ slug }`
 				);
+			} else if ( block?.name === 'core/navigation' ) {
+				const { ref } = block.attributes;
+
+				entity = select( coreStore ).getEntityRecord(
+					'postType',
+					'wp_navigation',
+					// Ideally this should be an official public API.
+					ref
+				);
 			}
+
+			return {
+				entity,
+				block,
+			};
 		},
 		[ selectedClientId ]
 	);
@@ -66,6 +81,10 @@ function EditTemplatePartMenuItem( { selectedClientId, onClose } ) {
 		return null;
 	}
 
+	const label = isTemplatePart( selectedBlock )
+		? selectedTemplatePart.slug
+		: selectedTemplatePart?.title.rendered;
+
 	return (
 		<MenuItem
 			{ ...linkProps }
@@ -76,7 +95,7 @@ function EditTemplatePartMenuItem( { selectedClientId, onClose } ) {
 		>
 			{
 				/* translators: %s: template part title */
-				sprintf( __( 'Edit %s' ), selectedTemplatePart.slug )
+				sprintf( __( 'Edit %s' ), label )
 			}
 		</MenuItem>
 	);
