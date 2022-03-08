@@ -71,6 +71,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	const isTemplatePart = templateType === 'wp_template_part';
+	const isFocusMode = isTemplatePart || templateType === 'wp_navigation';
 
 	return (
 		<BlockEditorProvider
@@ -80,8 +81,12 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 			onChange={ onChange }
 			useSubRegistry={ false }
 		>
-			<EditTemplatePartMenuButton />
-			<TemplatePartConverter />
+			{ isTemplatePart && (
+				<>
+					<EditTemplatePartMenuButton />
+					<TemplatePartConverter />
+				</>
+			) }
 			<__experimentalLinkControl.ViewerFill>
 				{ useCallback(
 					( fillProps ) => (
@@ -99,7 +104,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 			</SidebarInspectorFill>
 			<BlockTools
 				className={ classnames( 'edit-site-visual-editor', {
-					'is-focus-mode': isTemplatePart,
+					'is-focus-mode': isFocusMode,
 				} ) }
 				__unstableContentRef={ contentRef }
 				onClick={ ( event ) => {
@@ -115,7 +120,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 					// Reinitialize the editor and reset the states when the template changes.
 					key={ templateId }
 					enableResizing={
-						isTemplatePart &&
+						isFocusMode &&
 						// Disable resizing in mobile viewport.
 						! isMobileViewport
 					}
@@ -125,7 +130,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 					<BlockList
 						className="edit-site-block-editor__block-list wp-site-blocks"
 						__experimentalLayout={ LAYOUT }
-						renderAppender={ isTemplatePart ? false : undefined }
+						renderAppender={ isFocusMode ? false : undefined }
 					/>
 				</ResizableEditor>
 				<__unstableBlockSettingsMenuFirstItem>
