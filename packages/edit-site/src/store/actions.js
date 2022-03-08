@@ -156,6 +156,13 @@ export function setTemplatePart( templatePartId ) {
 	};
 }
 
+export function setNavigationMenu( navigationMenuId ) {
+	return {
+		type: 'SET_NAVIGATION_MENU',
+		navigationMenuId,
+	};
+}
+
 /**
  * Action that sets the home template ID to the template ID of the page resolved
  * from a given path.
