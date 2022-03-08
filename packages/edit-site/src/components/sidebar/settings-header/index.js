@@ -2,10 +2,13 @@
  * WordPress dependencies
  */
 import { Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+import { __, sprintf } from '@wordpress/i18n';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { store as interfaceStore } from '@wordpress/interface';
-
+/**
+ * Internal dependencies
+ */
+import { store as editSiteStore } from '../../../store';
 /**
  * Internal dependencies
  */
@@ -13,18 +16,29 @@ import { STORE_NAME } from '../../../store/constants';
 import { SIDEBAR_BLOCK, SIDEBAR_TEMPLATE } from '../constants';
 
 const SettingsHeader = ( { sidebarName } ) => {
+	const { postType } = useSelect( ( select ) => {
+		const { getEditedPostType } = select( editSiteStore );
+
+		return {
+			postType: getEditedPostType(),
+		};
+	}, [] );
+
 	const { enableComplementaryArea } = useDispatch( interfaceStore );
 	const openTemplateSettings = () =>
 		enableComplementaryArea( STORE_NAME, SIDEBAR_TEMPLATE );
 	const openBlockSettings = () =>
 		enableComplementaryArea( STORE_NAME, SIDEBAR_BLOCK );
 
+	const sidebarLabel =
+		'wp_navigation' === postType ? 'Navigation Menu' : 'Template';
+
 	const [ templateAriaLabel, templateActiveClass ] =
 		sidebarName === SIDEBAR_TEMPLATE
 			? // translators: ARIA label for the Template sidebar tab, selected.
-			  [ __( 'Template (selected)' ), 'is-active' ]
+			  [ sprintf( __( '%s (selected)' ), sidebarLabel ), 'is-active' ]
 			: // translators: ARIA label for the Template Settings Sidebar tab, not selected.
-			  [ __( 'Template' ), '' ];
+			  [ sidebarLabel, '' ];
 
 	const [ blockAriaLabel, blockActiveClass ] =
 		sidebarName === SIDEBAR_BLOCK
@@ -42,11 +56,11 @@ const SettingsHeader = ( { sidebarName } ) => {
 					className={ `edit-site-sidebar__panel-tab ${ templateActiveClass }` }
 					aria-label={ templateAriaLabel }
 					// translators: Data label for the Template Settings Sidebar tab.
-					data-label={ __( 'Template' ) }
+					data-label={ sidebarLabel }
 				>
 					{
 						// translators: Text label for the Template Settings Sidebar tab.
-						__( 'Template' )
+						sidebarLabel
 					}
 				</Button>
 			</li>
