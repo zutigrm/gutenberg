@@ -376,9 +376,7 @@ function CoverEdit( {
 	};
 
 	const onUploadError = ( message ) => {
-		createErrorNotice( Array.isArray( message ) ? message[ 2 ] : message, {
-			type: 'snackbar',
-		} );
+		createErrorNotice( message, { type: 'snackbar' } );
 	};
 
 	const isDarkElement = useRef();
