@@ -81,19 +81,28 @@ class WP_Webfonts {
 	public function register_font( $font ) {
 		$font = $this->validate_font( $font );
 		if ( $font ) {
-			$id                    = $this->get_font_id( $font );
-			$this->webfonts[ $id ] = $font;
+			$slug = $this->get_font_slug( $font );
+
+			if ( ! isset( $this->webfonts[ $slug ] ) ) {
+				$this->webfonts[ $slug ] = array();
+			}
+
+			$this->webfonts[ $slug ][] = $font;
 		}
 	}
 
 	/**
-	 * Get the font ID.
+	 * Get the font slug.
 	 *
 	 * @param array $font The font arguments.
 	 * @return string
 	 */
-	public function get_font_id( $font ) {
-		return sanitize_title( "{$font['font-family']}-{$font['font-weight']}-{$font['font-style']}-{$font['provider']}" );
+	public function get_font_slug( $font ) {
+		if ( is_string( $font ) ) {
+			return sanitize_title( $font );
+		}
+
+		return sanitize_title( $font['font-family'] );
 	}
 
 	/**
@@ -242,18 +251,26 @@ class WP_Webfonts {
 		$styles    = '';
 		$providers = $this->get_providers();
 
+		$webfonts = array();
+
+		// Grab only the font face declarations from $font_families.
+		foreach ( $this->get_fonts() as $font_family ) {
+			foreach ( $font_family as $font_face ) {
+				$webfonts[] = $font_face;
+			}
+		}
+
 		// Group webfonts by provider.
 		$webfonts_by_provider = array();
-		$registered_webfonts  = $this->get_fonts();
-		foreach ( $registered_webfonts as $id => $webfont ) {
+		foreach ( $webfonts as $slug => $webfont ) {
 			$provider = $webfont['provider'];
 			if ( ! isset( $providers[ $provider ] ) ) {
 				/* translators: %s is the provider name. */
 				error_log( sprintf( __( 'Webfont provider "%s" is not registered.', 'gutenberg' ), $provider ) );
 				continue;
 			}
-			$webfonts_by_provider[ $provider ]        = isset( $webfonts_by_provider[ $provider ] ) ? $webfonts_by_provider[ $provider ] : array();
-			$webfonts_by_provider[ $provider ][ $id ] = $webfont;
+			$webfonts_by_provider[ $provider ]          = isset( $webfonts_by_provider[ $provider ] ) ? $webfonts_by_provider[ $provider ] : array();
+			$webfonts_by_provider[ $provider ][ $slug ] = $webfont;
 		}
 
 		/*
