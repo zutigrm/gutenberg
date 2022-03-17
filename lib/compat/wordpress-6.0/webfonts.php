@@ -97,6 +97,10 @@ function wp_register_webfont( array $webfont ) {
 	wp_webfonts()->register_font( $webfont );
 }
 
+function wp_enqueue_webfont( $font_family ) {
+	wp_webfonts()->enqueue_font( $font_family );
+}
+
 /**
  * Registers a custom font service provider.
  *
