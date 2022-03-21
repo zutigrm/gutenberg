@@ -14,17 +14,17 @@ class WP_Webfonts {
 	 * An array of registered webfonts.
 	 *
 	 * @access private
-	 * @var array
+	 * @var WP_Webfont_Registry
 	 */
-	private $registered_webfonts = array();
+	private $registered_webfonts = new WP_Webfont_Registry();
 
 	/**
 	 * An array of enqueued webfonts.
 	 *
 	 * @access private
-	 * @var array
+	 * @var WP_Webfont_Registry
 	 */
-	private $enqueued_webfonts = array();
+	private $enqueued_webfonts = new WP_Webfont_Registry();
 
 	/**
 	 * An array of registered providers.
@@ -69,7 +69,7 @@ class WP_Webfonts {
 	 * @return array
 	 */
 	public function get_registered_webfonts() {
-			return $this->registered_webfonts;
+			return $this->registered_webfonts->get_items();
 	}
 
 	/**
@@ -78,7 +78,7 @@ class WP_Webfonts {
 	 * @return array
 	 */
 	public function get_enqueued_webfonts() {
-		return $this->enqueued_webfonts;
+		return $this->enqueued_webfonts->get_items();
 	}
 
 	/**
@@ -104,132 +104,20 @@ class WP_Webfonts {
 	 *
 	 * @param array $font The font arguments.
 	 */
-	public function register_font( $font ) {
-		$font = $this->validate_font( $font );
-		if ( $font ) {
-			$slug = $this->get_font_slug( $font );
+	public function register_font( $raw_font ) {
+		$font = new WP_Webfont( $raw_font );
 
-			if ( ! isset( $this->registered_webfonts[ $slug ] ) ) {
-				$this->registered_webfonts[ $slug ] = array();
-			}
-
-			$this->registered_webfonts[ $slug ][] = $font;
+		if ( ! $font ) {
+			return false;
 		}
+
+		$this->registered_webfonts->register( $font );
 	}
 
-	public function enqueue_font( $font_family ) {
-		$slug = $this->get_font_slug( $font_family );
+	public function enqueue_font( $font_family_slug ) {
+		$font_family = $this->registered_webfonts->unregister_family( $font_family_slug );
 
-		if ( isset( $this->enqueued_webfonts[ $slug ] ) ) {
-			_doing_it_wrong( __FUNCTION__, sprintf( __( 'The "%s" font family is already enqueued.' ), $slug ), '6.0.0' );
-			return false;
-		}
-
-		if ( ! isset( $this->registered_webfonts[ $slug ] ) ) {
-			_doing_it_wrong( __FUNCTION__, sprintf( __( 'The "%s" font family is not registered.' ), $slug ), '6.0.0' );
-			return false;
-		}
-
-		$this->enqueued_webfonts[ $slug ] = $this->registered_webfonts[ $slug ];
-		unset( $this->registered_webfonts[ $slug ] );
-	}
-
-	/**
-	 * Get the font slug.
-	 *
-	 * @param array $font The font arguments.
-	 * @return string
-	 */
-	public function get_font_slug( $font ) {
-		if ( is_string( $font ) ) {
-			return sanitize_title( $font );
-		}
-
-		return sanitize_title( $font['font-family'] );
-	}
-
-	/**
-	 * Validate a font.
-	 *
-	 * @param array $font The font arguments.
-	 *
-	 * @return array|false The validated font arguments, or false if the font is invalid.
-	 */
-	public function validate_font( $font ) {
-		$font = wp_parse_args(
-			$font,
-			array(
-				'provider'     => 'local',
-				'font-family'  => '',
-				'font-style'   => 'normal',
-				'font-weight'  => '400',
-				'font-display' => 'fallback',
-			)
-		);
-
-		// Check the font-family.
-		if ( empty( $font['font-family'] ) || ! is_string( $font['font-family'] ) ) {
-			trigger_error( __( 'Webfont font family must be a non-empty string.', 'gutenberg' ) );
-			return false;
-		}
-
-		// Local fonts need a "src".
-		if ( 'local' === $font['provider'] ) {
-			// Make sure that local fonts have 'src' defined.
-			if ( empty( $font['src'] ) || ( ! is_string( $font['src'] ) && ! is_array( $font['src'] ) ) ) {
-				trigger_error( __( 'Webfont src must be a non-empty string or an array of strings.', 'gutenberg' ) );
-				return false;
-			}
-		}
-
-		// Validate the 'src' property.
-		if ( ! empty( $font['src'] ) ) {
-			foreach ( (array) $font['src'] as $src ) {
-				if ( empty( $src ) || ! is_string( $src ) ) {
-					trigger_error( __( 'Each webfont src must be a non-empty string.', 'gutenberg' ) );
-					return false;
-				}
-			}
-		}
-
-		// Check the font-weight.
-		if ( ! is_string( $font['font-weight'] ) && ! is_int( $font['font-weight'] ) ) {
-			trigger_error( __( 'Webfont font weight must be a properly formatted string or integer.', 'gutenberg' ) );
-			return false;
-		}
-
-		// Check the font-display.
-		if ( ! in_array( $font['font-display'], array( 'auto', 'block', 'fallback', 'swap' ), true ) ) {
-			$font['font-display'] = 'fallback';
-		}
-
-		$valid_props = array(
-			'ascend-override',
-			'descend-override',
-			'font-display',
-			'font-family',
-			'font-stretch',
-			'font-style',
-			'font-weight',
-			'font-variant',
-			'font-feature-settings',
-			'font-variation-settings',
-			'line-gap-override',
-			'size-adjust',
-			'src',
-			'unicode-range',
-
-			// Exceptions.
-			'provider',
-		);
-
-		foreach ( $font as $prop => $value ) {
-			if ( ! in_array( $prop, $valid_props, true ) ) {
-				unset( $font[ $prop ] );
-			}
-		}
-
-		return $font;
+		$this->enqueued_webfonts->register( $font_family );
 	}
 
 	/**
