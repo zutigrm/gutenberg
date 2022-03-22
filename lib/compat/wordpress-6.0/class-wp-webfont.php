@@ -1,26 +1,30 @@
 <?php
+
+// TODO: Change to WP_Webfonts_Font_Face
 class WP_Webfont {
-	private $font;
+	private $font_face;
 
-	public function __construct( $raw_font ) {
-		$font = $this->validate( $raw_font );
+	public function __construct( $raw_font_face ) {
+		$font_face = $this->validate( $raw_font_face );
 
-		if ( $font ) {
-			$this->font = $font;
+		if ( $font_face ) {
+			$this->font_face = $font_face;
 		}
 	}
 
-	public function get_slug() {
-		return sanitize_title( $this->font['font-family'] );
-	}
-
 	public function get_font() {
-		return $this->font;
+		return $this->font_face;
 	}
 
 	public function update_font( $updates ) {
-		$this->font = array_merge( $this->font, $updates );
+		$this->font_face = array_merge( $this->font_face, $updates );
 		return $this->font;
+	}
+
+	public function is_equal( $given_font_face ) {
+		return $this->font_face['font-family'] === $given_font_face->get_font()['font-family'] &&
+			$this->font_face['font-style'] === $given_font_face->get_font()['font-style'] &&
+			$this->font_face['font-display'] === $given_font_face->get_font()['font-display'];
 	}
 
 	private function validate( $font ) {

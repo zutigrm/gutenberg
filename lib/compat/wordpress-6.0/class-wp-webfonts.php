@@ -138,7 +138,7 @@ class WP_Webfonts {
 	 * @return array
 	 */
 	public function get_registered_webfonts() {
-			return $this->registered_webfonts->get_items();
+			return $this->registered_webfonts->get_font_families();
 	}
 
 	/**
@@ -147,7 +147,7 @@ class WP_Webfonts {
 	 * @return array
 	 */
 	public function get_enqueued_webfonts() {
-		return $this->enqueued_webfonts->get_items();
+		return $this->enqueued_webfonts->get_font_families();
 	}
 
 	/**
@@ -180,31 +180,26 @@ class WP_Webfonts {
 			return false;
 		}
 
-		$this->registered_webfonts->register( $font );
+		$this->registered_webfonts->register_font_face( $font );
 	}
 
 	private function enqueue_font_family_by_slug( $slug ) {
-		$enqueued_webfonts = $this->enqueued_webfonts->get_items();
-		$registered_webfonts = $this->registered_webfonts->get_items();
-
-		if ( isset( $enqueued_webfonts[ $slug ] ) ) {
+		if ( $this->enqueued_webfonts->has_font_family_in_registry( $slug ) ) {
 			return new WP_Error( 'webfont_already_enqueued', sprintf( __( 'The "%s" font family is already enqueued.' ), $slug ) );
 		}
 
-		if ( ! isset( $registered_webfonts[ $slug ] ) ) {
+		if ( ! $this->registered_webfonts->has_font_family_in_registry( $slug ) ) {
 			return new WP_Error( 'webfont_not_registered', sprintf( __( 'The "%s" font family is not registered.' ), $slug ) );
 		}
 
-		foreach ( $registered_webfonts[ $slug ] as $font_face ) {
-			$this->enqueued_webfonts->register( $font_face );
-		}
-		$this->registered_webfonts->unregister_family( $slug );
+		$this->enqueue_font( $slug );
 	}
 
 	public function enqueue_font( $font_family_slug ) {
 		$font_family = $this->registered_webfonts->unregister_family( $font_family_slug );
 
-		$this->enqueued_webfonts->register( $font_family );
+		error_log( print_r( $font_family, true) );
+		$this->enqueued_webfonts->register_font_family( $font_family );
 	}
 
 	/**

@@ -62,6 +62,7 @@ function gutenberg_register_webfonts_from_theme_json() {
  * @return array The global styles with missing fonts data.
  */
 function gutenberg_add_registered_webfonts_to_theme_json( $data ) {
+	// font_families_registered = [ WP_Webfonts_Font_Families ]
 	$font_families_registered = wp_webfonts()->get_all_webfonts();
 
 	// Make sure the path to settings.typography.fontFamilies.theme exists
@@ -76,11 +77,11 @@ function gutenberg_add_registered_webfonts_to_theme_json( $data ) {
 		$data['settings']['typography']['fontFamilies'] = array();
 	}
 
-	foreach ( $font_families_registered as $slug => $font_faces_for_family ) {
-		$family     = $font_faces_for_family[0]->get_font()['font-family'];
+	foreach ( $font_families_registered as $slug => $font_family ) {
+		$family     = $font_family->get_font_family_name();
 		$font_faces = array();
 
-		foreach ( $font_faces_for_family as $font_face ) {
+		foreach ( $font_family as $font_face ) {
 			$camel_cased = array( 'origin' => 'gutenberg_wp_webfonts_api' );
 			foreach ( $font_face->get_font() as $key => $value ) {
 				$camel_cased[ lcfirst( str_replace( '-', '', ucwords( $key, '-' ) ) ) ] = $value;
