@@ -217,14 +217,22 @@ describe( 'actions', () => {
 				getBlockCount: () => 1,
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
-			replaceBlock( 'chicken', block )( { select, dispatch } );
+			replaceBlock( 'chicken', block )( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'REPLACE_BLOCKS',
 				clientIds: [ 'chicken' ],
 				blocks: [ block ],
-				time: expect.any( Number ),
 				initialPosition: 0,
 			} );
 		} );
@@ -257,8 +265,20 @@ describe( 'actions', () => {
 				},
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
-			replaceBlocks( [ 'chicken' ], blocks )( { select, dispatch } );
+			replaceBlocks(
+				[ 'chicken' ],
+				blocks
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).not.toHaveBeenCalled();
 		} );
@@ -282,14 +302,25 @@ describe( 'actions', () => {
 				getBlockCount: () => 1,
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
-			replaceBlocks( [ 'chicken' ], blocks )( { select, dispatch } );
+			replaceBlocks(
+				[ 'chicken' ],
+				blocks
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'REPLACE_BLOCKS',
 				clientIds: [ 'chicken' ],
 				blocks,
-				time: expect.any( Number ),
 				initialPosition: 0,
 			} );
 		} );
@@ -315,6 +346,15 @@ describe( 'actions', () => {
 				getBlockCount: () => 1,
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
 			replaceBlocks(
 				[ 'chicken' ],
@@ -322,17 +362,75 @@ describe( 'actions', () => {
 				null,
 				null,
 				meta
-			)( { select, dispatch } );
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'REPLACE_BLOCKS',
 				clientIds: [ 'chicken' ],
 				blocks,
-				time: expect.any( Number ),
 				indexToSelect: null,
 				initialPosition: null,
 				meta: { patternName: 'core/chicken-ribs-pattern' },
 			} );
+		} );
+
+		it( 'should set insertUsage in the preferences store', () => {
+			const ribsBlock = {
+				clientId: 'ribs',
+				name: 'core/test-ribs',
+			};
+			const chickenBlock = {
+				clientId: 'chicken',
+				name: 'core/test-chicken',
+			};
+			const blocks = [ ribsBlock, chickenBlock ];
+
+			const select = {
+				getSettings: () => null,
+				getBlockRootClientId: () => null,
+				canInsertBlockType: () => true,
+				getBlockCount: () => 1,
+			};
+			const dispatch = () => {};
+			const preferencesSet = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					// Throw in a block variation, to make sure that information
+					// is tracked.
+					getActiveBlockVariation: ( blockName ) =>
+						blockName === 'core/test-chicken'
+							? { name: 'wings' }
+							: undefined,
+				} ),
+				dispatch: () => ( {
+					set: preferencesSet,
+				} ),
+			};
+
+			replaceBlocks(
+				[ 'pineapple' ],
+				blocks,
+				null,
+				null
+			)( { select, dispatch, registry } );
+
+			expect( preferencesSet ).toHaveBeenCalledWith(
+				'core',
+				'insertUsage',
+				{
+					'core/test-chicken/wings': {
+						count: 1,
+						insert: { name: 'core/test-chicken/wings' },
+						time: expect.any( Number ),
+					},
+					'core/test-ribs': {
+						count: 1,
+						insert: { name: 'core/test-ribs' },
+						time: expect.any( Number ),
+					},
+				}
+			);
 		} );
 	} );
 
@@ -349,20 +447,28 @@ describe( 'actions', () => {
 				canInsertBlockType: () => true,
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
 			insertBlock(
 				block,
 				index,
 				'testclientid',
 				true
-			)( { select, dispatch } );
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'INSERT_BLOCKS',
 				blocks: [ block ],
 				index,
 				rootClientId: 'testclientid',
-				time: expect.any( Number ),
 				updateSelection: true,
 				initialPosition: 0,
 			} );
@@ -397,13 +503,22 @@ describe( 'actions', () => {
 				canInsertBlockType: () => true,
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
 			insertBlocks(
 				blocks,
 				5,
 				'testrootid',
 				false
-			)( { select, dispatch } );
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'INSERT_BLOCKS',
@@ -420,7 +535,6 @@ describe( 'actions', () => {
 				],
 				index: 5,
 				rootClientId: 'testrootid',
-				time: expect.any( Number ),
 				updateSelection: false,
 				initialPosition: null,
 			} );
@@ -447,13 +561,22 @@ describe( 'actions', () => {
 				canInsertBlockType: () => true,
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
 			insertBlocks(
 				blocks,
 				5,
 				'testrootid',
 				false
-			)( { select, dispatch } );
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'INSERT_BLOCKS',
@@ -465,7 +588,6 @@ describe( 'actions', () => {
 				],
 				index: 5,
 				rootClientId: 'testrootid',
-				time: expect.any( Number ),
 				updateSelection: false,
 				initialPosition: null,
 			} );
@@ -502,20 +624,28 @@ describe( 'actions', () => {
 				},
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
 			insertBlocks(
 				blocks,
 				5,
 				'testrootid',
 				false
-			)( { select, dispatch } );
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'INSERT_BLOCKS',
 				blocks: [ ribsBlock, chickenRibsBlock ],
 				index: 5,
 				rootClientId: 'testrootid',
-				time: expect.any( Number ),
 				updateSelection: false,
 				initialPosition: null,
 			} );
@@ -580,6 +710,15 @@ describe( 'actions', () => {
 				},
 			};
 			const dispatch = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					getActiveBlockVariation: () => {},
+				} ),
+				dispatch: () => ( {
+					set: () => {},
+				} ),
+			};
 
 			insertBlocks(
 				blocks,
@@ -588,18 +727,75 @@ describe( 'actions', () => {
 				false,
 				0,
 				meta
-			)( { select, dispatch } );
+			)( { select, dispatch, registry } );
 
 			expect( dispatch ).toHaveBeenCalledWith( {
 				type: 'INSERT_BLOCKS',
 				blocks: [ ribsBlock, chickenRibsBlock ],
 				index: 5,
 				rootClientId: 'testrootid',
-				time: expect.any( Number ),
 				updateSelection: false,
 				initialPosition: null,
 				meta: { patternName: 'core/chicken-ribs-pattern' },
 			} );
+		} );
+
+		it( 'should set insertUsage in the preferences store', () => {
+			const ribsBlock = {
+				clientId: 'ribs',
+				name: 'core/test-ribs',
+			};
+			const chickenBlock = {
+				clientId: 'chicken',
+				name: 'core/test-chicken',
+			};
+			const blocks = [ ribsBlock, chickenBlock ];
+
+			const select = {
+				getSettings: () => null,
+				canInsertBlockType: () => true,
+			};
+			const dispatch = () => {};
+			const preferencesSet = jest.fn();
+			const registry = {
+				select: () => ( {
+					get: () => ( {} ),
+					// Throw in a block variation, to make sure that information
+					// is tracked.
+					getActiveBlockVariation: ( blockName ) =>
+						blockName === 'core/test-chicken'
+							? { name: 'wings' }
+							: undefined,
+				} ),
+				dispatch: () => ( {
+					set: preferencesSet,
+				} ),
+			};
+
+			insertBlocks(
+				blocks,
+				5,
+				'testrootid',
+				false,
+				0
+			)( { select, dispatch, registry } );
+
+			expect( preferencesSet ).toHaveBeenCalledWith(
+				'core',
+				'insertUsage',
+				{
+					'core/test-chicken/wings': {
+						count: 1,
+						insert: { name: 'core/test-chicken/wings' },
+						time: expect.any( Number ),
+					},
+					'core/test-ribs': {
+						count: 1,
+						insert: { name: 'core/test-ribs' },
+						time: expect.any( Number ),
+					},
+				}
+			);
 		} );
 	} );
 
@@ -888,7 +1084,6 @@ describe( 'actions', () => {
 				type: 'REPLACE_INNER_BLOCKS',
 				blocks: [ block ],
 				rootClientId: 'root',
-				time: expect.any( Number ),
 				updateSelection: false,
 				initialPosition: null,
 			} );
@@ -899,7 +1094,6 @@ describe( 'actions', () => {
 				type: 'REPLACE_INNER_BLOCKS',
 				blocks: [ block ],
 				rootClientId: 'root',
-				time: expect.any( Number ),
 				updateSelection: true,
 				initialPosition: 0,
 			} );

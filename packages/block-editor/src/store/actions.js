@@ -935,7 +935,6 @@ export function replaceInnerBlocks(
 		blocks,
 		updateSelection,
 		initialPosition: updateSelection ? initialPosition : null,
-		time: Date.now(),
 	};
 }
 

@@ -61,6 +61,7 @@ const MILLISECONDS_PER_WEEK = 7 * 24 * 3600 * 1000;
  * @type {Array}
  */
 const EMPTY_ARRAY = [];
+const EMPTY_OBJECT = {};
 
 /**
  * Returns a block's name given its client ID, or null if no block exists with
@@ -1456,7 +1457,7 @@ export function canMoveBlocks( state, clientIds, rootClientId = null ) {
  */
 export const __unstableGetInsertUsage = createRegistrySelector(
 	( select ) => () =>
-		select( preferencesStore ).get( 'core', 'insertUsage' ) ?? {}
+		select( preferencesStore ).get( 'core', 'insertUsage' ) ?? EMPTY_OBJECT
 );
 
 /**
@@ -1827,7 +1828,7 @@ export const getBlockTransformItems = createSelector(
 	( state, rootClientId ) => [
 		state.blockListSettings[ rootClientId ],
 		state.blocks.byClientId,
-		__unstableGetInsertUsage,
+		__unstableGetInsertUsage(),
 		state.settings.allowedBlockTypes,
 		state.settings.templateLock,
 		getBlockTypes(),
