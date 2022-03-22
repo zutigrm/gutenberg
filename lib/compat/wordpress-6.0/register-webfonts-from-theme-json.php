@@ -77,13 +77,12 @@ function gutenberg_add_registered_webfonts_to_theme_json( $data ) {
 	}
 
 	foreach ( $font_families_registered as $slug => $font_faces_for_family ) {
-		$family = $font_faces_for_family[0]['font-family'];
-
+		$family     = $font_faces_for_family[0]->get_font()['font-family'];
 		$font_faces = array();
 
 		foreach ( $font_faces_for_family as $font_face ) {
 			$camel_cased = array( 'origin' => 'gutenberg_wp_webfonts_api' );
-			foreach ( $font_face as $key => $value ) {
+			foreach ( $font_face->get_font() as $key => $value ) {
 				$camel_cased[ lcfirst( str_replace( '-', '', ucwords( $key, '-' ) ) ) ] = $value;
 			}
 			$font_faces[] = $camel_cased;
