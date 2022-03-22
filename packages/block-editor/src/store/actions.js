@@ -371,7 +371,7 @@ export const replaceBlocks = (
 	indexToSelect,
 	initialPosition = 0,
 	meta
-) => ( { select, dispatch, registry } ) => {
+) => ( { select, dispatch } ) => {
 	/* eslint-enable jsdoc/valid-types */
 	clientIds = castArray( clientIds );
 	blocks = getBlocksWithDefaultStylesApplied(
@@ -391,7 +391,7 @@ export const replaceBlocks = (
 		}
 	}
 
-	updateInsertUsage( blocks, registry );
+	dispatch.updateInsertUsage( blocks );
 	dispatch( {
 		type: 'REPLACE_BLOCKS',
 		clientIds,
@@ -544,13 +544,11 @@ export function insertBlock(
 }
 
 /**
- * Helper function that updates the insertion usage stats in the preferences
- * store whenever a block is inserter or replaced.
+ * Updates the inserter usage statistics in the preferences store.
  *
- * @param {Array}  blocks   The array of blocks that were inserted.
- * @param {Object} registry The data registry.
+ * @param {Array} blocks The array of blocks that were inserted.
  */
-function updateInsertUsage( blocks, registry ) {
+export const updateInsertUsage = ( blocks ) => ( { registry } ) => {
 	const previousInsertUsage =
 		registry.select( preferencesStore ).get( 'core', 'insertUsage' ) ?? {};
 
@@ -567,7 +565,7 @@ function updateInsertUsage( blocks, registry ) {
 		let id = match?.name ? `${ blockName }/${ match.name }` : blockName;
 		const _insert = { name: id };
 		if ( blockName === 'core/block' ) {
-			insert.ref = attributes.ref;
+			_insert.ref = attributes.ref;
 			id += '/' + attributes.ref;
 		}
 
@@ -586,7 +584,7 @@ function updateInsertUsage( blocks, registry ) {
 	registry
 		.dispatch( preferencesStore )
 		.set( 'core', 'insertUsage', updatedInsertUsage );
-}
+};
 
 /* eslint-disable jsdoc/valid-types */
 /**
@@ -607,7 +605,7 @@ export const insertBlocks = (
 	updateSelection = true,
 	initialPosition = 0,
 	meta
-) => ( { select, dispatch, registry } ) => {
+) => ( { select, dispatch } ) => {
 	/* eslint-enable jsdoc/valid-types */
 	if ( isObject( initialPosition ) ) {
 		meta = initialPosition;
@@ -630,7 +628,7 @@ export const insertBlocks = (
 		}
 	}
 	if ( allowedBlocks.length ) {
-		updateInsertUsage( blocks, registry );
+		dispatch.updateInsertUsage( blocks );
 		dispatch( {
 			type: 'INSERT_BLOCKS',
 			blocks: allowedBlocks,
