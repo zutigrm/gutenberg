@@ -16,7 +16,7 @@ class WP_Webfont_Registry {
 	}
 
 	public function has_font_family_in_registry( $slug ) {
-		return isset( $this->font_familes[ $slug ] );
+		return isset( $this->font_families[ $slug ] );
 	}
 
 	public function register_font_family( $font_family ) {

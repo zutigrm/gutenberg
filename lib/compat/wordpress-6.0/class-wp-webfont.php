@@ -18,7 +18,7 @@ class WP_Webfont {
 
 	public function update_font( $updates ) {
 		$this->font_face = array_merge( $this->font_face, $updates );
-		return $this->font;
+		return $this->font_face;
 	}
 
 	public function is_equal( $given_font_face ) {

@@ -268,7 +268,7 @@ class WP_Webfonts {
 
 		// Grab only the font face declarations from $font_families.
 		foreach ( $font_families as $font_family ) {
-			foreach ( $font_family as $font_face ) {
+			foreach ( $font_family->get_font_faces() as $font_face ) {
 				$webfonts[] = $font_face;
 			}
 		}
