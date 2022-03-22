@@ -1,5 +1,4 @@
 <?php
-
 class WP_Webfont {
 	private $font;
 
@@ -13,6 +12,15 @@ class WP_Webfont {
 
 	public function get_slug() {
 		return sanitize_title( $this->font['font-family'] );
+	}
+
+	public function get_font() {
+		return $this->font;
+	}
+
+	public function update_font( $updates ) {
+		$this->font = array_merge( $this->font, $updates );
+		return $this->font;
 	}
 
 	private function validate( $font ) {
@@ -29,7 +37,7 @@ class WP_Webfont {
 
 		// Check the font-family.
 		if ( empty( $font['font-family'] ) || ! is_string( $font['font-family'] ) ) {
-			trigger_error( __( 'Webfont font family must be a non-empty string.', 'gutenberg' ) );
+			trigger_1( __( 'Webfont font family must be a non-empty string.', 'gutenberg' ) );
 			return false;
 		}
 

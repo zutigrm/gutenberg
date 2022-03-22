@@ -196,7 +196,7 @@ class WP_Webfonts {
 		// Group webfonts by provider.
 		$webfonts_by_provider = array();
 		foreach ( $webfonts as $slug => $webfont ) {
-			$provider = $webfont['provider'];
+			$provider = $webfont->get_font()['provider'];
 			if ( ! isset( $providers[ $provider ] ) ) {
 				/* translators: %s is the provider name. */
 				error_log( sprintf( __( 'Webfont provider "%s" is not registered.', 'gutenberg' ), $provider ) );

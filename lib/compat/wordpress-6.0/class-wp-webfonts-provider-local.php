@@ -100,18 +100,20 @@ class WP_Webfonts_Provider_Local extends WP_Webfonts_Provider {
 	 *
 	 * @since 6.0.0
 	 *
-	 * @param array $webfont Webfont to process.
-	 * @return array
+	 * @param object $webfont Webfont to process.
+	 * @return object
 	 */
-	private function order_src( array $webfont ) {
-		if ( ! is_array( $webfont['src'] ) ) {
-			$webfont['src'] = (array) $webfont['src'];
+	private function order_src( $webfont ) {
+		$font_face = $webfont->get_font();
+
+		if ( ! is_array( $font_face['src'] ) ) {
+			$font_face['src'] = (array) $font_face['src'];
 		}
 
 		$src         = array();
 		$src_ordered = array();
 
-		foreach ( $webfont['src'] as $url ) {
+		foreach ( $font_face['src'] as $url ) {
 			// Add data URIs first.
 			if ( 0 === strpos( trim( $url ), 'data:' ) ) {
 				$src_ordered[] = array(
@@ -163,7 +165,7 @@ class WP_Webfonts_Provider_Local extends WP_Webfonts_Provider {
 				'format' => 'opentype',
 			);
 		}
-		$webfont['src'] = $src_ordered;
+		$webfont->update_font( array( 'src' => $src_ordered ) );
 
 		return $webfont;
 	}
@@ -173,22 +175,23 @@ class WP_Webfonts_Provider_Local extends WP_Webfonts_Provider {
 	 *
 	 * @since 6.0.0
 	 *
-	 * @param array $webfont Webfont to process.
+	 * @param object $webfont Webfont to process.
 	 * @return string This font-family's CSS.
 	 */
-	private function build_font_face_css( array $webfont ) {
+	private function build_font_face_css( $webfont ) {
+		$font_face = $webfont->get_font();
 		$css = '';
 
 		// Wrap font-family in quotes if it contains spaces.
 		if (
-			false !== strpos( $webfont['font-family'], ' ' ) &&
-			false === strpos( $webfont['font-family'], '"' ) &&
-			false === strpos( $webfont['font-family'], "'" )
+			false !== strpos( $font_face['font-family'], ' ' ) &&
+			false === strpos( $font_face['font-family'], '"' ) &&
+			false === strpos( $font_face['font-family'], "'" )
 		) {
-			$webfont['font-family'] = '"' . $webfont['font-family'] . '"';
+			$font_face['font-family'] = '"' . $font_face['font-family'] . '"';
 		}
 
-		foreach ( $webfont as $key => $value ) {
+		foreach ( $font_face as $key => $value ) {
 
 			// Skip "provider", since it's for internal API use,
 			// and not a valid CSS property.
@@ -198,7 +201,7 @@ class WP_Webfonts_Provider_Local extends WP_Webfonts_Provider {
 
 			// Compile the "src" parameter.
 			if ( 'src' === $key ) {
-				$value = $this->compile_src( $webfont['font-family'], $value );
+				$value = $this->compile_src( $font_face['font-family'], $value );
 			}
 
 			// If font-variation-settings is an array, convert it to a string.
