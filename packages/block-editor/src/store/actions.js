@@ -16,11 +16,13 @@ import {
 	hasBlockSupport,
 	switchToBlockType,
 	synchronizeBlocksWithTemplate,
+	store as blocksStore,
 } from '@wordpress/blocks';
 import { speak } from '@wordpress/a11y';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { create, insert, remove, toHTMLString } from '@wordpress/rich-text';
 import deprecated from '@wordpress/deprecated';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 /**
  * Action which will insert a default block insert action if there
@@ -369,7 +371,7 @@ export const replaceBlocks = (
 	indexToSelect,
 	initialPosition = 0,
 	meta
-) => ( { select, dispatch } ) => {
+) => ( { select, dispatch, registry } ) => {
 	/* eslint-enable jsdoc/valid-types */
 	clientIds = castArray( clientIds );
 	blocks = getBlocksWithDefaultStylesApplied(
@@ -388,11 +390,12 @@ export const replaceBlocks = (
 			return;
 		}
 	}
+
+	updateInsertUsage( blocks, registry );
 	dispatch( {
 		type: 'REPLACE_BLOCKS',
 		clientIds,
 		blocks,
-		time: Date.now(),
 		indexToSelect,
 		initialPosition,
 		meta,
@@ -540,6 +543,51 @@ export function insertBlock(
 	);
 }
 
+/**
+ * Helper function that updates the insertion usage stats in the preferences
+ * store whenever a block is inserter or replaced.
+ *
+ * @param {Array}  blocks   The array of blocks that were inserted.
+ * @param {Object} registry The data registry.
+ */
+function updateInsertUsage( blocks, registry ) {
+	const previousInsertUsage =
+		registry.select( preferencesStore ).get( 'core', 'insertUsage' ) ?? {};
+
+	const time = Date.now();
+
+	const updatedInsertUsage = blocks.reduce( ( previousState, block ) => {
+		const { attributes, name: blockName } = block;
+		const match = registry
+			.select( blocksStore )
+			.getActiveBlockVariation( blockName, attributes );
+
+		// If a block variation match is found change the name to be the same with the
+		// one that is used for block variations in the Inserter (`getItemFromVariation`).
+		let id = match?.name ? `${ blockName }/${ match.name }` : blockName;
+		const _insert = { name: id };
+		if ( blockName === 'core/block' ) {
+			insert.ref = attributes.ref;
+			id += '/' + attributes.ref;
+		}
+
+		const previousCount = previousState?.[ id ]?.count ?? 0;
+
+		return {
+			...previousState,
+			[ id ]: {
+				time,
+				count: previousCount + 1,
+				insert: _insert,
+			},
+		};
+	}, previousInsertUsage );
+
+	registry
+		.dispatch( preferencesStore )
+		.set( 'core', 'insertUsage', updatedInsertUsage );
+}
+
 /* eslint-disable jsdoc/valid-types */
 /**
  * Action that inserts an array of blocks, optionally at a specific index respective a root block list.
@@ -559,7 +607,7 @@ export const insertBlocks = (
 	updateSelection = true,
 	initialPosition = 0,
 	meta
-) => ( { select, dispatch } ) => {
+) => ( { select, dispatch, registry } ) => {
 	/* eslint-enable jsdoc/valid-types */
 	if ( isObject( initialPosition ) ) {
 		meta = initialPosition;
@@ -582,12 +630,12 @@ export const insertBlocks = (
 		}
 	}
 	if ( allowedBlocks.length ) {
+		updateInsertUsage( blocks, registry );
 		dispatch( {
 			type: 'INSERT_BLOCKS',
 			blocks: allowedBlocks,
 			index,
 			rootClientId,
-			time: Date.now(),
 			updateSelection,
 			initialPosition: updateSelection ? initialPosition : null,
 			meta,

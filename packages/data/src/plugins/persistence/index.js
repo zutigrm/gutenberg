@@ -300,9 +300,18 @@ export function migrateFeaturePreferencesToPreferencesStore(
 	}
 }
 
+/**
+ * Migrates an individual item inside the `preferences` object for a store.
+ *
+ * @param {Object} persistence   The persistence interface.
+ * @param {Object} migrate       An options object that contains details of the migration.
+ * @param {string} migrate.from  The name of the store to migrate from.
+ * @param {string} migrate.scope The scope in the preferences store to migrate to.
+ * @param {string} key           The key in the preferences object to migrate.
+ */
 export function migrateIndividualPreferenceToPreferencesStore(
 	persistence,
-	sourceStoreName,
+	{ from: sourceStoreName, scope },
 	key
 ) {
 	const preferencesStoreName = 'core/preferences';
@@ -315,9 +324,7 @@ export function migrateIndividualPreferenceToPreferencesStore(
 	}
 
 	const targetPreference =
-		state[ preferencesStoreName ]?.preferences?.[ sourceStoreName ]?.[
-			key
-		];
+		state[ preferencesStoreName ]?.preferences?.[ scope ]?.[ key ];
 
 	// There's existing data at the target, so don't overwrite it, exit early.
 	if ( targetPreference ) {
@@ -326,12 +333,12 @@ export function migrateIndividualPreferenceToPreferencesStore(
 
 	const allPreferences = state[ preferencesStoreName ]?.preferences;
 	const targetPreferences =
-		state[ preferencesStoreName ]?.preferences?.[ sourceStoreName ];
+		state[ preferencesStoreName ]?.preferences?.[ scope ];
 
 	persistence.set( preferencesStoreName, {
 		preferences: {
 			...allPreferences,
-			[ sourceStoreName ]: {
+			[ scope ]: {
 				...targetPreferences,
 				[ key ]: sourcePreference,
 			},
@@ -427,23 +434,28 @@ persistencePlugin.__unstableMigrate = ( pluginOptions ) => {
 	// Other ad-hoc preferences.
 	migrateIndividualPreferenceToPreferencesStore(
 		persistence,
-		'core/edit-post',
+		{ from: 'core/edit-post', scope: 'core/edit-post' },
 		'hiddenBlockTypes'
 	);
 	migrateIndividualPreferenceToPreferencesStore(
 		persistence,
-		'core/edit-post',
+		{ from: 'core/edit-post', scope: 'core/edit-post' },
 		'editorMode'
 	);
 	migrateIndividualPreferenceToPreferencesStore(
 		persistence,
-		'core/edit-post',
+		{ from: 'core/edit-post', scope: 'core/edit-post' },
 		'preferredStyleVariations'
 	);
 	migrateIndividualPreferenceToPreferencesStore(
 		persistence,
-		'core/edit-site',
+		{ from: 'core/edit-site', scope: 'core/edit-site' },
 		'editorMode'
+	);
+	migrateIndividualPreferenceToPreferencesStore(
+		persistence,
+		{ from: 'core/block-editor', scope: 'core' },
+		'insertUsage'
 	);
 };
 
