@@ -16,7 +16,7 @@ class WP_Webfonts {
 	 * @access private
 	 * @var WP_Webfont_Registry
 	 */
-	private $registered_webfonts = new WP_Webfont_Registry();
+	private $registered_webfonts;
 
 	/**
 	 * An array of enqueued webfonts.
@@ -24,7 +24,7 @@ class WP_Webfonts {
 	 * @access private
 	 * @var WP_Webfont_Registry
 	 */
-	private $enqueued_webfonts = new WP_Webfont_Registry();
+	private $enqueued_webfonts;
 
 	/**
 	 * An array of registered providers.
@@ -45,6 +45,8 @@ class WP_Webfonts {
 	 * Init.
 	 */
 	public function init() {
+		$this->registered_webfonts = new WP_Webfont_Registry();
+		$this->enqueued_webfonts   = new WP_Webfont_Registry();
 
 		// Register default providers.
 		$this->register_provider( 'local', 'WP_Webfonts_Provider_Local' );
