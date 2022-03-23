@@ -160,7 +160,7 @@ class WP_Webfonts {
 	 *
 	 * @param array|string $to_convert The value to convert into a slug. Expected as the web font's array or a font-family as a string.
 	 */
-	private function get_font_slug( $to_convert ) {
+	public static function get_font_slug( $to_convert ) {
 		if ( is_array( $to_convert ) ) {
 			$to_convert = $to_convert['font-family'];
 		}
