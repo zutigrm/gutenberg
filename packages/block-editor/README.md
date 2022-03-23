@@ -161,6 +161,10 @@ Undocumented declaration.
 
 Undocumented declaration.
 
+### BlockManager
+
+Undocumented declaration.
+
 ### BlockMover
 
 Undocumented declaration.
