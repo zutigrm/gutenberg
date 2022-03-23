@@ -1247,7 +1247,7 @@ const canInsertBlockTypeUnmemoized = (
 		return false;
 	}
 
-	const { allowedBlockTypes } = getSettings( state );
+	const { allowedBlockTypes, hiddenBlockTypes } = getSettings( state );
 
 	const isBlockAllowedInEditor = checkAllowList(
 		allowedBlockTypes,
@@ -1255,6 +1255,10 @@ const canInsertBlockTypeUnmemoized = (
 		true
 	);
 	if ( ! isBlockAllowedInEditor ) {
+		return false;
+	}
+
+	if ( hiddenBlockTypes?.includes( blockName ) ) {
 		return false;
 	}
 
@@ -1338,6 +1342,7 @@ export const canInsertBlockType = createSelector(
 		state.blockListSettings[ rootClientId ],
 		state.blocks.byClientId[ rootClientId ],
 		state.settings.allowedBlockTypes,
+		state.settings.hiddenBlockTypes,
 		state.settings.templateLock,
 	]
 );
@@ -1734,6 +1739,7 @@ export const getInserterItems = createSelector(
 		state.blocks.order,
 		state.preferences.insertUsage,
 		state.settings.allowedBlockTypes,
+		state.settings.hiddenBlockTypes,
 		state.settings.templateLock,
 		getReusableBlocks( state ),
 		getBlockTypes(),
@@ -1831,6 +1837,7 @@ export const hasInserterItems = createSelector(
 		state.blockListSettings[ rootClientId ],
 		state.blocks.byClientId,
 		state.settings.allowedBlockTypes,
+		state.settings.hiddenBlockTypes,
 		state.settings.templateLock,
 		getReusableBlocks( state ),
 		getBlockTypes(),
