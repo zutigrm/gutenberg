@@ -7,13 +7,13 @@ import { __ } from '@wordpress/i18n';
 
 export default function BlockManagerShowAll( { checked, onChange } ) {
 	const instanceId = useInstanceId( BlockManagerShowAll );
-	const id = 'edit-post-block-manager__show-all-' + instanceId;
+	const id = 'block-editor-block-manager__show-all-' + instanceId;
 
 	return (
-		<div className="edit-post-block-manager__show-all">
+		<div className="block-editor-block-manager__show-all">
 			<label
 				htmlFor={ id }
-				className="edit-post-block-manager__show-all-label"
+				className="block-editor-block-manager__show-all-label"
 			>
 				{
 					/* translators: Checkbox toggle label */
