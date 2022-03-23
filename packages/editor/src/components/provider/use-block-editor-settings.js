@@ -98,6 +98,7 @@ function useBlockEditorSettings( settings, hasTemplate ) {
 				'bodyPlaceholder',
 				'codeEditingEnabled',
 				'colors',
+				'defaultAllowedBlockTypes',
 				'disableCustomColors',
 				'disableCustomFontSizes',
 				'disableCustomGradients',
