@@ -101,10 +101,14 @@ function gutenberg_generate_block_templates_export_file() {
 	$tree->merge( WP_Theme_JSON_Resolver_Gutenberg::get_user_data() );
 	$theme_json_raw = $tree->get_data();
 	// If a version is defined, add a schema.
-	if ( $theme_json_raw['version'] && in_array( $theme_json_raw['version'], array( "1", "2" ) ) ) {
-		// Put $schema at the start of the array.
+	if ( $theme_json_raw['version'] ) {
+		global $wp_version;
+		$theme_json_version = substr( $wp_version, 0, strpos( $wp_version, '-' ) );
+		if ( defined( 'IS_GUTENBERG_PLUGIN' ) ) {
+			$theme_json_version = 'trunk';
+		}
 		$theme_json_raw = array_reverse( $theme_json_raw );
-		$theme_json_raw['$schema'] = "https://json.schemastore.org/theme-v1.json";
+		$theme_json_raw['$schema'] = 'https://schemas.wp.org/wp/' . $theme_json_version . '/theme.json';
 		$theme_json_raw = array_reverse( $theme_json_raw );
 	}
 
