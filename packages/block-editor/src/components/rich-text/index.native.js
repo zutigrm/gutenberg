@@ -64,7 +64,10 @@ const classes = 'block-editor-rich-text__editable';
 
 function minMaxInteger( value ) {
 	const int32bit = Math.pow( 2, 31 );
-	return Math.min( Math.max( value, -1 * ( int32bit - 1 ) ), int32bit - 1 );
+	return Math.min(
+		Math.max( parseInt( value, 10 ), -1 * ( int32bit - 1 ) ),
+		int32bit - 1
+	);
 }
 
 function RichTextWrapper(
