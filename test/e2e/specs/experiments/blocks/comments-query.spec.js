@@ -8,7 +8,6 @@ import {
 	pressKeyTimes,
 	publishPost,
 	setOption,
-	trashAllComments,
 } from '@wordpress/e2e-test-utils';
 
 test.describe( 'Comment Query Loop', () => {
@@ -89,7 +88,7 @@ test.describe( 'Comment Query Loop', () => {
 		).not.toBeNull();
 	} );
 	test.afterAll( async ( { requestUtils } ) => {
-		await trashAllComments();
+		await requestUtils.trashAllComments();
 		await requestUtils.activateTheme( 'twentytwentyone' );
 		await setOption( 'page_comments', previousPageComments );
 		await setOption( 'comments_per_page', previousCommentsPerPage );
