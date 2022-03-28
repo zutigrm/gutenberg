@@ -10,6 +10,11 @@ import {
 	setOption,
 } from '@wordpress/e2e-test-utils';
 
+/**
+ * @typedef {import('@playwright/test').Page} Page
+ * @typedef {import('@wordpress/e2e-test-utils-playwright').RequestUtils} RequestUtils
+ */
+
 test.describe( 'Comment Query Loop', () => {
 	let previousPageComments,
 		previousCommentsPerPage,
