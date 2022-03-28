@@ -3,7 +3,6 @@
  */
 const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 import {
-	activateTheme,
 	createNewPost,
 	insertBlock,
 	pressKeyTimes,
@@ -16,8 +15,8 @@ test.describe( 'Comment Query Loop', () => {
 	let previousPageComments,
 		previousCommentsPerPage,
 		previousDefaultCommentsPage;
-	test.beforeAll( async () => {
-		await activateTheme( 'emptytheme' );
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activateTheme( 'emptytheme' );
 		previousPageComments = await setOption( 'page_comments', '1' );
 		previousCommentsPerPage = await setOption( 'comments_per_page', '1' );
 		previousDefaultCommentsPage = await setOption(
@@ -89,9 +88,9 @@ test.describe( 'Comment Query Loop', () => {
 			await page.$( '.wp-block-comments-pagination-next' )
 		).not.toBeNull();
 	} );
-	test.afterAll( async () => {
+	test.afterAll( async ( { requestUtils } ) => {
 		await trashAllComments();
-		await activateTheme( 'twentytwentyone' );
+		await requestUtils.activateTheme( 'twentytwentyone' );
 		await setOption( 'page_comments', previousPageComments );
 		await setOption( 'comments_per_page', previousCommentsPerPage );
 		await setOption( 'default_comments_page', previousDefaultCommentsPage );
