@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+const { test, expect } = require( '@wordpress/e2e-test-utils-playwright' );
 import {
 	activateTheme,
 	createNewPost,
@@ -11,11 +12,11 @@ import {
 	trashAllComments,
 } from '@wordpress/e2e-test-utils';
 
-describe( 'Comment Query Loop', () => {
+test.describe( 'Comment Query Loop', () => {
 	let previousPageComments,
 		previousCommentsPerPage,
 		previousDefaultCommentsPage;
-	beforeAll( async () => {
+	test.beforeAll( async () => {
 		await activateTheme( 'emptytheme' );
 		previousPageComments = await setOption( 'page_comments', '1' );
 		previousCommentsPerPage = await setOption( 'comments_per_page', '1' );
@@ -24,10 +25,10 @@ describe( 'Comment Query Loop', () => {
 			'newest'
 		);
 	} );
-	beforeEach( async () => {
+	test.beforeEach( async () => {
 		await createNewPost();
 	} );
-	it( 'Pagination links are working as expected', async () => {
+	test( 'Pagination links are working as expected', async ( { page } ) => {
 		// Insert the Query Comment Loop block.
 		await insertBlock( 'Comments Query Loop' );
 		// Insert the Comment Loop form.
@@ -88,7 +89,7 @@ describe( 'Comment Query Loop', () => {
 			await page.$( '.wp-block-comments-pagination-next' )
 		).not.toBeNull();
 	} );
-	afterAll( async () => {
+	test.afterAll( async () => {
 		await trashAllComments();
 		await activateTheme( 'twentytwentyone' );
 		await setOption( 'page_comments', previousPageComments );
