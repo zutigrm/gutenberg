@@ -884,6 +884,34 @@ describe( 'Navigation', () => {
 			newMenuButton.click();
 		}
 
+		it( 'retains uncontrolled inner blocks by default', async () => {
+			await createNewPost();
+			await clickOnMoreMenuItem( 'Code editor' );
+			const codeEditorInput = await page.waitForSelector(
+				'.editor-post-text-editor'
+			);
+			await codeEditorInput.click();
+
+			const markup =
+				'<!-- wp:navigation --><!-- wp:page-list /--><!-- /wp:navigation -->';
+			await page.keyboard.type( markup );
+			await clickButton( 'Exit code editor' );
+
+			const navBlock = await waitForBlock( 'Navigation' );
+
+			// Select the block
+			await navBlock.click();
+
+			const hasUncontrolledInnerBlocks = await page.evaluate( () => {
+				const blocks = wp.data
+					.select( 'core/block-editor' )
+					.getBlocks();
+				return !! blocks[ 0 ]?.innerBlocks?.length;
+			} );
+
+			expect( hasUncontrolledInnerBlocks ).toBe( true );
+		} );
+
 		it( 'does not retain uncontrolled inner blocks when creating a new entity', async () => {
 			await createNewPost();
 			await clickOnMoreMenuItem( 'Code editor' );
