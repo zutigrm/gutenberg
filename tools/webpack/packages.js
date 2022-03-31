@@ -20,12 +20,17 @@ const { dependencies } = require( '../../package' );
 const { baseConfig, plugins, stylesTransform } = require( './shared' );
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
+
+// Experimental or other packages should be private are bundled when used.
+// We can iterate on these package without making them part of the public API.
+// See: https://github.com/WordPress/gutenberg/pull/19809
 const BUNDLED_PACKAGES = [
 	'@wordpress/icons',
 	'@wordpress/interface',
 	'@wordpress/style-engine',
 ];
-// PHP files in packages that have to be copied over to /lib.
+
+// PHP files in packages that have to be copied during build.
 const BUNDLED_PACKAGES_PHP = [
 	{
 		from: './packages/style-engine/',
