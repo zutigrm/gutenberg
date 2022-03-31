@@ -11,9 +11,10 @@ import {
 	Icon,
 	Modal,
 } from '@wordpress/components';
-import { dragHandle, trash } from '@wordpress/icons';
+import { edit as editIcon, dragHandle, trash } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { isReusableBlock, getBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -22,19 +23,28 @@ import useBlockDisplayInformation from '../use-block-display-information';
 import { store as blockEditorStore } from '../../store';
 
 export default function BlockLockModal( { clientId, onClose } ) {
-	const [ lock, setLock ] = useState( { move: false, remove: false } );
-	const { canMove, canRemove } = useSelect(
+	const [ lock, setLock ] = useState( {
+		edit: false,
+		move: false,
+		remove: false,
+	} );
+	const { canEdit, canMove, canRemove, isReusable } = useSelect(
 		( select ) => {
 			const {
+				canEditBlock,
 				canMoveBlock,
 				canRemoveBlock,
+				getBlockName,
 				getBlockRootClientId,
 			} = select( blockEditorStore );
 			const rootClientId = getBlockRootClientId( clientId );
+			const blockName = getBlockName( clientId );
 
 			return {
+				canEdit: canEditBlock( clientId ),
 				canMove: canMoveBlock( clientId, rootClientId ),
 				canRemove: canRemoveBlock( clientId, rootClientId ),
+				isReusable: isReusableBlock( getBlockType( blockName ) ),
 			};
 		},
 		[ clientId ]
@@ -48,10 +58,11 @@ export default function BlockLockModal( { clientId, onClose } ) {
 
 	useEffect( () => {
 		setLock( {
+			edit: ! canEdit,
 			move: ! canMove,
 			remove: ! canRemove,
 		} );
-	}, [ canMove, canRemove ] );
+	}, [ canEdit, canMove, canRemove ] );
 
 	const isAllChecked = Object.values( lock ).every( Boolean );
 
@@ -101,12 +112,32 @@ export default function BlockLockModal( { clientId, onClose } ) {
 						aria-checked={ ariaChecked }
 						onChange={ ( newValue ) =>
 							setLock( {
+								edit: isReusable ? newValue : undefined,
 								move: newValue,
 								remove: newValue,
 							} )
 						}
 					/>
 					<ul className="block-editor-block-lock-modal__checklist">
+						{ isReusable && (
+							<li className="block-editor-block-lock-modal__checklist-item">
+								<CheckboxControl
+									label={
+										<>
+											{ __( 'Restrict editing' ) }
+											<Icon icon={ editIcon } />
+										</>
+									}
+									checked={ lock.edit }
+									onChange={ ( edit ) =>
+										setLock( ( prevLock ) => ( {
+											...prevLock,
+											edit,
+										} ) )
+									}
+								/>
+							</li>
+						) }
 						<li className="block-editor-block-lock-modal__checklist-item">
 							<CheckboxControl
 								label={
