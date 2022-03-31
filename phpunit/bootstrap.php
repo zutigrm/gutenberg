@@ -48,19 +48,19 @@ function _manually_load_plugin() {
 	/**
 	 * Manually load plugin dependencies.
 	 */
-	 // HACK ******* WARNING ****** EXPERIMENTAL HACK
-	if ( ! file_exists(dirname( __DIR__ ) . '/lib/packages' ) ) {
-	    mkdir( dirname( __DIR__ ) . '/lib/packages', 0777, true );
-	}
-
-	if ( ! file_exists( dirname( __DIR__ ) . '/lib/packages/class-wp-style-engine-gutenberg.php' ) ) {
-		copy( dirname( __DIR__ ) . '/packages/style-engine/class-wp-style-engine.php', dirname( __DIR__ ) . '/lib/packages/class-wp-style-engine-gutenberg.php' );
-		$contents = file_get_contents( dirname( __DIR__ ) . '/lib/packages/class-wp-style-engine-gutenberg.php' );
-		$patterns = array( '/WP_Style_Engine/', '/wp_get_style_engine/' );
-		$replace  = array( 'WP_Style_Engine_Gutenberg', 'gutenberg_get_style_engine' );
-		$contents = preg_replace( $patterns, $replace, $contents );
-		file_put_contents( dirname( __DIR__ ) . '/lib/packages/class-wp-style-engine-gutenberg.php', $contents );
-	}
+	// HACK ******* WARNING ****** EXPERIMENTAL HACK
+	// if ( ! file_exists(dirname( __DIR__ ) . '/build/style-engine' ) ) {
+	// mkdir( dirname( __DIR__ ) . '/build/style-engine', 0777, true );
+	// }
+	//
+	// if ( ! file_exists( dirname( __DIR__ ) . '/build/style-engine/class-wp-style-engine-gutenberg.php' ) ) {
+	// copy( dirname( __DIR__ ) . '/packages/style-engine/class-wp-style-engine.php', dirname( __DIR__ ) . '/build/style-engine/class-wp-style-engine-gutenberg.php' );
+	// $contents = file_get_contents( dirname( __DIR__ ) . '/build/style-engine/class-wp-style-engine-gutenberg.php' );
+	// $patterns = array( '/WP_Style_Engine/', '/wp_get_style_engine/' );
+	// $replace  = array( 'WP_Style_Engine_Gutenberg', 'gutenberg_get_style_engine' );
+	// $contents = preg_replace( $patterns, $replace, $contents );
+	// file_put_contents( dirname( __DIR__ ) . '/build/style-engine/class-wp-style-engine-gutenberg.php', $contents );
+	// }?
 
 	/**
 	 * Manually load plugin.

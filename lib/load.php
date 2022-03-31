@@ -123,8 +123,8 @@ require __DIR__ . '/experiments-page.php';
 require __DIR__ . '/global-styles.php';
 
 // Copied package PHP files.
-if ( file_exists( __DIR__ . '/packages/class-wp-style-engine-gutenberg.php' ) ) {
-	require __DIR__ . '/packages/class-wp-style-engine-gutenberg.php';
+if ( file_exists( __DIR__ . '/../build/style-engine/class-wp-style-engine-gutenberg.php' ) ) {
+	require_once __DIR__ . '/../build/style-engine/class-wp-style-engine-gutenberg.php';
 }
 
 require __DIR__ . '/block-supports/utils.php';

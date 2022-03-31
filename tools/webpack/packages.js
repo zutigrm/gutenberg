@@ -21,8 +21,8 @@ const { baseConfig, plugins, stylesTransform } = require( './shared' );
 
 const WORDPRESS_NAMESPACE = '@wordpress/';
 
-// Experimental or other packages should be private are bundled when used.
-// We can iterate on these package without making them part of the public API.
+// Experimental or other packages that should be private are bundled when used.
+// That way, we can iterate on these package without making them part of the public API.
 // See: https://github.com/WordPress/gutenberg/pull/19809
 const BUNDLED_PACKAGES = [
 	'@wordpress/icons',
@@ -31,13 +31,44 @@ const BUNDLED_PACKAGES = [
 ];
 
 // PHP files in packages that have to be copied during build.
-const BUNDLED_PACKAGES_PHP = [
+const bundledPackagesPhpConfig = [
 	{
 		from: './packages/style-engine/',
-		to: 'lib/packages/',
+		to: 'build/style-engine/',
 		replaceClasses: [ 'WP_Style_Engine' ],
 	},
-];
+].map( ( { from, to, replaceClasses } ) => ( {
+	from: `${ from }/*.php`,
+	to( { absoluteFilename } ) {
+		const [ , filename ] = absoluteFilename.match(
+			/([\w-]+)(\.php){1,1}$/
+		);
+		return join( to, `${ filename }-gutenberg.php` );
+	},
+	transform: ( content ) => {
+		const classSuffix = '_Gutenberg';
+		const functionPrefix = 'gutenberg_';
+		content = content.toString();
+		// Replace class names.
+		content = content.replace(
+			new RegExp( replaceClasses.join( '|' ), 'g' ),
+			( match ) => `${ match }${ classSuffix }`
+		);
+		// Replace function names.
+		content = Array.from(
+			content.matchAll( /^\s*function ([^\(]+)/gm )
+		).reduce( ( result, [ , functionName ] ) => {
+			// Prepend the Gutenberg prefix, substituting any
+			// other core prefix (e.g. "wp_").
+			return result.replace(
+				new RegExp( functionName, 'g' ),
+				( match ) => functionPrefix + match.replace( /^wp_/, '' )
+			);
+		}, content );
+		return content;
+	},
+} ) );
+
 const gutenbergPackages = Object.keys( dependencies )
 	.filter(
 		( packageName ) =>
@@ -111,52 +142,16 @@ module.exports = {
 		...plugins,
 		new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
 		new CopyWebpackPlugin( {
-			patterns: [].concat(
-				gutenbergPackages.map( ( packageName ) => ( {
+			patterns: gutenbergPackages
+				.map( ( packageName ) => ( {
 					from: '*.css',
+					context: `./packages/${ packageName }/build-style`,
 					to: `./build/${ packageName }`,
 					transform: stylesTransform,
 					noErrorOnMissing: true,
-				} ) ),
-				// Packages with PHP files to be parsed and copied to ./lib.
-				BUNDLED_PACKAGES_PHP.map(
-					( { from, to, replaceClasses } ) => ( {
-						from: `${ from }/*.php`,
-						to: ( { absoluteFilename } ) => {
-							const [ , filename ] = absoluteFilename.match(
-								/([\w-]+)(\.php){1,1}$/
-							);
-							return join( to, `${ filename }-gutenberg.php` );
-						},
-						transform: ( content ) => {
-							const classSuffix = '_Gutenberg';
-							const functionPrefix = 'gutenberg_';
-							content = content.toString();
-							// Replace class names.
-							content = content.replace(
-								new RegExp( replaceClasses.join( '|' ), 'g' ),
-								( match ) => `${ match }${ classSuffix }`
-							);
-							// Replace function names.
-							content = Array.from(
-								content.matchAll( /^\s*function ([^\(]+)/gm )
-							).reduce( ( result, [ , functionName ] ) => {
-								// Prepend the Gutenberg prefix, substituting any
-								// other core prefix (e.g. "wp_").
-								return result.replace(
-									new RegExp( functionName, 'g' ),
-									( match ) =>
-										functionPrefix +
-										match.replace( /^wp_/, '' )
-								);
-							}, content );
-							return content;
-						},
-						noErrorOnMissing: true,
-					} )
-				),
-				vendorsCopyConfig
-			),
+				} ) )
+				.concat( bundledPackagesPhpConfig )
+				.concat( vendorsCopyConfig ),
 		} ),
 	].filter( Boolean ),
 };
