@@ -20,19 +20,50 @@ function gutenberg_register_webfonts_from_theme_json() {
 	$webfonts = array();
 
 	// Look for fontFamilies.
-	foreach ( $theme_settings['typography']['fontFamilies'] as $font_families ) {
-		foreach ( $font_families as $font_family ) {
-
-			// Skip if fontFace is not defined.
-			if ( empty( $font_family['fontFace'] ) ) {
+	foreach ( $theme_settings['typography']['fontFamilies'] as $preset_font_families ) {
+		foreach ( $preset_font_families as $font_family ) {
+			// The whole font family is already registered programmatically, so we can skip it.
+			if ( isset( $font_family['origin'] ) && 'gutenberg_wp_webfonts_api' === $font_family['origin'] ) {
 				continue;
 			}
 
-			$font_family['fontFace'] = (array) $font_family['fontFace'];
+			// If a provider is set on the root level, they're trying to register
+			// a whole font family to the same provider. Let's do it!
+			if ( isset( $font_family['provider'] ) ) {
+				if ( empty( $font_family['fontFaces'] ) ) {
+					trigger_error(
+						sprint_r( 'The %s font family was going to be registered, but no font faces where declared.', $font_family['fontFamily'] )
+					);
+					continue;
+				}
 
-			foreach ( $font_family['fontFace'] as $font_face ) {
+				wp_register_webfonts(
+					array_map(
+						function( $font_face ) use ( $font_family ) {
+							$font_face['provider'] = $font_family['provider'];
+						},
+						$font_family['fontFaces']
+					)
+				);
+
+				continue;
+			}
+
+			// Skip if fontFaces are not defined.
+			if ( empty( $font_family['fontFaces'] ) ) {
+				continue;
+			}
+
+			$font_family['fontFaces'] = (array) $font_family['fontFaces'];
+
+			foreach ( $font_family['fontFaces'] as $font_face ) {
 				// Skip if the webfont was registered through the Webfonts API.
 				if ( isset( $font_face['origin'] ) && 'gutenberg_wp_webfonts_api' === $font_face['origin'] ) {
+					continue;
+				}
+
+				// Skip if there is no provider key in the font face.
+				if ( ! isset( $font_face['provider'] ) ) {
 					continue;
 				}
 
@@ -62,87 +93,10 @@ function gutenberg_register_webfonts_from_theme_json() {
 			}
 		}
 	}
+
 	foreach ( $webfonts as $webfont ) {
 		wp_webfonts()->register_webfont( $webfont );
 	}
-}
-
-/**
- * Add missing fonts data to the global styles.
- *
- * @param array $data The global styles.
- * @return array The global styles with missing fonts data.
- */
-function gutenberg_add_registered_webfonts_to_theme_json( $data ) {
-	$font_families_registered = wp_webfonts()->get_all_webfonts();
-	$font_families_from_theme = array();
-	if ( ! empty( $data['settings'] ) && ! empty( $data['settings']['typography'] ) && ! empty( $data['settings']['typography']['fontFamilies'] ) ) {
-		$font_families_from_theme = $data['settings']['typography']['fontFamilies'];
-	}
-
-	/**
-	 * Helper to get an array of the font-families.
-	 *
-	 * @param array $families_data The font-families data.
-	 * @return array The font-families array.
-	 */
-	$get_families = static function( $families_data ) {
-		$families = array();
-		foreach ( $families_data as $family ) {
-			$families[] = WP_Webfonts::get_font_slug( $family );
-		}
-
-		// Micro-optimization: Use array_flip( array_flip( $array ) )
-		// instead of array_unique( $array ) because it's faster.
-		// The result is the same.
-		return array_flip( array_flip( $families ) );
-	};
-
-	// Diff the arrays to find the missing fonts.
-	$to_add = array_diff(
-		array_keys( $font_families_registered ),
-		$get_families( $font_families_from_theme )
-	);
-
-	// Bail out early if there are no missing fonts.
-	if ( empty( $to_add ) ) {
-		return $data;
-	}
-
-	// Make sure the path to settings.typography.fontFamilies.theme exists
-	// before adding missing fonts.
-	if ( empty( $data['settings'] ) ) {
-		$data['settings'] = array();
-	}
-	if ( empty( $data['settings']['typography'] ) ) {
-		$data['settings']['typography'] = array();
-	}
-	if ( empty( $data['settings']['typography']['fontFamilies'] ) ) {
-		$data['settings']['typography']['fontFamilies'] = array();
-	}
-
-	foreach ( $to_add as $slug ) {
-		$font_faces_for_family = $font_families_registered[ $slug ];
-		$family_name           = $font_faces_for_family[0]['font-family'];
-		$font_faces            = array();
-
-		foreach ( $font_faces_for_family as $font_face ) {
-			$camel_cased = array( 'origin' => 'gutenberg_wp_webfonts_api' );
-			foreach ( $font_face as $key => $value ) {
-				$camel_cased[ lcfirst( str_replace( '-', '', ucwords( $key, '-' ) ) ) ] = $value;
-			}
-			$font_faces[] = $camel_cased;
-		}
-
-		$data['settings']['typography']['fontFamilies'][] = array(
-			'fontFamily' => str_contains( $family_name, ' ' ) ? "'{$family_name}'" : $family_name,
-			'name'       => $family_name,
-			'slug'       => $slug,
-			'fontFace'   => $font_faces,
-		);
-	}
-
-	return $data;
 }
 
 add_action( 'init', 'gutenberg_register_webfonts_from_theme_json' );

@@ -145,13 +145,14 @@ class WP_Webfonts {
 	/**
 	 * Enqueue a font-family that has been already registered.
 	 *
-	 * @param string $font_family_name The font family name to be enqueued.
+	 * @param string     $font_family_name The font family name to be enqueued.
+	 * @param array|null $font_face The font face to selectively enqueue.
 	 * @return bool True if successfully enqueued, else false.
 	 */
-	public function enqueue_webfont( $font_family_name ) {
+	public function enqueue_webfont( $font_family_name, $font_face = null ) {
 		$slug = $this->get_font_slug( $font_family_name );
 
-		if ( isset( $this->enqueued_webfonts[ $slug ] ) ) {
+		if ( isset( $this->enqueued_webfonts[ $slug ] ) && ! isset( $this->registered_webfonts[ $slug ] ) ) {
 			trigger_error(
 				sprintf(
 					/* translators: %s unique slug to identify the font family of the webfont */
@@ -170,9 +171,73 @@ class WP_Webfonts {
 			return false;
 		}
 
-		$this->enqueued_webfonts[ $slug ] = $this->registered_webfonts[ $slug ];
+		if ( ! $font_face ) {
+			$this->enqueued_webfonts[ $slug ] = $this->registered_webfonts[ $slug ];
+			unset( $this->registered_webfonts[ $slug ] );
+
+			return true;
+		}
+
+		$registered_font_faces = $this->registered_webfonts[ $slug ];
+		$font_face             = gutenberg_transform_font_face_to_kebab_case( $font_face );
+		$font_face_index       = gutenberg_find_webfont( $registered_font_faces, $font_face );
+
+		if ( false === $font_face_index ) {
+			/* translators: %s unique slug to identify the font family of the webfont */
+			_doing_it_wrong( __METHOD__, sprintf( __( 'The specified font face for the "%s" font family is not registered.', 'gutenberg' ), $slug ), '6.0.0' );
+			return false;
+		}
+
+		if ( ! isset( $this->enqueued_webfonts[ $slug ] ) ) {
+			$this->enqueued_webfonts[ $slug ] = array();
+		}
+
+		$font_face_to_enqueue = $this->unregister_font_face_by_index( $slug, $font_face_index );
+
+		$this->enqueued_webfonts[ $slug ][] = $font_face_to_enqueue;
+	}
+
+	/**
+	 * Checks if a font family is registered.
+	 *
+	 * @param string $font_family_name The font family name to check in the registry.
+	 * @return bool True if found, else false.
+	 */
+	public function is_font_family_registered( $font_family_name ) {
+		return isset( $this->registered_webfonts[ $this->get_font_slug( $font_family_name ) ] );
+	}
+
+	/**
+	 * Unregister a font family by its slug.
+	 *
+	 * @param string $slug The font family slug to unregister.
+	 * @return array[] The font family object with font faces inside.
+	 */
+	public function unregister_font_family_by_slug( $slug ) {
+		$font_family = $this->registered_webfonts[ $slug ];
 		unset( $this->registered_webfonts[ $slug ] );
-		return true;
+
+		return $font_family;
+	}
+
+	/**
+	 * Unregister a font face by its index.
+	 *
+	 * @param string  $slug The font family to search for.
+	 * @param integer $index The index of the font face that'll be unregistered.
+	 * @return array The font face that was just unregistered.
+	 */
+	public function unregister_font_face_by_index( $slug, $index ) {
+		$font_face = $this->registered_webfonts[ $slug ][ $index ];
+
+		unset( $this->registered_webfonts[ $slug ][ $index ] );
+		$this->registered_webfonts[ $slug ] = array_values( $this->registered_webfonts[ $slug ] );
+
+		if ( empty( $this->registered_webfonts[ $slug ] ) ) {
+			unset( $this->registered_webfonts[ $slug ] );
+		}
+
+		return $font_face;
 	}
 
 	/**
