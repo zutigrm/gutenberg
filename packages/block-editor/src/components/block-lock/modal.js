@@ -23,11 +23,7 @@ import useBlockDisplayInformation from '../use-block-display-information';
 import { store as blockEditorStore } from '../../store';
 
 export default function BlockLockModal( { clientId, onClose } ) {
-	const [ lock, setLock ] = useState( {
-		edit: false,
-		move: false,
-		remove: false,
-	} );
+	const [ lock, setLock ] = useState( { move: false, remove: false } );
 	const { canEdit, canMove, canRemove, isReusable } = useSelect(
 		( select ) => {
 			const {
@@ -58,11 +54,11 @@ export default function BlockLockModal( { clientId, onClose } ) {
 
 	useEffect( () => {
 		setLock( {
-			edit: ! canEdit,
 			move: ! canMove,
 			remove: ! canRemove,
+			...( isReusable ? { edit: ! canEdit } : {} ),
 		} );
-	}, [ canEdit, canMove, canRemove ] );
+	}, [ canEdit, canMove, canRemove, isReusable ] );
 
 	const isAllChecked = Object.values( lock ).every( Boolean );
 
@@ -112,9 +108,9 @@ export default function BlockLockModal( { clientId, onClose } ) {
 						aria-checked={ ariaChecked }
 						onChange={ ( newValue ) =>
 							setLock( {
-								edit: isReusable ? newValue : undefined,
 								move: newValue,
 								remove: newValue,
+								...( isReusable ? { edit: newValue } : {} ),
 							} )
 						}
 					/>
@@ -128,7 +124,7 @@ export default function BlockLockModal( { clientId, onClose } ) {
 											<Icon icon={ editIcon } />
 										</>
 									}
-									checked={ lock.edit }
+									checked={ !! lock.edit }
 									onChange={ ( edit ) =>
 										setLock( ( prevLock ) => ( {
 											...prevLock,
